@@ -1,6 +1,7 @@
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart' hide CarouselController;
+import 'add_money_new_users.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -214,7 +215,15 @@ class _HomePageState extends State<HomePage>
                                       .size
                                       .height,
                               child: ElevatedButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          AddMoneyNewUsers(key: UniqueKey()),
+                                    ),
+                                  );
+                                },
                                 style: ButtonStyle(
                                   backgroundColor:
                                   WidgetStateProperty.resolveWith<Color>(

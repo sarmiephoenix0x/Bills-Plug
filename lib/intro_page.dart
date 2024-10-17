@@ -37,6 +37,7 @@ class _IntroPageState extends State<IntroPage> {
   // Use the fully qualified CarouselController from the carousel_slider package
   final CarouselController _controller = CarouselController();
 
+
   @override
   Widget build(BuildContext context) {
     return OrientationBuilder(

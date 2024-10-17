@@ -22,7 +22,6 @@ class LoginPageOldUserState extends State<LoginPageOldUser> {
   bool _isPasswordVisible = false;
   final LocalAuthentication _localAuth = LocalAuthentication();
 
-
   Future<void> _authenticateUser() async {
     bool canCheckBiometrics = await _localAuth.canCheckBiometrics;
     bool isDeviceSupported = await _localAuth.isDeviceSupported();
@@ -241,87 +240,91 @@ class LoginPageOldUserState extends State<LoginPageOldUser> {
                             SizedBox(
                                 height:
                                     MediaQuery.of(context).size.height * 0.05),
-                        Padding(
-                            padding:
-                            const EdgeInsets.symmetric(horizontal: 20.0),
-                            child:Row(
-                              children: [
-                                Expanded(
-                                  flex:7,
-                                child:SizedBox(
-                                  height: (60 /
-                                          MediaQuery.of(context).size.height) *
-                                      MediaQuery.of(context).size.height,
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              MainApp(key: UniqueKey()),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20.0),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    flex: 7,
+                                    child: SizedBox(
+                                      height: (60 /
+                                              MediaQuery.of(context)
+                                                  .size
+                                                  .height) *
+                                          MediaQuery.of(context).size.height,
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.pushReplacement(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  MainApp(key: UniqueKey()),
+                                            ),
+                                          );
+                                        },
+                                        style: ButtonStyle(
+                                          backgroundColor: WidgetStateProperty
+                                              .resolveWith<Color>(
+                                            (Set<WidgetState> states) {
+                                              if (states.contains(
+                                                  WidgetState.pressed)) {
+                                                return Colors.white;
+                                              }
+                                              return const Color(0xFF02AA03);
+                                            },
+                                          ),
+                                          foregroundColor: WidgetStateProperty
+                                              .resolveWith<Color>(
+                                            (Set<WidgetState> states) {
+                                              if (states.contains(
+                                                  WidgetState.pressed)) {
+                                                return const Color(0xFF02AA03);
+                                              }
+                                              return Colors.white;
+                                            },
+                                          ),
+                                          elevation:
+                                              WidgetStateProperty.all<double>(
+                                                  4.0),
+                                          shape: WidgetStateProperty.all<
+                                              RoundedRectangleBorder>(
+                                            const RoundedRectangleBorder(
+                                              side: BorderSide(
+                                                  width: 3,
+                                                  color: Color(0xFF02AA03)),
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(15)),
+                                            ),
+                                          ),
                                         ),
-                                      );
-                                    },
-                                    style: ButtonStyle(
-                                      backgroundColor: WidgetStateProperty
-                                          .resolveWith<Color>(
-                                        (Set<WidgetState> states) {
-                                          if (states
-                                              .contains(WidgetState.pressed)) {
-                                            return Colors.white;
-                                          }
-                                          return const Color(0xFF02AA03);
-                                        },
-                                      ),
-                                      foregroundColor: WidgetStateProperty
-                                          .resolveWith<Color>(
-                                        (Set<WidgetState> states) {
-                                          if (states
-                                              .contains(WidgetState.pressed)) {
-                                            return const Color(0xFF02AA03);
-                                          }
-                                          return Colors.white;
-                                        },
-                                      ),
-                                      elevation:
-                                          WidgetStateProperty.all<double>(4.0),
-                                      shape: WidgetStateProperty.all<
-                                          RoundedRectangleBorder>(
-                                        const RoundedRectangleBorder(
-                                          side: BorderSide(
-                                              width: 3,
-                                              color: Color(0xFF02AA03)),
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(15)),
+                                        child: const Text(
+                                          'Login',
+                                          style: TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                    child: const Text(
-                                      'Login',
-                                      style: TextStyle(
-                                        fontFamily: 'Inter',
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                  ),
+                                  const Spacer(),
+                                  Container(
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xFF02AA03),
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(10.0)),
+                                    ),
+                                    child: IconButton(
+                                      iconSize: 45,
+                                      icon: const Icon(Icons.fingerprint,
+                                          color: Colors.white),
+                                      onPressed: _authenticateUser,
                                     ),
                                   ),
-                                ),
-                                ),
-                                const Spacer(),
-                                Container(
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFF02AA03),
-                                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                                  ),
-                                  child:IconButton(
-                                  iconSize: 45,
-                                  icon: const Icon(Icons.fingerprint,
-                                      color: Colors.white),
-                                  onPressed: _authenticateUser,
-                                ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                        ),
                             SizedBox(
                                 height:
                                     MediaQuery.of(context).size.height * 0.03),
