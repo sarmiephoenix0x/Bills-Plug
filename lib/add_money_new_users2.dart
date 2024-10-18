@@ -14,9 +14,17 @@ class _AddMoneyNewUsers2State extends State<AddMoneyNewUsers2>
   String? _type = 'type1';
   final FocusNode _detailsFocusNode = FocusNode();
   final FocusNode _dobFocusNode = FocusNode();
+  final FocusNode _amountFocusNode = FocusNode();
+  final FocusNode _chargesFocusNode = FocusNode();
+  final FocusNode _amountToPayFocusNode = FocusNode();
+  final FocusNode _amount2FocusNode = FocusNode();
 
   final TextEditingController detailsController = TextEditingController();
   final TextEditingController dobController = TextEditingController();
+  final TextEditingController amountController = TextEditingController();
+  final TextEditingController chargesController = TextEditingController();
+  final TextEditingController amountToPayController = TextEditingController();
+  final TextEditingController amount2Controller = TextEditingController();
 
   TabController? tabController;
 
@@ -42,12 +50,12 @@ class _AddMoneyNewUsers2State extends State<AddMoneyNewUsers2>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SizedBox(
-        height: MediaQuery.of(context).size.height,
-        child: ListView(
-          children: [
-            Expanded(
-              child: Column(
+      body: SafeArea(
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height,
+          child: ListView(
+            children: [
+              Column(
                 children: [
                   Container(
                     padding: const EdgeInsets.only(
@@ -139,38 +147,39 @@ class _AddMoneyNewUsers2State extends State<AddMoneyNewUsers2>
                     ),
                   ),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-                  Flexible(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                      child: Container(
-                        width: MediaQuery.of(context).size.width,
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 12.0, horizontal: 20.0),
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(25.0),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black26,
-                              spreadRadius: 2,
-                              blurRadius: 10,
-                            ),
-                          ],
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Container(
+                      width: MediaQuery.of(context).size.width,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 12.0, horizontal: 20.0),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(25.0),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _tab(),
-                            SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.05),
-                            Expanded(
-                              child: TabBarView(
-                                controller: tabController,
-                                children: [
-                                  Column(
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            spreadRadius: 2,
+                            blurRadius: 10,
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _tab(),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 0.05),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.6,
+                            child: TabBarView(
+                              controller: tabController,
+                              children: [
+                                SingleChildScrollView(
+                                  child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
@@ -411,16 +420,7 @@ class _AddMoneyNewUsers2State extends State<AddMoneyNewUsers2>
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 0.0),
                                         child: ElevatedButton(
-                                          onPressed: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    AddMoneyNewUsers2(
-                                                        key: UniqueKey()),
-                                              ),
-                                            );
-                                          },
+                                          onPressed: () {},
                                           style: ButtonStyle(
                                             backgroundColor: WidgetStateProperty
                                                 .resolveWith<Color>(
@@ -459,7 +459,7 @@ class _AddMoneyNewUsers2State extends State<AddMoneyNewUsers2>
                                             ),
                                           ),
                                           child: const Text(
-                                            'Continue',
+                                            'Pay Now',
                                             style: TextStyle(
                                               fontFamily: 'Inter',
                                               fontWeight: FontWeight.bold,
@@ -469,18 +469,880 @@ class _AddMoneyNewUsers2State extends State<AddMoneyNewUsers2>
                                       ),
                                     ],
                                   ),
-                                ],
-                              ),
+                                ),
+                                SingleChildScrollView(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Center(
+                                        child: InkWell(
+                                          onTap: () {},
+                                          child: Image.asset(
+                                            'images/RefreshImg.png',
+                                            height: 80,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.02),
+                                      const Center(
+                                        child: Text(
+                                          'Fund Wallet',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20.0,
+                                            color: Color(0xFF02AA03),
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.02),
+                                      Center(
+                                        child: RichText(
+                                          text: const TextSpan(
+                                            children: [
+                                              TextSpan(
+                                                text:
+                                                    'Pay with card, bank transfer, ussd, or bank deposit. Secured by Monnify',
+                                                style: TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontSize: 16.0,
+                                                  color: Color(0xFFFF2626),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.1),
+                                      Text(
+                                        'Amount',
+                                        textAlign: TextAlign.start,
+                                        style: TextStyle(
+                                          fontFamily: 'Inter',
+                                          fontSize: 16.0,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.02),
+                                      TextFormField(
+                                        controller: amountController,
+                                        focusNode: _amountFocusNode,
+                                        style: const TextStyle(
+                                          fontSize: 16.0,
+                                        ),
+                                        decoration: InputDecoration(
+                                          labelText: '',
+                                          labelStyle: const TextStyle(
+                                            color: Colors.grey,
+                                            fontFamily: 'Inter',
+                                            fontSize: 12.0,
+                                            decoration: TextDecoration.none,
+                                          ),
+                                          floatingLabelBehavior:
+                                              FloatingLabelBehavior.never,
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                            borderSide: const BorderSide(
+                                                width: 3, color: Colors.grey),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                            borderSide: const BorderSide(
+                                                width: 3,
+                                                color: Color(0xFF02AA03)),
+                                          ),
+                                          suffix: const Text(
+                                            '(Required)',
+                                            style: TextStyle(
+                                              fontSize: 12.0,
+                                              color: Colors.red,
+                                              fontFamily: 'Inter',
+                                            ),
+                                          ),
+                                        ),
+                                        cursorColor: const Color(0xFF02AA03),
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'This field is required';
+                                          }
+                                          return null; // No validation error
+                                        },
+                                      ),
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.04),
+                                      Text(
+                                        'Charges',
+                                        textAlign: TextAlign.start,
+                                        style: TextStyle(
+                                          fontFamily: 'Inter',
+                                          fontSize: 16.0,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.02),
+                                      TextFormField(
+                                        controller: chargesController,
+                                        focusNode: _chargesFocusNode,
+                                        style: const TextStyle(
+                                          fontSize: 16.0,
+                                        ),
+                                        decoration: InputDecoration(
+                                          labelText: '',
+                                          labelStyle: const TextStyle(
+                                            color: Colors.grey,
+                                            fontFamily: 'Inter',
+                                            fontSize: 12.0,
+                                            decoration: TextDecoration.none,
+                                          ),
+                                          floatingLabelBehavior:
+                                              FloatingLabelBehavior.never,
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                            borderSide: const BorderSide(
+                                                width: 3, color: Colors.grey),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                            borderSide: const BorderSide(
+                                                width: 3,
+                                                color: Color(0xFF02AA03)),
+                                          ),
+                                          suffix: const Text(
+                                            '(Required)',
+                                            style: TextStyle(
+                                              fontSize: 12.0,
+                                              color: Colors.red,
+                                              fontFamily: 'Inter',
+                                            ),
+                                          ),
+                                        ),
+                                        cursorColor: const Color(0xFF02AA03),
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'This field is required';
+                                          }
+                                          return null; // No validation error
+                                        },
+                                      ),
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.04),
+                                      Text(
+                                        'Amount To Pay',
+                                        textAlign: TextAlign.start,
+                                        style: TextStyle(
+                                          fontFamily: 'Inter',
+                                          fontSize: 16.0,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.02),
+                                      TextFormField(
+                                        controller: amountToPayController,
+                                        focusNode: _amountToPayFocusNode,
+                                        style: const TextStyle(
+                                          fontSize: 16.0,
+                                        ),
+                                        decoration: InputDecoration(
+                                          labelText: '',
+                                          labelStyle: const TextStyle(
+                                            color: Colors.grey,
+                                            fontFamily: 'Inter',
+                                            fontSize: 12.0,
+                                            decoration: TextDecoration.none,
+                                          ),
+                                          floatingLabelBehavior:
+                                              FloatingLabelBehavior.never,
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                            borderSide: const BorderSide(
+                                                width: 3, color: Colors.grey),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                            borderSide: const BorderSide(
+                                                width: 3,
+                                                color: Color(0xFF02AA03)),
+                                          ),
+                                          suffix: const Text(
+                                            '(Required)',
+                                            style: TextStyle(
+                                              fontSize: 12.0,
+                                              color: Colors.red,
+                                              fontFamily: 'Inter',
+                                            ),
+                                          ),
+                                        ),
+                                        cursorColor: const Color(0xFF02AA03),
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'This field is required';
+                                          }
+                                          return null; // No validation error
+                                        },
+                                      ),
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.04),
+                                      const Center(
+                                        child: Text(
+                                          'Secured By Monnify',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontSize: 20.0,
+                                          ),
+                                        ),
+                                      ),
+                                      Image.asset(
+                                        'images/DebitCards.png',
+                                        fit: BoxFit.cover,
+                                      ),
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.04),
+                                      Container(
+                                        width: double.infinity,
+                                        height: (60 /
+                                                MediaQuery.of(context)
+                                                    .size
+                                                    .height) *
+                                            MediaQuery.of(context).size.height,
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 0.0),
+                                        child: ElevatedButton(
+                                          onPressed: () {},
+                                          style: ButtonStyle(
+                                            backgroundColor: WidgetStateProperty
+                                                .resolveWith<Color>(
+                                              (Set<WidgetState> states) {
+                                                if (states.contains(
+                                                    WidgetState.pressed)) {
+                                                  return const Color(
+                                                      0xFFE9FFEF);
+                                                }
+                                                return const Color(0xFF02AA03);
+                                              },
+                                            ),
+                                            foregroundColor: WidgetStateProperty
+                                                .resolveWith<Color>(
+                                              (Set<WidgetState> states) {
+                                                if (states.contains(
+                                                    WidgetState.pressed)) {
+                                                  return const Color(
+                                                      0xFF02AA03);
+                                                }
+                                                return const Color(0xFFE9FFEF);
+                                              },
+                                            ),
+                                            elevation:
+                                                WidgetStateProperty.all<double>(
+                                                    4.0),
+                                            shape: WidgetStateProperty.all<
+                                                RoundedRectangleBorder>(
+                                              const RoundedRectangleBorder(
+                                                side: BorderSide(
+                                                    width: 3,
+                                                    color: Color(0xFF02AA03)),
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(35)),
+                                              ),
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            'Pay Now',
+                                            style: TextStyle(
+                                              fontFamily: 'Inter',
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SingleChildScrollView(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Center(
+                                        child: InkWell(
+                                          onTap: () {},
+                                          child: Image.asset(
+                                            'images/RefreshImg.png',
+                                            height: 80,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.02),
+                                      const Center(
+                                        child: Text(
+                                          'Fund Wallet',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20.0,
+                                            color: Color(0xFF02AA03),
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.04),
+                                      Center(
+                                        child: RichText(
+                                          overflow: TextOverflow.ellipsis,
+                                          text: const TextSpan(
+                                            children: [
+                                              TextSpan(
+                                                text: 'Bank Name: ',
+                                                style: TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontSize: 18.0,
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                              TextSpan(
+                                                text: 'WEMA BANK',
+                                                style: TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 18.0,
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.04),
+                                      Center(
+                                        child: RichText(
+                                          overflow: TextOverflow.ellipsis,
+                                          text: const TextSpan(
+                                            children: [
+                                              TextSpan(
+                                                text: 'Account Number: ',
+                                                style: TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontSize: 18.0,
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                              TextSpan(
+                                                text: '964789332345',
+                                                style: TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 18.0,
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.04),
+                                      Center(
+                                        child: RichText(
+                                          overflow: TextOverflow.ellipsis,
+                                          text: const TextSpan(
+                                            children: [
+                                              TextSpan(
+                                                text: 'Account Name: ',
+                                                style: TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontSize: 18.0,
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                              TextSpan(
+                                                text: 'CLASSY EMPIRE',
+                                                style: TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 18.0,
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.1),
+                                      Center(
+                                        child: RichText(
+                                          text: const TextSpan(
+                                            children: [
+                                              TextSpan(
+                                                text: 'Note: ',
+                                                style: TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16.0,
+                                                  color: Color(0xFFFF2626),
+                                                ),
+                                              ),
+                                              TextSpan(
+                                                text:
+                                                    'Your wallet will be credited when admin approve the request, all the above information will be required ensure you upload it because is compulsory Thanks.',
+                                                style: TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontSize: 16.0,
+                                                  color: Color(0xFFFF2626),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.1),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Expanded(
+                                            child: Container(
+                                              height: (60 /
+                                                      MediaQuery.of(context)
+                                                          .size
+                                                          .height) *
+                                                  MediaQuery.of(context)
+                                                      .size
+                                                      .height,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 0.0),
+                                              child: ElevatedButton(
+                                                onPressed: () {},
+                                                style: ButtonStyle(
+                                                  backgroundColor:
+                                                      WidgetStateProperty
+                                                          .resolveWith<Color>(
+                                                    (Set<WidgetState> states) {
+                                                      if (states.contains(
+                                                          WidgetState
+                                                              .pressed)) {
+                                                        return const Color(
+                                                            0xFF02AA03);
+                                                      }
+                                                      return Colors.white;
+                                                    },
+                                                  ),
+                                                  foregroundColor:
+                                                      WidgetStateProperty
+                                                          .resolveWith<Color>(
+                                                    (Set<WidgetState> states) {
+                                                      if (states.contains(
+                                                          WidgetState
+                                                              .pressed)) {
+                                                        return const Color(
+                                                            0xFFE9FFEF);
+                                                      }
+                                                      return const Color(
+                                                          0xFF02AA03);
+                                                    },
+                                                  ),
+                                                  elevation: WidgetStateProperty
+                                                      .all<double>(4.0),
+                                                  shape: WidgetStateProperty.all<
+                                                      RoundedRectangleBorder>(
+                                                    const RoundedRectangleBorder(
+                                                      side: BorderSide(
+                                                          width: 3,
+                                                          color: Color(
+                                                              0xFF02AA03)),
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  35)),
+                                                    ),
+                                                  ),
+                                                ),
+                                                child: const Text(
+                                                  'Copy',
+                                                  style: TextStyle(
+                                                    fontFamily: 'Inter',
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  0.02),
+                                          Expanded(
+                                            child: Container(
+                                              height: (60 /
+                                                      MediaQuery.of(context)
+                                                          .size
+                                                          .height) *
+                                                  MediaQuery.of(context)
+                                                      .size
+                                                      .height,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 0.0),
+                                              child: ElevatedButton(
+                                                onPressed: () {},
+                                                style: ButtonStyle(
+                                                  backgroundColor:
+                                                      WidgetStateProperty
+                                                          .resolveWith<Color>(
+                                                    (Set<WidgetState> states) {
+                                                      if (states.contains(
+                                                          WidgetState
+                                                              .pressed)) {
+                                                        return const Color(
+                                                            0xFFE9FFEF);
+                                                      }
+                                                      return const Color(
+                                                          0xFF02AA03);
+                                                    },
+                                                  ),
+                                                  foregroundColor:
+                                                      WidgetStateProperty
+                                                          .resolveWith<Color>(
+                                                    (Set<WidgetState> states) {
+                                                      if (states.contains(
+                                                          WidgetState
+                                                              .pressed)) {
+                                                        return const Color(
+                                                            0xFF02AA03);
+                                                      }
+                                                      return const Color(
+                                                          0xFFE9FFEF);
+                                                    },
+                                                  ),
+                                                  elevation: WidgetStateProperty
+                                                      .all<double>(4.0),
+                                                  shape: WidgetStateProperty.all<
+                                                      RoundedRectangleBorder>(
+                                                    const RoundedRectangleBorder(
+                                                      side: BorderSide(
+                                                          width: 3,
+                                                          color: Color(
+                                                              0xFF02AA03)),
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  35)),
+                                                    ),
+                                                  ),
+                                                ),
+                                                child: const Text(
+                                                  "I've Payed",
+                                                  style: TextStyle(
+                                                    fontFamily: 'Inter',
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SingleChildScrollView(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Center(
+                                        child: InkWell(
+                                          onTap: () {},
+                                          child: Image.asset(
+                                            'images/RefreshImg.png',
+                                            height: 80,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.02),
+                                      const Center(
+                                        child: Text(
+                                          'DYNAMIC ACCOUNT',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20.0,
+                                            color: Color(0xFF02AA03),
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.02),
+                                      Center(
+                                        child: RichText(
+                                          text: const TextSpan(
+                                            children: [
+                                              TextSpan(
+                                                text: 'Note: ',
+                                                style: TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16.0,
+                                                  color: Color(0xFFFF2626),
+                                                ),
+                                              ),
+                                              TextSpan(
+                                                text:
+                                                    'Generate One-Time Payment account details for your wallet Funding',
+                                                style: TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontSize: 16.0,
+                                                  color: Color(0xFFFF2626),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.05),
+                                      Text(
+                                        'Amount',
+                                        textAlign: TextAlign.start,
+                                        style: TextStyle(
+                                          fontFamily: 'Inter',
+                                          fontSize: 16.0,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.02),
+                                      TextFormField(
+                                        controller: amount2Controller,
+                                        focusNode: _amount2FocusNode,
+                                        style: const TextStyle(
+                                          fontSize: 16.0,
+                                        ),
+                                        decoration: InputDecoration(
+                                          labelText: '',
+                                          labelStyle: const TextStyle(
+                                            color: Colors.grey,
+                                            fontFamily: 'Inter',
+                                            fontSize: 12.0,
+                                            decoration: TextDecoration.none,
+                                          ),
+                                          floatingLabelBehavior:
+                                              FloatingLabelBehavior.never,
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                            borderSide: const BorderSide(
+                                                width: 3, color: Colors.grey),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                            borderSide: const BorderSide(
+                                                width: 3,
+                                                color: Color(0xFF02AA03)),
+                                          ),
+                                          suffix: const Text(
+                                            '(Required)',
+                                            style: TextStyle(
+                                              fontSize: 12.0,
+                                              color: Colors.red,
+                                              fontFamily: 'Inter',
+                                            ),
+                                          ),
+                                        ),
+                                        cursorColor: const Color(0xFF02AA03),
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'This field is required';
+                                          }
+                                          return null; // No validation error
+                                        },
+                                      ),
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.04),
+                                      const Center(
+                                        child: Text(
+                                          'Secured By Monnify',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontSize: 20.0,
+                                          ),
+                                        ),
+                                      ),
+                                      Image.asset(
+                                        'images/DebitCards.png',
+                                        fit: BoxFit.cover,
+                                      ),
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.04),
+                                      Container(
+                                        width: double.infinity,
+                                        height: (60 /
+                                                MediaQuery.of(context)
+                                                    .size
+                                                    .height) *
+                                            MediaQuery.of(context).size.height,
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 0.0),
+                                        child: ElevatedButton(
+                                          onPressed: () {},
+                                          style: ButtonStyle(
+                                            backgroundColor: WidgetStateProperty
+                                                .resolveWith<Color>(
+                                              (Set<WidgetState> states) {
+                                                if (states.contains(
+                                                    WidgetState.pressed)) {
+                                                  return const Color(
+                                                      0xFFE9FFEF);
+                                                }
+                                                return const Color(0xFF02AA03);
+                                              },
+                                            ),
+                                            foregroundColor: WidgetStateProperty
+                                                .resolveWith<Color>(
+                                              (Set<WidgetState> states) {
+                                                if (states.contains(
+                                                    WidgetState.pressed)) {
+                                                  return const Color(
+                                                      0xFF02AA03);
+                                                }
+                                                return const Color(0xFFE9FFEF);
+                                              },
+                                            ),
+                                            elevation:
+                                                WidgetStateProperty.all<double>(
+                                                    4.0),
+                                            shape: WidgetStateProperty.all<
+                                                RoundedRectangleBorder>(
+                                              const RoundedRectangleBorder(
+                                                side: BorderSide(
+                                                    width: 3,
+                                                    color: Color(0xFF02AA03)),
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(35)),
+                                              ),
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            'Pay Now',
+                                            style: TextStyle(
+                                              fontFamily: 'Inter',
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ],
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

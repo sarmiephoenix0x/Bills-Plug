@@ -120,6 +120,15 @@ flutter:
     - images/Loading.png
     - images/ion_home.png
     - images/RefreshImg.png
+    - images/DebitCards.png
+    - images/BankImg.png
+    - images/DividerImg.png
+    - images/ion_copy-outline.png
+    - images/teenyicons_down-solid.png
+    - images/MTNImg.png
+    - images/GoTVImg.png
+    - images/NairaImg.png
+    - images/CloseBut.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 
