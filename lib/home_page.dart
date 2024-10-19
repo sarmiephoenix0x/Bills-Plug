@@ -1,8 +1,10 @@
 import 'package:bills_plug/add_money_old_users.dart';
 import 'package:bills_plug/airtime_and_data_page.dart';
+import 'package:bills_plug/withdraw_money.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart' hide CarouselController;
 import 'add_money_new_users.dart';
+import 'cable_tv.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -130,12 +132,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              const Expanded(
+                              Expanded(
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
+                                    const Text(
                                       "Available Balance",
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
@@ -145,15 +147,24 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                         color: Colors.white,
                                       ),
                                     ),
-                                    Text(
-                                      "\$0.00",
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontFamily: 'Inter',
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 27.0,
-                                        color: Colors.white,
-                                      ),
+                                    Row(
+                                      children: [
+                                        Image.asset(
+                                          'images/NairaImg.png',
+                                          height: 20,
+                                          color: Colors.white,
+                                        ),
+                                        const Text(
+                                          "0.00",
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 27.0,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -185,20 +196,20 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                         MediaQuery.of(context).size.height,
                                 child: ElevatedButton(
                                   onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            AddMoneyOldUsers(key: UniqueKey()),
-                                      ),
-                                    );
                                     // Navigator.push(
                                     //   context,
                                     //   MaterialPageRoute(
                                     //     builder: (context) =>
-                                    //         AddMoneyNewUsers(key: UniqueKey()),
+                                    //         AddMoneyOldUsers(key: UniqueKey()),
                                     //   ),
                                     // );
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            AddMoneyNewUsers(key: UniqueKey()),
+                                      ),
+                                    );
                                   },
                                   style: ButtonStyle(
                                     backgroundColor:
@@ -262,7 +273,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                     (50 / MediaQuery.of(context).size.height) *
                                         MediaQuery.of(context).size.height,
                                 child: ElevatedButton(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            WithdrawMoneyPage(key: UniqueKey()),
+                                      ),
+                                    );
+                                  },
                                   style: ButtonStyle(
                                     backgroundColor:
                                         WidgetStateProperty.resolveWith<Color>(
@@ -469,8 +488,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) =>
-                                      AirtimeAndDataPage(key: UniqueKey()),
+                                  builder: (context) => AirtimeAndDataPage(
+                                    key: UniqueKey(),
+                                    tabIndex: 1,
+                                  ),
                                 ),
                               );
                             },
@@ -481,7 +502,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           ),
                           const Spacer(),
                           InkWell(
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => AirtimeAndDataPage(
+                                    key: UniqueKey(),
+                                    tabIndex: 0,
+                                  ),
+                                ),
+                              );
+                            },
                             child: Image.asset(
                               'images/AirtimeImg.png',
                               height: 50,
@@ -489,7 +520,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           ),
                           const Spacer(),
                           InkWell(
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      CableTVPage(key: UniqueKey()),
+                                ),
+                              );
+                            },
                             child: Image.asset(
                               'images/CableTVImg.png',
                               height: 50,

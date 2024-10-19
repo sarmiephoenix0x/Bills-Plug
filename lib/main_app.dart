@@ -5,16 +5,14 @@ import 'home_page.dart';
 import 'service_page.dart';
 
 class MainApp extends StatefulWidget {
-
-  const MainApp(
-      {super.key});
+  const MainApp({super.key});
 
   @override
   State<MainApp> createState() => _MainAppState();
 }
 
 class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
-  int _selectedIndex = 1;
+  int _selectedIndex = 2;
   final List<bool> _hasNotification = [false, false, false, false, false];
   DateTime? currentBackPressTime;
 
@@ -170,14 +168,11 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
   Widget _buildPageContent(int index) {
     switch (index) {
       case 0:
-        return const ServicePage(
-        );
+        return const ServicePage();
       case 1:
-        return const HomePage(
-        );
+        return const HomePage();
       case 2:
-        return const ProfilePage(
-        );
+        return const ProfilePage();
       default:
         return const Center(child: Text("Error: Invalid page index"));
     }
