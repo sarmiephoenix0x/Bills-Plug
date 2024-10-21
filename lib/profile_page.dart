@@ -234,6 +234,41 @@ class _ProfilePageState extends State<ProfilePage>
                                 color: Colors.black,
                               ),
                             ),
+                            SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.04),
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.person,
+                                      color: Color(0xFF02AA03)),
+                                  onPressed: () {},
+                                ),
+                                RichText(
+                                  text: const TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: 'Name: ',
+                                        style: TextStyle(
+                                          fontFamily: 'Inter',
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16.0,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: 'William John',
+                                        style: TextStyle(
+                                          fontFamily: 'Inter',
+                                          fontSize: 16.0,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ),
