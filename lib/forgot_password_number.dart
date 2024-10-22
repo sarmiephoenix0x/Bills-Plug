@@ -283,7 +283,8 @@ class ForgotPasswordNumberState extends State<ForgotPasswordNumber>
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => ChangePassword(key: UniqueKey()),
+                                      builder: (context) =>
+                                          ChangePassword(key: UniqueKey()),
                                     ),
                                   );
                                 },

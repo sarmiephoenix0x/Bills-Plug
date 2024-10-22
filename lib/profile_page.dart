@@ -1,5 +1,11 @@
 import 'package:bills_plug/add_money_old_users.dart';
 import 'package:bills_plug/airtime_and_data_page.dart';
+import 'package:bills_plug/create_new_password.dart';
+import 'package:bills_plug/transaction_pin.dart';
+import 'package:bills_plug/upgrade_to_agent.dart';
+import 'package:bills_plug/verify_account_details.dart';
+import 'package:bills_plug/verify_email.dart';
+import 'package:bills_plug/verify_phone_number.dart';
 import 'package:bills_plug/withdraw_money.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart' hide CarouselController;
@@ -119,7 +125,15 @@ class _ProfilePageState extends State<ProfilePage>
                               ),
                               const Spacer(),
                               InkWell(
-                                onTap: () {},
+                                onTap: () {
+                                  // Navigator.push(
+                                  //   context,
+                                  //   MaterialPageRoute(
+                                  //     builder: (context) =>
+                                  //         TransactionPin(key: UniqueKey()),
+                                  //   ),
+                                  // );
+                                },
                                 child: Image.asset(
                                   'images/Notification.png',
                                   height: 40,
@@ -237,38 +251,41 @@ class _ProfilePageState extends State<ProfilePage>
                             SizedBox(
                                 height:
                                     MediaQuery.of(context).size.height * 0.04),
-                            Row(
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.person,
-                                      color: Color(0xFF02AA03)),
-                                  onPressed: () {},
-                                ),
-                                RichText(
-                                  text: const TextSpan(
-                                    children: [
-                                      TextSpan(
-                                        text: 'Name: ',
-                                        style: TextStyle(
-                                          fontFamily: 'Inter',
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16.0,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                      TextSpan(
-                                        text: 'William John',
-                                        style: TextStyle(
-                                          fontFamily: 'Inter',
-                                          fontSize: 16.0,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                            basicInfo("Name: ", "William John", Icons.person),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width,
+                              child: const Divider(
+                                color: Colors.grey,
+                                height: 20,
+                              ),
                             ),
+                            basicInfo("Email: ", "test@gmail.com", Icons.mail),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width,
+                              child: const Divider(
+                                color: Colors.grey,
+                                height: 20,
+                              ),
+                            ),
+                            basicInfo("Phone: ", "09022999999", Icons.phone),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width,
+                              child: const Divider(
+                                color: Colors.grey,
+                                height: 20,
+                              ),
+                            ),
+                            basicInfo("State: ", "Delta", Icons.map),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width,
+                              child: const Divider(
+                                color: Colors.grey,
+                                height: 20,
+                              ),
+                            ),
+                            basicInfo("KYC: ", "Not Submitted",
+                                Icons.domain_verification,
+                                showUnverified: true),
                           ],
                         ),
                       ),
@@ -295,7 +312,45 @@ class _ProfilePageState extends State<ProfilePage>
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [],
+                          children: [
+                            basicInfo(
+                                "Transaction History", "", Icons.history_edu,
+                                showArrow: true),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width,
+                              child: const Divider(
+                                color: Colors.grey,
+                                height: 20,
+                              ),
+                            ),
+                            basicInfo("Self Help", "", Icons.self_improvement,
+                                showArrow: true),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width,
+                              child: const Divider(
+                                color: Colors.grey,
+                                height: 20,
+                              ),
+                            ),
+                            basicInfo("Password", "", Icons.lock,
+                                showArrow: true),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width,
+                              child: const Divider(
+                                color: Colors.grey,
+                                height: 20,
+                              ),
+                            ),
+                            basicInfo("Reset Pin", "", Icons.key,
+                                showArrow: true),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width,
+                              child: const Divider(
+                                color: Colors.grey,
+                                height: 20,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -306,6 +361,74 @@ class _ProfilePageState extends State<ProfilePage>
           ],
         ),
       ),
+    );
+  }
+
+  Widget basicInfo(String title, String value, IconData icon,
+      {showUnverified = false, showArrow = false}) {
+    return Row(
+      children: [
+        IconButton(
+          icon: Icon(icon, color: const Color(0xFF02AA03)),
+          onPressed: () {},
+        ),
+        Expanded(
+          flex: 10,
+          child: RichText(
+            overflow: TextOverflow.ellipsis,
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: title,
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16.0,
+                    color: Colors.black,
+                  ),
+                ),
+                TextSpan(
+                  text: value,
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 16.0,
+                    color: Colors.black,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (showUnverified == true)
+          Expanded(
+            flex: 10,
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFFF0C0C),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              child: const Text(
+                "UNVERIFIED",
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontFamily: 'Poppins',
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        if (showArrow == true) const Spacer(),
+        if (showArrow == true)
+          IconButton(
+            icon: Icon(
+              Icons.navigate_next,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+            onPressed: () {},
+          ),
+      ],
     );
   }
 }
