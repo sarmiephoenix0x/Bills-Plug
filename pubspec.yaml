@@ -131,6 +131,17 @@ flutter:
     - images/CloseBut.png
     - images/mdi_arrow-dropdown.png
     - images/VerifyDets.png
+    - images/Airtime2Cash.png
+    - images/Betting.png
+    - images/DataPins.png
+    - images/Electricity.png
+    - images/ExamPins.png
+    - images/History.png
+    - images/Pricing.png
+    - images/RechargeCardPrinting.png
+    - images/Airtime.png
+    - images/CableTV.png
+    - images/Data.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 
