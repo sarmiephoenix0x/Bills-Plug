@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
-
 import 'Login_Page.dart';
 import 'main_app.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RegisterPageSecond extends StatefulWidget {
-  const RegisterPageSecond({super.key});
+  final String username;
+  final String phoneNumber;
+  final String email;
+  const RegisterPageSecond(
+      {super.key,
+      required this.username,
+      required this.phoneNumber,
+      required this.email});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -17,18 +27,22 @@ class RegisterPageSecondState extends State<RegisterPageSecond>
   final FocusNode _passwordFocusNode = FocusNode();
   final FocusNode _confirmPasswordFocusNode = FocusNode();
   final FocusNode _referralFocusNode = FocusNode();
+  final FocusNode _countryFocusNode = FocusNode();
 
   final TextEditingController stateController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
   final TextEditingController referralController = TextEditingController();
+  final TextEditingController countryController = TextEditingController();
 
   bool _isPasswordVisible = false;
   bool _isPasswordVisible2 = false;
   late AnimationController _controller;
   late Animation<double> _animation;
   bool isLoading = false;
+  final storage = const FlutterSecureStorage();
+  late SharedPreferences prefs;
 
   @override
   void initState() {
@@ -41,10 +55,170 @@ class RegisterPageSecondState extends State<RegisterPageSecond>
     _animation = Tween<double>(begin: 0.4, end: 0.6).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
+    _initializePrefs();
+  }
+
+  Future<void> _initializePrefs() async {
+    prefs = await SharedPreferences.getInstance();
+  }
+
+  Future<void> _registerUser() async {
+    if (prefs == null) {
+      await _initializePrefs();
+    }
+    final String email = widget.email;
+    final String password = passwordController.text.trim();
+    final String passwordConfirmation = confirmPasswordController.text.trim();
+    final String phoneNumber = widget.phoneNumber;
+    final String country = countryController.text.trim();
+    final String username = widget.username;
+
+    if (username.isEmpty ||
+        email.isEmpty ||
+        phoneNumber.isEmpty ||
+        password.isEmpty ||
+        passwordConfirmation.isEmpty ||
+        country.isEmpty) {
+      _showCustomSnackBar(
+        context,
+        'All fields are required.',
+        isError: true,
+      );
+      return;
+    }
+
+    final RegExp emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+    if (!emailRegex.hasMatch(email)) {
+      _showCustomSnackBar(
+        context,
+        'Please enter a valid email address.',
+        isError: true,
+      );
+      return;
+    }
+
+    if (password.length < 6) {
+      _showCustomSnackBar(
+        context,
+        'Password must be at least 6 characters.',
+        isError: true,
+      );
+      return;
+    }
+
+    if (password != passwordConfirmation) {
+      _showCustomSnackBar(
+        context,
+        'Passwords do not match.',
+        isError: true,
+      );
+
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    final response = await http.post(
+      Uri.parse('https://glad.payguru.com.ng/api/register'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'username': username,
+        'email': email,
+        'mobile': phoneNumber,
+        'password': password,
+        'password_confirmation': passwordConfirmation,
+        'country': country,
+      }),
+    );
+
+    final Map<String, dynamic> responseData = jsonDecode(response.body);
+    print('Response Data: $responseData');
+
+    if (response.statusCode == 201) {
+      final Map<String, dynamic> user = responseData['user'];
+      final String accessToken = responseData['access_token'];
+
+      await storage.write(key: 'billsplug_accessToken', value: accessToken);
+      await prefs.setString('user', jsonEncode(user));
+
+      _showCustomSnackBar(
+        context,
+        'Sign up successful! Welcome, ${user['name']}',
+        isError: false,
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MainApp(key: UniqueKey()),
+        ),
+      );
+    } else if (response.statusCode == 400) {
+      setState(() {
+        isLoading = false;
+      });
+
+      final Map<String, dynamic> errors = responseData['errors'];
+      String errorMessage = 'Error: ';
+
+      // Collect error messages for each field
+      errors.forEach((field, messages) {
+        errorMessage += '$field: ${messages.join(", ")}\n';
+      });
+
+      _showCustomSnackBar(
+        context,
+        errorMessage,
+        isError: true,
+      );
+    } else {
+      setState(() {
+        isLoading = false;
+      });
+      _showCustomSnackBar(
+        context,
+        'An unexpected error occurred.',
+        isError: true,
+      );
+    }
+  }
+
+  void _showCustomSnackBar(BuildContext context, String message,
+      {bool isError = false}) {
+    final snackBar = SnackBar(
+      content: Row(
+        children: [
+          Icon(
+            isError ? Icons.error_outline : Icons.check_circle_outline,
+            color: isError ? Colors.red : Colors.green,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+      backgroundColor: isError ? Colors.red : Colors.green,
+      behavior: SnackBarBehavior.floating,
+      margin: const EdgeInsets.all(10),
+      duration: const Duration(seconds: 3),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   @override
   void dispose() {
+    countryController.dispose();
+    passwordController.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -141,48 +315,48 @@ class RegisterPageSecondState extends State<RegisterPageSecond>
                             SizedBox(
                                 height:
                                     MediaQuery.of(context).size.height * 0.04),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 20.0),
-                              child: TextFormField(
-                                controller: stateController,
-                                focusNode: _stateFocusNode,
-                                style: const TextStyle(
-                                  fontSize: 16.0,
-                                ),
-                                decoration: InputDecoration(
-                                    labelText: 'State',
-                                    labelStyle: const TextStyle(
-                                      color: Colors.grey,
-                                      fontFamily: 'Inter',
-                                      fontSize: 12.0,
-                                      decoration: TextDecoration.none,
-                                    ),
-                                    floatingLabelBehavior:
-                                        FloatingLabelBehavior.never,
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(15),
-                                      borderSide: const BorderSide(
-                                          width: 3, color: Colors.grey),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(15),
-                                      borderSide: const BorderSide(
-                                          width: 3, color: Color(0xFF02AA03)),
-                                    ),
-                                    prefixIcon: IconButton(
-                                      icon: const Icon(
-                                        Icons.map,
-                                        color: Colors.grey,
-                                      ),
-                                      onPressed: () {},
-                                    )),
-                                cursorColor: const Color(0xFF02AA03),
-                              ),
-                            ),
-                            SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.02),
+                            // Padding(
+                            //   padding:
+                            //       const EdgeInsets.symmetric(horizontal: 20.0),
+                            //   child: TextFormField(
+                            //     controller: stateController,
+                            //     focusNode: _stateFocusNode,
+                            //     style: const TextStyle(
+                            //       fontSize: 16.0,
+                            //     ),
+                            //     decoration: InputDecoration(
+                            //         labelText: 'State',
+                            //         labelStyle: const TextStyle(
+                            //           color: Colors.grey,
+                            //           fontFamily: 'Inter',
+                            //           fontSize: 12.0,
+                            //           decoration: TextDecoration.none,
+                            //         ),
+                            //         floatingLabelBehavior:
+                            //             FloatingLabelBehavior.never,
+                            //         border: OutlineInputBorder(
+                            //           borderRadius: BorderRadius.circular(15),
+                            //           borderSide: const BorderSide(
+                            //               width: 3, color: Colors.grey),
+                            //         ),
+                            //         focusedBorder: OutlineInputBorder(
+                            //           borderRadius: BorderRadius.circular(15),
+                            //           borderSide: const BorderSide(
+                            //               width: 3, color: Color(0xFF02AA03)),
+                            //         ),
+                            //         prefixIcon: IconButton(
+                            //           icon: const Icon(
+                            //             Icons.map,
+                            //             color: Colors.grey,
+                            //           ),
+                            //           onPressed: () {},
+                            //         )),
+                            //     cursorColor: const Color(0xFF02AA03),
+                            //   ),
+                            // ),
+                            // SizedBox(
+                            //     height:
+                            //         MediaQuery.of(context).size.height * 0.02),
                             Padding(
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 20.0),
@@ -297,13 +471,13 @@ class RegisterPageSecondState extends State<RegisterPageSecond>
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 20.0),
                               child: TextFormField(
-                                controller: referralController,
-                                focusNode: _referralFocusNode,
+                                controller: countryController,
+                                focusNode: _countryFocusNode,
                                 style: const TextStyle(
                                   fontSize: 16.0,
                                 ),
                                 decoration: InputDecoration(
-                                    labelText: 'Referral',
+                                    labelText: 'Country',
                                     labelStyle: const TextStyle(
                                       color: Colors.grey,
                                       fontFamily: 'Inter',
@@ -324,7 +498,7 @@ class RegisterPageSecondState extends State<RegisterPageSecond>
                                     ),
                                     prefixIcon: IconButton(
                                       icon: const Icon(
-                                        Icons.person_add,
+                                        Icons.map,
                                         color: Colors.grey,
                                       ),
                                       onPressed: () {},
@@ -332,6 +506,45 @@ class RegisterPageSecondState extends State<RegisterPageSecond>
                                 cursorColor: const Color(0xFF02AA03),
                               ),
                             ),
+                            // Padding(
+                            //   padding:
+                            //       const EdgeInsets.symmetric(horizontal: 20.0),
+                            //   child: TextFormField(
+                            //     controller: referralController,
+                            //     focusNode: _referralFocusNode,
+                            //     style: const TextStyle(
+                            //       fontSize: 16.0,
+                            //     ),
+                            //     decoration: InputDecoration(
+                            //         labelText: 'Referral',
+                            //         labelStyle: const TextStyle(
+                            //           color: Colors.grey,
+                            //           fontFamily: 'Inter',
+                            //           fontSize: 12.0,
+                            //           decoration: TextDecoration.none,
+                            //         ),
+                            //         floatingLabelBehavior:
+                            //             FloatingLabelBehavior.never,
+                            //         border: OutlineInputBorder(
+                            //           borderRadius: BorderRadius.circular(15),
+                            //           borderSide: const BorderSide(
+                            //               width: 3, color: Colors.grey),
+                            //         ),
+                            //         focusedBorder: OutlineInputBorder(
+                            //           borderRadius: BorderRadius.circular(15),
+                            //           borderSide: const BorderSide(
+                            //               width: 3, color: Color(0xFF02AA03)),
+                            //         ),
+                            //         prefixIcon: IconButton(
+                            //           icon: const Icon(
+                            //             Icons.person_add,
+                            //             color: Colors.grey,
+                            //           ),
+                            //           onPressed: () {},
+                            //         )),
+                            //     cursorColor: const Color(0xFF02AA03),
+                            //   ),
+                            // ),
                             SizedBox(
                                 height:
                                     MediaQuery.of(context).size.height * 0.05),
@@ -344,13 +557,7 @@ class RegisterPageSecondState extends State<RegisterPageSecond>
                                   const EdgeInsets.symmetric(horizontal: 20.0),
                               child: ElevatedButton(
                                 onPressed: () {
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          MainApp(key: UniqueKey()),
-                                    ),
-                                  );
+                                  _registerUser();
                                 },
                                 style: ButtonStyle(
                                   backgroundColor:
@@ -447,19 +654,27 @@ class RegisterPageSecondState extends State<RegisterPageSecond>
                     ),
                   ),
                   if (isLoading)
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Center(
-                        child: ScaleTransition(
-                          scale: _animation,
-                          child: Image.asset(
-                            'images/Loading.png',
+                    Positioned.fill(
+                      child: AbsorbPointer(
+                        absorbing:
+                            true, // Blocks interaction with widgets behind
+                        child: Container(
+                          color: Colors.black
+                              .withOpacity(0.5), // Semi-transparent background
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ScaleTransition(
+                                scale: _animation,
+                                child: Image.asset(
+                                  'images/Loading.png',
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
                 ],
               ),
             ),

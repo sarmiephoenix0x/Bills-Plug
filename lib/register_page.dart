@@ -21,17 +21,11 @@ class RegisterPageState extends State<RegisterPage>
   final FocusNode _userNameFocusNode = FocusNode();
   final FocusNode _phoneNumberFocusNode = FocusNode();
   final FocusNode _emailFocusNode = FocusNode();
-  final FocusNode _countryFocusNode = FocusNode();
-  final FocusNode _passwordFocusNode = FocusNode();
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController userNameController = TextEditingController();
   final TextEditingController phoneNumberController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
-  final TextEditingController countryController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-
-  bool _isPasswordVisible = false;
 
   final storage = const FlutterSecureStorage();
   late SharedPreferences prefs;
@@ -50,123 +44,6 @@ class RegisterPageState extends State<RegisterPage>
     _animation = Tween<double>(begin: 0.4, end: 0.6).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
-    _initializePrefs();
-  }
-
-  Future<void> _initializePrefs() async {
-    prefs = await SharedPreferences.getInstance();
-  }
-
-  Future<void> _registerUser() async {
-    if (prefs == null) {
-      await _initializePrefs();
-    }
-    final String email = emailController.text.trim();
-    final String password = passwordController.text.trim();
-    final String phoneNumber = phoneNumberController.text.trim();
-    final String country = countryController.text.trim();
-    final String username = userNameController.text.trim();
-
-    if (username.isEmpty ||
-        email.isEmpty ||
-        phoneNumber.isEmpty ||
-        password.isEmpty ||
-        country.isEmpty) {
-      _showCustomSnackBar(
-        context,
-        'All fields are required.',
-        isError: true,
-      );
-      return;
-    }
-
-    final RegExp emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
-    if (!emailRegex.hasMatch(email)) {
-      _showCustomSnackBar(
-        context,
-        'Please enter a valid email address.',
-        isError: true,
-      );
-      return;
-    }
-
-    if (password.length < 6) {
-      _showCustomSnackBar(
-        context,
-        'Password must be at least 6 characters.',
-        isError: true,
-      );
-      return;
-    }
-
-    setState(() {
-      isLoading = true;
-    });
-
-    final response = await http.post(
-      Uri.parse('https://glad.payguru.com.ng/api/register'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'username': username,
-        'email': email,
-        'mobile': phoneNumber,
-        'password': password,
-        'country': country,
-      }),
-    );
-
-    final Map<String, dynamic> responseData = jsonDecode(response.body);
-    print('Response Data: $responseData');
-
-    if (response.statusCode == 201) {
-      final Map<String, dynamic> user = responseData['user'];
-      final String accessToken = responseData['access_token'];
-      final String profilePhoto = responseData['profile_photo'];
-
-      user['profile_photo'] = profilePhoto;
-      await storage.write(key: 'accessToken', value: accessToken);
-      await prefs.setString('user', jsonEncode(user));
-
-      _showCustomSnackBar(
-        context,
-        'Sign up successful! Welcome, ${user['name']}',
-        isError: false,
-      );
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => MainApp(key: UniqueKey()),
-        ),
-      );
-    } else if (response.statusCode == 400) {
-      setState(() {
-        isLoading = false;
-      });
-
-      final Map<String, dynamic> errors = responseData['errors'];
-      String errorMessage = 'Error: ';
-
-      // Collect error messages for each field
-      errors.forEach((field, messages) {
-        errorMessage += '$field: ${messages.join(", ")}\n';
-      });
-
-      _showCustomSnackBar(
-        context,
-        errorMessage,
-        isError: true,
-      );
-    } else {
-      setState(() {
-        isLoading = false;
-      });
-      _showCustomSnackBar(
-        context,
-        'An unexpected error occurred.',
-        isError: true,
-      );
-    }
   }
 
   void _showCustomSnackBar(BuildContext context, String message,
@@ -197,6 +74,15 @@ class RegisterPageState extends State<RegisterPage>
     );
 
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  @override
+  void dispose() {
+    userNameController.dispose();
+    emailController.dispose();
+    phoneNumberController.dispose();
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -268,13 +154,13 @@ class RegisterPageState extends State<RegisterPage>
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 20.0),
                               child: TextFormField(
-                                controller: nameController,
-                                focusNode: _nameFocusNode,
+                                controller: userNameController,
+                                focusNode: _userNameFocusNode,
                                 style: const TextStyle(
                                   fontSize: 16.0,
                                 ),
                                 decoration: InputDecoration(
-                                    labelText: 'Name',
+                                    labelText: 'Username',
                                     labelStyle: const TextStyle(
                                       color: Colors.grey,
                                       fontFamily: 'Inter',
@@ -387,6 +273,7 @@ class RegisterPageState extends State<RegisterPage>
                                 cursorColor: const Color(0xFF02AA03),
                               ),
                             ),
+
                             SizedBox(
                                 height:
                                     MediaQuery.of(context).size.height * 0.02),
@@ -429,48 +316,7 @@ class RegisterPageState extends State<RegisterPage>
                                 cursorColor: const Color(0xFF02AA03),
                               ),
                             ),
-                            SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.02),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 20.0),
-                              child: TextFormField(
-                                controller: countryController,
-                                focusNode: _countryFocusNode,
-                                style: const TextStyle(
-                                  fontSize: 16.0,
-                                ),
-                                decoration: InputDecoration(
-                                    labelText: 'Country',
-                                    labelStyle: const TextStyle(
-                                      color: Colors.grey,
-                                      fontFamily: 'Inter',
-                                      fontSize: 12.0,
-                                      decoration: TextDecoration.none,
-                                    ),
-                                    floatingLabelBehavior:
-                                        FloatingLabelBehavior.never,
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(15),
-                                      borderSide: const BorderSide(
-                                          width: 3, color: Colors.grey),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(15),
-                                      borderSide: const BorderSide(
-                                          width: 3, color: Color(0xFF02AA03)),
-                                    ),
-                                    prefixIcon: IconButton(
-                                      icon: const Icon(
-                                        Icons.map,
-                                        color: Colors.grey,
-                                      ),
-                                      onPressed: () {},
-                                    )),
-                                cursorColor: const Color(0xFF02AA03),
-                              ),
-                            ),
+
                             SizedBox(
                                 height:
                                     MediaQuery.of(context).size.height * 0.05),
@@ -483,14 +329,53 @@ class RegisterPageState extends State<RegisterPage>
                                   const EdgeInsets.symmetric(horizontal: 20.0),
                               child: ElevatedButton(
                                 onPressed: () {
-                                  _registerUser();
-                                  // Navigator.push(
-                                  //   context,
-                                  //   MaterialPageRoute(
-                                  //     builder: (context) =>
-                                  //         RegisterPageSecond(key: UniqueKey()),
-                                  //   ),
-                                  // );
+                                  if (userNameController.text.trim().isEmpty ||
+                                      emailController.text.trim().isEmpty ||
+                                      phoneNumberController.text
+                                          .trim()
+                                          .isEmpty) {
+                                    _showCustomSnackBar(
+                                      context,
+                                      'All fields are required.',
+                                      isError: true,
+                                    );
+                                    return;
+                                  }
+
+                                  if (userNameController.text.trim().length <
+                                      6) {
+                                    _showCustomSnackBar(
+                                      context,
+                                      'Username must be at least 6 characters.',
+                                      isError: true,
+                                    );
+                                    return;
+                                  }
+
+                                  final RegExp emailRegex =
+                                      RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+                                  if (!emailRegex
+                                      .hasMatch(emailController.text.trim())) {
+                                    _showCustomSnackBar(
+                                      context,
+                                      'Please enter a valid email address.',
+                                      isError: true,
+                                    );
+                                    return;
+                                  }
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => RegisterPageSecond(
+                                        key: UniqueKey(),
+                                        username:
+                                            userNameController.text.trim(),
+                                        phoneNumber:
+                                            phoneNumberController.text.trim(),
+                                        email: emailController.text.trim(),
+                                      ),
+                                    ),
+                                  );
                                 },
                                 style: ButtonStyle(
                                   backgroundColor:
@@ -526,7 +411,7 @@ class RegisterPageState extends State<RegisterPage>
                                   ),
                                 ),
                                 child: const Text(
-                                  'Register',
+                                  'Next',
                                   style: TextStyle(
                                     fontFamily: 'Inter',
                                     fontWeight: FontWeight.bold,

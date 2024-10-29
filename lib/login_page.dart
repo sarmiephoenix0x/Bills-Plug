@@ -194,6 +194,15 @@ class LoginPageState extends State<LoginPage>
   }
 
   @override
+  void dispose() {
+    emailController.dispose();
+    phoneNumberController.dispose();
+    passwordController.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return OrientationBuilder(
       builder: (context, orientation) {
