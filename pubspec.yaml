@@ -49,6 +49,7 @@ dependencies:
   image_cropper: ^8.0.2
   country_picker: ^2.0.26
   intl_phone_field: ^3.2.0
+  table_calendar: ^3.0.6
 
 dev_dependencies:
   flutter_test:
@@ -159,6 +160,8 @@ flutter:
     - images/ShareReceipt.png
     - images/SportyBet.png
     - images/TinyForwardArrow.png
+    - images/BackButton_White.png
+    - images/CloseBut_White.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

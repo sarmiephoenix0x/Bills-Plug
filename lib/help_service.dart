@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:bills_plug/airtime_and_data_page.dart';
 import 'cable_tv.dart';
 
-class ServicePage extends StatefulWidget {
-  const ServicePage({super.key});
+class HelpServicePage extends StatefulWidget {
+  const HelpServicePage({super.key});
 
   @override
-  State<ServicePage> createState() => _ServicePageState();
+  State<HelpServicePage> createState() => _HelpServicePageState();
 }
 
-class _ServicePageState extends State<ServicePage>
+class _HelpServicePageState extends State<HelpServicePage>
     with TickerProviderStateMixin {
   String? profileImg;
 
@@ -45,114 +45,52 @@ class _ServicePageState extends State<ServicePage>
                               ),
                               child: Column(
                                 children: [
-                                  Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      if (profileImg == null)
-                                        ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(55),
-                                          child: Container(
-                                            width: (60 /
-                                                    MediaQuery.of(context)
-                                                        .size
-                                                        .width) *
-                                                MediaQuery.of(context)
-                                                    .size
-                                                    .width,
-                                            height: (60 /
-                                                    MediaQuery.of(context)
-                                                        .size
-                                                        .height) *
-                                                MediaQuery.of(context)
-                                                    .size
-                                                    .height,
-                                            color: Colors.grey,
-                                            child: Image.asset(
-                                              'images/ProfilePic.png',
-                                              fit: BoxFit.cover,
-                                            ),
+                                  Expanded(
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        InkWell(
+                                          onTap: () {
+                                            Navigator.pop(context);
+                                          },
+                                          child: Image.asset(
+                                            'images/CloseBut_White.png',
+                                            height: 40,
                                           ),
-                                        )
-                                      else if (profileImg != null)
-                                        ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(55),
-                                          child: Container(
-                                            width: (60 /
-                                                    MediaQuery.of(context)
-                                                        .size
-                                                        .width) *
-                                                MediaQuery.of(context)
-                                                    .size
-                                                    .width,
-                                            height: (60 /
-                                                    MediaQuery.of(context)
-                                                        .size
-                                                        .height) *
-                                                MediaQuery.of(context)
-                                                    .size
-                                                    .height,
-                                            color: Colors.grey,
-                                            child: Image.network(
-                                              profileImg!,
-                                              fit: BoxFit.cover,
+                                        ),
+                                        const Spacer(),
+                                        const Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 20.0),
+                                          child: Text(
+                                            'Cable TV',
+                                            style: TextStyle(
+                                              fontFamily: 'Inter',
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 20.0,
+                                              color: Colors.black,
                                             ),
                                           ),
                                         ),
-                                      SizedBox(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.02),
-                                      const Expanded(
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              "Hello",
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                fontFamily: 'Inter',
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16.0,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                            Text(
-                                              "William John",
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                fontFamily: 'Inter',
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16.0,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                          ],
+                                        const Spacer(),
+                                        InkWell(
+                                          onTap: () {
+                                            // Navigator.push(
+                                            //   context,
+                                            //   MaterialPageRoute(
+                                            //     builder: (context) =>
+                                            //         TransactionPin(key: UniqueKey()),
+                                            //   ),
+                                            // );
+                                          },
+                                          child: Image.asset(
+                                            'images/Notification.png',
+                                            height: 40,
+                                          ),
                                         ),
-                                      ),
-                                      const Spacer(),
-                                      InkWell(
-                                        onTap: () {
-                                          // Navigator.push(
-                                          //   context,
-                                          //   MaterialPageRoute(
-                                          //     builder: (context) =>
-                                          //         TransactionPin(key: UniqueKey()),
-                                          //   ),
-                                          // );
-                                        },
-                                        child: Image.asset(
-                                          'images/Notification.png',
-                                          height: 40,
-                                        ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),
@@ -184,7 +122,7 @@ class _ServicePageState extends State<ServicePage>
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const Text(
-                                      "Payment Services",
+                                      "SELF SERVICES",
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         fontFamily: 'Inter',
@@ -215,7 +153,7 @@ class _ServicePageState extends State<ServicePage>
                                               ),
                                             );
                                           },
-                                          child: services(
+                                          child: HelpServices(
                                               'images/Airtime.png', 'Airtime'),
                                         ),
                                         InkWell(
@@ -231,7 +169,7 @@ class _ServicePageState extends State<ServicePage>
                                               ),
                                             );
                                           },
-                                          child: services(
+                                          child: HelpServices(
                                               'images/Data.png', 'Data'),
                                         ),
                                         InkWell(
@@ -245,28 +183,31 @@ class _ServicePageState extends State<ServicePage>
                                               ),
                                             );
                                           },
-                                          child: services(
+                                          child: HelpServices(
                                               'images/CableTV.png', 'Cable TV'),
                                         ),
                                         InkWell(
                                           onTap: () {},
-                                          child: services('images/ExamPins.png',
+                                          child: HelpServices(
+                                              'images/ExamPins.png',
                                               'Exam Pins'),
                                         ),
                                         InkWell(
                                           onTap: () {},
-                                          child: services('images/DataPins.png',
+                                          child: HelpServices(
+                                              'images/DataPins.png',
                                               'Data Pin'),
                                         ),
                                         InkWell(
                                           onTap: () {},
-                                          child: services(
+                                          child: HelpServices(
                                               'images/Electricity.png',
                                               'Electricity'),
                                         ),
                                         InkWell(
                                           onTap: () {},
-                                          child: services('images/Betting.png',
+                                          child: HelpServices(
+                                              'images/Betting.png',
                                               'Fund Betting Wallet'),
                                         ),
                                         InkWell(
@@ -281,19 +222,20 @@ class _ServicePageState extends State<ServicePage>
                                               ),
                                             );
                                           },
-                                          child: services(
+                                          child: HelpServices(
                                               'images/Airtime2Cash.png',
                                               'Airtime2cash'),
                                         ),
                                         InkWell(
                                           onTap: () {},
-                                          child: services(
+                                          child: HelpServices(
                                               'images/RechargeCardPrinting.png',
                                               'Recharge card printing'),
                                         ),
                                         InkWell(
                                           onTap: () {},
-                                          child: services('images/ExamPins.png',
+                                          child: HelpServices(
+                                              'images/ExamPins.png',
                                               'Jamb E-PIN'),
                                         ),
                                       ],
@@ -349,17 +291,18 @@ class _ServicePageState extends State<ServicePage>
                                       children: [
                                         InkWell(
                                           onTap: () {},
-                                          child: services(
+                                          child: HelpServices(
                                               'images/Pricing.png', 'Pricing'),
                                         ),
                                         InkWell(
                                           onTap: () {},
-                                          child: services(
+                                          child: HelpServices(
                                               'images/History.png', 'History'),
                                         ),
                                         InkWell(
                                           onTap: () {},
-                                          child: services('images/mdi_bell.png',
+                                          child: HelpServices(
+                                              'images/mdi_bell.png',
                                               'Notification'),
                                         ),
                                       ],
@@ -382,7 +325,7 @@ class _ServicePageState extends State<ServicePage>
     );
   }
 
-  Widget services(String img, String content) {
+  Widget HelpServices(String img, String content) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Container(

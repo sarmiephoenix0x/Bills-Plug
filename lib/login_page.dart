@@ -105,10 +105,8 @@ class LoginPageState extends State<LoginPage>
     if (response.statusCode == 200) {
       final Map<String, dynamic> user = responseData['user'];
       final String accessToken = responseData['access_token'];
-      final String profilePhoto = responseData['profile_photo'];
 
-      user['profile_photo'] = profilePhoto;
-      await storage.write(key: 'accessToken', value: accessToken);
+      await storage.write(key: 'billsplug_accessToken', value: accessToken);
       await prefs.setString('user', jsonEncode(user));
 
       _showCustomSnackBar(
@@ -448,6 +446,13 @@ class LoginPageState extends State<LoginPage>
                               child: ElevatedButton(
                                 onPressed: () {
                                   _submitForm();
+                                  // Navigator.pushReplacement(
+                                  //   context,
+                                  //   MaterialPageRoute(
+                                  //     builder: (context) =>
+                                  //         MainApp(key: UniqueKey()),
+                                  //   ),
+                                  // );
                                 },
                                 style: ButtonStyle(
                                   backgroundColor:

@@ -7,6 +7,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RegisterPageSecond extends StatefulWidget {
+  final String firstname;
+  final String lastname;
   final String username;
   final String phoneNumber;
   final String email;
@@ -14,7 +16,9 @@ class RegisterPageSecond extends StatefulWidget {
       {super.key,
       required this.username,
       required this.phoneNumber,
-      required this.email});
+      required this.email,
+      required this.firstname,
+      required this.lastname});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -66,12 +70,15 @@ class RegisterPageSecondState extends State<RegisterPageSecond>
     if (prefs == null) {
       await _initializePrefs();
     }
+    final String firstname = widget.firstname;
+    final String lastname = widget.lastname;
+    final String username = widget.username;
     final String email = widget.email;
     final String password = passwordController.text.trim();
     final String passwordConfirmation = confirmPasswordController.text.trim();
     final String phoneNumber = widget.phoneNumber;
     final String country = countryController.text.trim();
-    final String username = widget.username;
+    final String referral = referralController.text.trim();
 
     if (username.isEmpty ||
         email.isEmpty ||
@@ -124,12 +131,15 @@ class RegisterPageSecondState extends State<RegisterPageSecond>
       Uri.parse('https://glad.payguru.com.ng/api/register'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
+        'firstname': firstname,
+        'lastname': lastname,
         'username': username,
         'email': email,
         'mobile': phoneNumber,
         'password': password,
         'password_confirmation': passwordConfirmation,
         'country': country,
+        'ref_by': referral
       }),
     );
 
@@ -145,7 +155,7 @@ class RegisterPageSecondState extends State<RegisterPageSecond>
 
       _showCustomSnackBar(
         context,
-        'Sign up successful! Welcome, ${user['name']}',
+        'Sign up successful! Welcome, ${user['firstname']}',
         isError: false,
       );
 
@@ -506,45 +516,48 @@ class RegisterPageSecondState extends State<RegisterPageSecond>
                                 cursorColor: const Color(0xFF02AA03),
                               ),
                             ),
-                            // Padding(
-                            //   padding:
-                            //       const EdgeInsets.symmetric(horizontal: 20.0),
-                            //   child: TextFormField(
-                            //     controller: referralController,
-                            //     focusNode: _referralFocusNode,
-                            //     style: const TextStyle(
-                            //       fontSize: 16.0,
-                            //     ),
-                            //     decoration: InputDecoration(
-                            //         labelText: 'Referral',
-                            //         labelStyle: const TextStyle(
-                            //           color: Colors.grey,
-                            //           fontFamily: 'Inter',
-                            //           fontSize: 12.0,
-                            //           decoration: TextDecoration.none,
-                            //         ),
-                            //         floatingLabelBehavior:
-                            //             FloatingLabelBehavior.never,
-                            //         border: OutlineInputBorder(
-                            //           borderRadius: BorderRadius.circular(15),
-                            //           borderSide: const BorderSide(
-                            //               width: 3, color: Colors.grey),
-                            //         ),
-                            //         focusedBorder: OutlineInputBorder(
-                            //           borderRadius: BorderRadius.circular(15),
-                            //           borderSide: const BorderSide(
-                            //               width: 3, color: Color(0xFF02AA03)),
-                            //         ),
-                            //         prefixIcon: IconButton(
-                            //           icon: const Icon(
-                            //             Icons.person_add,
-                            //             color: Colors.grey,
-                            //           ),
-                            //           onPressed: () {},
-                            //         )),
-                            //     cursorColor: const Color(0xFF02AA03),
-                            //   ),
-                            // ),
+                            SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.02),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20.0),
+                              child: TextFormField(
+                                controller: referralController,
+                                focusNode: _referralFocusNode,
+                                style: const TextStyle(
+                                  fontSize: 16.0,
+                                ),
+                                decoration: InputDecoration(
+                                    labelText: 'Referral',
+                                    labelStyle: const TextStyle(
+                                      color: Colors.grey,
+                                      fontFamily: 'Inter',
+                                      fontSize: 12.0,
+                                      decoration: TextDecoration.none,
+                                    ),
+                                    floatingLabelBehavior:
+                                        FloatingLabelBehavior.never,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: const BorderSide(
+                                          width: 3, color: Colors.grey),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: const BorderSide(
+                                          width: 3, color: Color(0xFF02AA03)),
+                                    ),
+                                    prefixIcon: IconButton(
+                                      icon: const Icon(
+                                        Icons.person_add,
+                                        color: Colors.grey,
+                                      ),
+                                      onPressed: () {},
+                                    )),
+                                cursorColor: const Color(0xFF02AA03),
+                              ),
+                            ),
                             SizedBox(
                                 height:
                                     MediaQuery.of(context).size.height * 0.05),

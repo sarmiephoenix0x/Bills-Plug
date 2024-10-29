@@ -17,12 +17,14 @@ class RegisterPage extends StatefulWidget {
 
 class RegisterPageState extends State<RegisterPage>
     with SingleTickerProviderStateMixin {
-  final FocusNode _nameFocusNode = FocusNode();
+  final FocusNode _firstNameFocusNode = FocusNode();
+  final FocusNode _lastNameFocusNode = FocusNode();
   final FocusNode _userNameFocusNode = FocusNode();
   final FocusNode _phoneNumberFocusNode = FocusNode();
   final FocusNode _emailFocusNode = FocusNode();
 
-  final TextEditingController nameController = TextEditingController();
+  final TextEditingController firstNameController = TextEditingController();
+  final TextEditingController lastNameController = TextEditingController();
   final TextEditingController userNameController = TextEditingController();
   final TextEditingController phoneNumberController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
@@ -103,7 +105,7 @@ class RegisterPageState extends State<RegisterPage>
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.05),
+                            height: MediaQuery.of(context).size.height * 0.015),
                         Image.asset(
                           "images/AppLogo.png",
                           fit: BoxFit.contain,
@@ -154,6 +156,90 @@ class RegisterPageState extends State<RegisterPage>
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 20.0),
                               child: TextFormField(
+                                controller: firstNameController,
+                                focusNode: _firstNameFocusNode,
+                                style: const TextStyle(
+                                  fontSize: 16.0,
+                                ),
+                                decoration: InputDecoration(
+                                    labelText: 'First Name',
+                                    labelStyle: const TextStyle(
+                                      color: Colors.grey,
+                                      fontFamily: 'Inter',
+                                      fontSize: 12.0,
+                                      decoration: TextDecoration.none,
+                                    ),
+                                    floatingLabelBehavior:
+                                        FloatingLabelBehavior.never,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: const BorderSide(
+                                          width: 3, color: Colors.grey),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: const BorderSide(
+                                          width: 3, color: Color(0xFF02AA03)),
+                                    ),
+                                    prefixIcon: IconButton(
+                                      icon: const Icon(
+                                        Icons.person,
+                                        color: Colors.grey,
+                                      ),
+                                      onPressed: () {},
+                                    )),
+                                cursorColor: const Color(0xFF02AA03),
+                              ),
+                            ),
+                            SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.02),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20.0),
+                              child: TextFormField(
+                                controller: lastNameController,
+                                focusNode: _lastNameFocusNode,
+                                style: const TextStyle(
+                                  fontSize: 16.0,
+                                ),
+                                decoration: InputDecoration(
+                                    labelText: 'Last Name',
+                                    labelStyle: const TextStyle(
+                                      color: Colors.grey,
+                                      fontFamily: 'Inter',
+                                      fontSize: 12.0,
+                                      decoration: TextDecoration.none,
+                                    ),
+                                    floatingLabelBehavior:
+                                        FloatingLabelBehavior.never,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: const BorderSide(
+                                          width: 3, color: Colors.grey),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: const BorderSide(
+                                          width: 3, color: Color(0xFF02AA03)),
+                                    ),
+                                    prefixIcon: IconButton(
+                                      icon: const Icon(
+                                        Icons.person,
+                                        color: Colors.grey,
+                                      ),
+                                      onPressed: () {},
+                                    )),
+                                cursorColor: const Color(0xFF02AA03),
+                              ),
+                            ),
+                            SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.02),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20.0),
+                              child: TextFormField(
                                 controller: userNameController,
                                 focusNode: _userNameFocusNode,
                                 style: const TextStyle(
@@ -189,48 +275,6 @@ class RegisterPageState extends State<RegisterPage>
                                 cursorColor: const Color(0xFF02AA03),
                               ),
                             ),
-                            // SizedBox(
-                            //     height:
-                            //         MediaQuery.of(context).size.height * 0.02),
-                            // Padding(
-                            //   padding:
-                            //       const EdgeInsets.symmetric(horizontal: 20.0),
-                            //   child: TextFormField(
-                            //     controller: userNameController,
-                            //     focusNode: _userNameFocusNode,
-                            //     style: const TextStyle(
-                            //       fontSize: 16.0,
-                            //     ),
-                            //     decoration: InputDecoration(
-                            //         labelText: 'Last Name',
-                            //         labelStyle: const TextStyle(
-                            //           color: Colors.grey,
-                            //           fontFamily: 'Inter',
-                            //           fontSize: 12.0,
-                            //           decoration: TextDecoration.none,
-                            //         ),
-                            //         floatingLabelBehavior:
-                            //             FloatingLabelBehavior.never,
-                            //         border: OutlineInputBorder(
-                            //           borderRadius: BorderRadius.circular(15),
-                            //           borderSide: const BorderSide(
-                            //               width: 3, color: Colors.grey),
-                            //         ),
-                            //         focusedBorder: OutlineInputBorder(
-                            //           borderRadius: BorderRadius.circular(15),
-                            //           borderSide: const BorderSide(
-                            //               width: 3, color: Color(0xFF02AA03)),
-                            //         ),
-                            //         prefixIcon: IconButton(
-                            //           icon: const Icon(
-                            //             Icons.person,
-                            //             color: Colors.grey,
-                            //           ),
-                            //           onPressed: () {},
-                            //         )),
-                            //     cursorColor: const Color(0xFF02AA03),
-                            //   ),
-                            // ),
                             SizedBox(
                                 height:
                                     MediaQuery.of(context).size.height * 0.02),
@@ -273,7 +317,6 @@ class RegisterPageState extends State<RegisterPage>
                                 cursorColor: const Color(0xFF02AA03),
                               ),
                             ),
-
                             SizedBox(
                                 height:
                                     MediaQuery.of(context).size.height * 0.02),
@@ -316,7 +359,6 @@ class RegisterPageState extends State<RegisterPage>
                                 cursorColor: const Color(0xFF02AA03),
                               ),
                             ),
-
                             SizedBox(
                                 height:
                                     MediaQuery.of(context).size.height * 0.05),
@@ -329,7 +371,9 @@ class RegisterPageState extends State<RegisterPage>
                                   const EdgeInsets.symmetric(horizontal: 20.0),
                               child: ElevatedButton(
                                 onPressed: () {
-                                  if (userNameController.text.trim().isEmpty ||
+                                  if (firstNameController.text.trim().isEmpty ||
+                                      lastNameController.text.trim().isEmpty ||
+                                      userNameController.text.trim().isEmpty ||
                                       emailController.text.trim().isEmpty ||
                                       phoneNumberController.text
                                           .trim()
@@ -373,6 +417,10 @@ class RegisterPageState extends State<RegisterPage>
                                         phoneNumber:
                                             phoneNumberController.text.trim(),
                                         email: emailController.text.trim(),
+                                        firstname:
+                                            firstNameController.text.trim(),
+                                        lastname:
+                                            lastNameController.text.trim(),
                                       ),
                                     ),
                                   );

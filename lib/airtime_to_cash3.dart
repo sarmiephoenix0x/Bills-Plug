@@ -27,6 +27,7 @@ class AirtimeToCashSellPageState extends State<AirtimeToCashSellPage>
 
   bool paymentSectionAirtimeToCashSellOpen = false;
   bool paymentSectionAirtimeToCash = false;
+  bool paymentSuccessful = false;
 
   @override
   void initState() {
@@ -178,65 +179,69 @@ class AirtimeToCashSellPageState extends State<AirtimeToCashSellPage>
                                         width:
                                             MediaQuery.of(context).size.width *
                                                 0.01),
-                                    const Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'MTN',
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontFamily: 'Inter',
-                                            color: Colors.black,
+                                    const Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'MTN',
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              fontFamily: 'Inter',
+                                              color: Colors.black,
+                                            ),
                                           ),
-                                        ),
-                                        Text(
-                                          '0905 525 9546',
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontFamily: 'Inter',
-                                            color: Colors.black,
+                                          Text(
+                                            '0905 525 9546',
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontFamily: 'Inter',
+                                              color: Colors.black,
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                     const Spacer(),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        const Text(
-                                          'Airtime Balance',
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontFamily: 'Inter',
-                                            color: Colors.black,
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            'Airtime Balance',
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              fontFamily: 'Inter',
+                                              color: Colors.black,
+                                            ),
                                           ),
-                                        ),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Image.asset(
-                                              'images/NairaImg.png',
-                                              height: 10,
-                                            ),
-                                            const Text(
-                                              '1500.00',
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                fontFamily: 'Inter',
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 18.0,
-                                                color: Color(0xFF02AA03),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Image.asset(
+                                                'images/NairaImg.png',
+                                                height: 15,
                                               ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
+                                              const Text(
+                                                '1500.00',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 18.0,
+                                                  color: Color(0xFF02AA03),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -328,8 +333,8 @@ class AirtimeToCashSellPageState extends State<AirtimeToCashSellPage>
                                 child: ElevatedButton(
                                   onPressed: () {
                                     setState(() {
-                                          paymentSectionAirtimeToCash = true;
-                                        });
+                                      paymentSectionAirtimeToCash = true;
+                                    });
                                   },
                                   style: ButtonStyle(
                                     backgroundColor:
@@ -547,40 +552,6 @@ class AirtimeToCashSellPageState extends State<AirtimeToCashSellPage>
                                   Expanded(
                                     flex: 5,
                                     child: Text(
-                                      'Plan',
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontFamily: 'Inter',
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  ),
-                                  Spacer(),
-                                  Expanded(
-                                    flex: 5,
-                                    child: Text(
-                                      '10.0GB',
-                                      overflow: TextOverflow.ellipsis,
-                                      textAlign: TextAlign.end,
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontFamily: 'Inter',
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                  )
-                                ],
-                              ),
-                              SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      0.02),
-                              const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Expanded(
-                                    flex: 5,
-                                    child: Text(
                                       'Phone Number',
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
@@ -615,7 +586,49 @@ class AirtimeToCashSellPageState extends State<AirtimeToCashSellPage>
                                   const Expanded(
                                     flex: 5,
                                     child: Text(
-                                      'Amount to pay',
+                                      'Airtime Amount',
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontFamily: 'Inter',
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  Expanded(
+                                    flex: 5,
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Image.asset(
+                                          'images/NairaImg.png',
+                                          height: 15,
+                                        ),
+                                        const Text(
+                                          '1,400.00',
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontFamily: 'Inter',
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(
+                                  height: MediaQuery.of(context).size.height *
+                                      0.02),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Expanded(
+                                    flex: 5,
+                                    child: Text(
+                                      'Amount To Receive',
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         fontSize: 18,
@@ -715,6 +728,7 @@ class AirtimeToCashSellPageState extends State<AirtimeToCashSellPage>
                                   onPressed: () {
                                     setState(() {
                                       paymentSectionAirtimeToCash = false;
+                                      paymentSuccessful = true;
                                     });
                                   },
                                   style: ButtonStyle(
@@ -766,6 +780,190 @@ class AirtimeToCashSellPageState extends State<AirtimeToCashSellPage>
                           ),
                         ),
                       ),
+                    ),
+                  if (paymentSuccessful)
+                    Stack(
+                      children: [
+                        ModalBarrier(
+                          dismissible: false,
+                          color: Colors.black.withOpacity(0.5),
+                        ),
+                        PopScope(
+                          canPop: false,
+                          onPopInvokedWithResult: (didPop, dynamic result) {
+                            if (!didPop) {
+                              setState(() {
+                                paymentSuccessful = false;
+                              });
+                            }
+                          },
+                          child: Center(
+                            child: SingleChildScrollView(
+                              child: Container(
+                                margin: const EdgeInsets.symmetric(
+                                    horizontal: 20.0), // Centered padding
+                                padding: const EdgeInsets.all(
+                                    16.0), // Inner padding for content
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(25.0),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.black26,
+                                      spreadRadius: 2,
+                                      blurRadius: 10,
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize
+                                      .min, // Expands only as needed
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    // Close button
+                                    Align(
+                                      alignment: Alignment.topRight,
+                                      child: InkWell(
+                                        onTap: () {
+                                          setState(() {
+                                            paymentSuccessful = false;
+                                          });
+                                        },
+                                        child: Image.asset(
+                                          'images/CloseBut.png',
+                                          height: 25,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.02),
+
+                                    // Receipt title and content
+                                    const Text(
+                                      'Payment Successful',
+                                      style: TextStyle(
+                                        fontSize: 20.0,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'Inter',
+                                      ),
+                                    ),
+                                    SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.02),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Image.asset(
+                                          'images/NairaImg.png',
+                                          height: 20,
+                                        ),
+                                        const Text(
+                                          '1,370.00',
+                                          style: TextStyle(
+                                            fontSize: 24,
+                                            fontFamily: 'Inter',
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.02),
+                                    const Text(
+                                      'Airtime Sell was successful, the payment will be added to your wallet balance within 5 minutes',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 16.0,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'Inter',
+                                        color: Color(0xFF02AA03),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.02),
+                                    Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 12.0, horizontal: 12.0),
+                                          decoration: const BoxDecoration(
+                                            color: Color(0xFFDAF3DB),
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(15.0),
+                                            ),
+                                          ),
+                                          child: Column(
+                                            children: [
+                                              Image.asset(
+                                                'images/ShareReceipt.png',
+                                                height: 20,
+                                              ),
+                                              SizedBox(
+                                                  height: MediaQuery.of(context)
+                                                          .size
+                                                          .height *
+                                                      0.02),
+                                              const Text(
+                                                'Share Receipt',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontSize: 14.0,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const Spacer(),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 12.0, horizontal: 12.0),
+                                          decoration: const BoxDecoration(
+                                            color: Color(0xFFDAF3DB),
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(15.0),
+                                            ),
+                                          ),
+                                          child: Column(
+                                            children: [
+                                              Image.asset(
+                                                'images/Download.png',
+                                                height: 20,
+                                              ),
+                                              SizedBox(
+                                                  height: MediaQuery.of(context)
+                                                          .size
+                                                          .height *
+                                                      0.02),
+                                              const Text(
+                                                'View Receipt',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontSize: 14.0,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                 ],
               ),
