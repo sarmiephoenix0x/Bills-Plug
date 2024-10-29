@@ -109,7 +109,7 @@ class RegisterPageState extends State<RegisterPage>
       body: jsonEncode({
         'username': username,
         'email': email,
-        'phone_number': phoneNumber,
+        'mobile': phoneNumber,
         'password': password,
         'country': country,
       }),
@@ -587,18 +587,26 @@ class RegisterPageState extends State<RegisterPage>
                     ),
                   ),
                   if (isLoading)
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Center(
-                          child: ScaleTransition(
-                            scale: _animation,
-                            child: Image.asset(
-                              'images/Loading.png',
-                            ),
+                    Positioned.fill(
+                      child: AbsorbPointer(
+                        absorbing:
+                            true, // Blocks interaction with widgets behind
+                        child: Container(
+                          color: Colors.black
+                              .withOpacity(0.5), // Semi-transparent background
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ScaleTransition(
+                                scale: _animation,
+                                child: Image.asset(
+                                  'images/Loading.png',
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
+                      ),
                     ),
                 ],
               ),

@@ -538,18 +538,26 @@ class LoginPageState extends State<LoginPage>
                     ),
                   ),
                   if (isLoading)
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Center(
-                          child: ScaleTransition(
-                            scale: _animation,
-                            child: Image.asset(
-                              'images/Loading.png',
-                            ),
+                    Positioned.fill(
+                      child: AbsorbPointer(
+                        absorbing:
+                            true, // Blocks interaction with widgets behind
+                        child: Container(
+                          color: Colors.black
+                              .withOpacity(0.5), // Semi-transparent background
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ScaleTransition(
+                                scale: _animation,
+                                child: Image.asset(
+                                  'images/Loading.png',
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
+                      ),
                     ),
                   Positioned(
                     bottom: 0,
