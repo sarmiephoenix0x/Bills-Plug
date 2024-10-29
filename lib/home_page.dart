@@ -246,16 +246,32 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                           height: 20,
                                           color: Colors.white,
                                         ),
-                                        const Text(
-                                          "0.00",
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontFamily: 'Inter',
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 27.0,
-                                            color: Colors.white,
-                                          ),
-                                        ),
+                                        if (userBalance != null)
+                                          Text(
+                                            double.tryParse(userBalance!) !=
+                                                    null
+                                                ? double.parse(userBalance!)
+                                                    .toStringAsFixed(2)
+                                                : "0.00",
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              fontFamily: 'Inter',
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 27.0,
+                                              color: Colors.white,
+                                            ),
+                                          )
+                                        else
+                                          const Text(
+                                            "0.00",
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontFamily: 'Inter',
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 27.0,
+                                              color: Colors.white,
+                                            ),
+                                          )
                                       ],
                                     ),
                                   ],

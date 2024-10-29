@@ -45,52 +45,35 @@ class _HelpServicePageState extends State<HelpServicePage>
                               ),
                               child: Column(
                                 children: [
-                                  Expanded(
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        InkWell(
-                                          onTap: () {
-                                            Navigator.pop(context);
-                                          },
-                                          child: Image.asset(
-                                            'images/CloseBut_White.png',
-                                            height: 40,
-                                          ),
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      InkWell(
+                                        onTap: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: Image.asset(
+                                          'images/CloseBut_White.png',
+                                          height: 40,
                                         ),
-                                        const Spacer(),
-                                        const Padding(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 20.0),
-                                          child: Text(
-                                            'Cable TV',
-                                            style: TextStyle(
-                                              fontFamily: 'Inter',
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 20.0,
-                                              color: Colors.black,
-                                            ),
-                                          ),
+                                      ),
+                                      SizedBox(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.2),
+                                      const Text(
+                                        'Help Center',
+                                        style: TextStyle(
+                                          fontFamily: 'Inter',
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20.0,
+                                          color: Colors.black,
                                         ),
-                                        const Spacer(),
-                                        InkWell(
-                                          onTap: () {
-                                            // Navigator.push(
-                                            //   context,
-                                            //   MaterialPageRoute(
-                                            //     builder: (context) =>
-                                            //         TransactionPin(key: UniqueKey()),
-                                            //   ),
-                                            // );
-                                          },
-                                          child: Image.asset(
-                                            'images/Notification.png',
-                                            height: 40,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                      ),
+                                      const Spacer(),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -104,7 +87,7 @@ class _HelpServicePageState extends State<HelpServicePage>
                               child: Container(
                                 width: MediaQuery.of(context).size.width,
                                 padding: const EdgeInsets.symmetric(
-                                    vertical: 12.0, horizontal: 20.0),
+                                    vertical: 0.0, horizontal: 0.0),
                                 decoration: const BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.all(
@@ -121,191 +104,159 @@ class _HelpServicePageState extends State<HelpServicePage>
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      "SELF SERVICES",
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontFamily: 'Inter',
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18.0,
-                                      ),
-                                    ),
-                                    SizedBox(
+                                    Container(
                                       width: MediaQuery.of(context).size.width,
-                                      child: const Divider(
-                                        color: Colors.grey,
-                                        height: 20,
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 12.0, horizontal: 20.0),
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFFD9D9D9),
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(25.0),
+                                          topRight: Radius.circular(25.0),
+                                        ),
+                                      ),
+                                      child: const Text(
+                                        "SELF SERVICES",
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontFamily: 'Inter',
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18.0,
+                                        ),
                                       ),
                                     ),
-                                    Wrap(
-                                      runSpacing: 10.0,
-                                      children: [
-                                        InkWell(
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    AirtimeAndDataPage(
-                                                  key: UniqueKey(),
-                                                  tabIndex: 0,
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                          child: HelpServices(
-                                              'images/Airtime.png', 'Airtime'),
-                                        ),
-                                        InkWell(
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    AirtimeAndDataPage(
-                                                  key: UniqueKey(),
-                                                  tabIndex: 1,
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                          child: HelpServices(
-                                              'images/Data.png', 'Data'),
-                                        ),
-                                        InkWell(
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    CableTVPage(
-                                                        key: UniqueKey()),
-                                              ),
-                                            );
-                                          },
-                                          child: HelpServices(
-                                              'images/CableTV.png', 'Cable TV'),
-                                        ),
-                                        InkWell(
-                                          onTap: () {},
-                                          child: HelpServices(
-                                              'images/ExamPins.png',
-                                              'Exam Pins'),
-                                        ),
-                                        InkWell(
-                                          onTap: () {},
-                                          child: HelpServices(
-                                              'images/DataPins.png',
-                                              'Data Pin'),
-                                        ),
-                                        InkWell(
-                                          onTap: () {},
-                                          child: HelpServices(
-                                              'images/Electricity.png',
-                                              'Electricity'),
-                                        ),
-                                        InkWell(
-                                          onTap: () {},
-                                          child: HelpServices(
-                                              'images/Betting.png',
-                                              'Fund Betting Wallet'),
-                                        ),
-                                        InkWell(
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    AirtimeToCashPage(
-                                                  key: UniqueKey(),
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                          child: HelpServices(
-                                              'images/Airtime2Cash.png',
-                                              'Airtime2cash'),
-                                        ),
-                                        InkWell(
-                                          onTap: () {},
-                                          child: HelpServices(
-                                              'images/RechargeCardPrinting.png',
-                                              'Recharge card printing'),
-                                        ),
-                                        InkWell(
-                                          onTap: () {},
-                                          child: HelpServices(
-                                              'images/ExamPins.png',
-                                              'Jamb E-PIN'),
-                                        ),
-                                      ],
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 20.0, vertical: 12.0),
+                                      child: help("Wallet Funding"),
                                     ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.05),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 20.0),
-                              child: Container(
-                                width: MediaQuery.of(context).size.width,
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 12.0, horizontal: 20.0),
-                                decoration: const BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(25.0),
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black26,
-                                      spreadRadius: 2,
-                                      blurRadius: 10,
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 20.0, vertical: 12.0),
+                                      child: help("Airtime Purchase"),
                                     ),
-                                  ],
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      "Others",
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontFamily: 'Inter',
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18.0,
-                                      ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 20.0, vertical: 12.0),
+                                      child: help("Databundle Purchase"),
                                     ),
-                                    SizedBox(
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 20.0, vertical: 12.0),
+                                      child: help("CableTV Subscription"),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 20.0, vertical: 12.0),
+                                      child: help("Electricity Payment"),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 20.0, vertical: 12.0),
+                                      child: help("Betting Wallet"),
+                                    ),
+                                    Container(
                                       width: MediaQuery.of(context).size.width,
-                                      child: const Divider(
-                                        color: Colors.grey,
-                                        height: 20,
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 12.0, horizontal: 20.0),
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFFD9D9D9),
+                                      ),
+                                      child: const Text(
+                                        "COMPLAINTS / FEEDBACK",
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontFamily: 'Inter',
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18.0,
+                                        ),
                                       ),
                                     ),
-                                    Wrap(
-                                      runSpacing: 10.0,
-                                      children: [
-                                        InkWell(
-                                          onTap: () {},
-                                          child: HelpServices(
-                                              'images/Pricing.png', 'Pricing'),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 20.0, vertical: 12.0),
+                                      child: help("Submit a ticket"),
+                                    ),
+                                    Container(
+                                      width: MediaQuery.of(context).size.width,
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 12.0, horizontal: 20.0),
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFFD9D9D9),
+                                      ),
+                                      child: const Text(
+                                        "CONTACT US",
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontFamily: 'Inter',
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18.0,
                                         ),
-                                        InkWell(
-                                          onTap: () {},
-                                          child: HelpServices(
-                                              'images/History.png', 'History'),
-                                        ),
-                                        InkWell(
-                                          onTap: () {},
-                                          child: HelpServices(
-                                              'images/mdi_bell.png',
-                                              'Notification'),
-                                        ),
-                                      ],
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 20.0, vertical: 12.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            "Call",
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontFamily: 'Inter',
+                                              fontSize: 16.0,
+                                            ),
+                                          ),
+                                          SizedBox(
+                                              height: MediaQuery.of(context)
+                                                      .size
+                                                      .height *
+                                                  0.02),
+                                          Text(
+                                            "09055259546",
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontFamily: 'Inter',
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16.0,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 20.0, vertical: 12.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            "Address",
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontFamily: 'Inter',
+                                              fontSize: 16.0,
+                                            ),
+                                          ),
+                                          SizedBox(
+                                              height: MediaQuery.of(context)
+                                                      .size
+                                                      .height *
+                                                  0.02),
+                                          const Text(
+                                            "Head Office No 2 Ladoke Akintola Way, Off Aare Avenue, New Bodija, Ibadan Oyo State.",
+                                            softWrap: true,
+                                            style: TextStyle(
+                                              fontFamily: 'Inter',
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16.0,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -325,37 +276,29 @@ class _HelpServicePageState extends State<HelpServicePage>
     );
   }
 
-  Widget HelpServices(String img, String content) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      child: Container(
-        width: 100,
-        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
-        decoration: const BoxDecoration(
-          color: Color(0xFFF7FFF1),
-          borderRadius: BorderRadius.all(
-            Radius.circular(25.0),
+  Widget help(String value) {
+    return Row(
+      children: [
+        Expanded(
+          flex: 10,
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 16.0,
+              color: Colors.black,
+            ),
           ),
         ),
-        child: Column(
-          children: [
-            Image.asset(
-              img,
-              height: 30,
-            ),
-            SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-            Text(
-              content,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.bold,
-                fontSize: 14.0,
-              ),
-            ),
-          ],
+        const Spacer(),
+        IconButton(
+          icon: Icon(
+            Icons.navigate_next,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+          onPressed: () {},
         ),
-      ),
+      ],
     );
   }
 }
