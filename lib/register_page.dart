@@ -274,7 +274,7 @@ class RegisterPageState extends State<RegisterPage>
                                   fontSize: 16.0,
                                 ),
                                 decoration: InputDecoration(
-                                    labelText: 'First Name',
+                                    labelText: 'Name',
                                     labelStyle: const TextStyle(
                                       color: Colors.grey,
                                       fontFamily: 'Inter',
@@ -303,48 +303,48 @@ class RegisterPageState extends State<RegisterPage>
                                 cursorColor: const Color(0xFF02AA03),
                               ),
                             ),
-                            SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.02),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 20.0),
-                              child: TextFormField(
-                                controller: userNameController,
-                                focusNode: _userNameFocusNode,
-                                style: const TextStyle(
-                                  fontSize: 16.0,
-                                ),
-                                decoration: InputDecoration(
-                                    labelText: 'Last Name',
-                                    labelStyle: const TextStyle(
-                                      color: Colors.grey,
-                                      fontFamily: 'Inter',
-                                      fontSize: 12.0,
-                                      decoration: TextDecoration.none,
-                                    ),
-                                    floatingLabelBehavior:
-                                        FloatingLabelBehavior.never,
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(15),
-                                      borderSide: const BorderSide(
-                                          width: 3, color: Colors.grey),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(15),
-                                      borderSide: const BorderSide(
-                                          width: 3, color: Color(0xFF02AA03)),
-                                    ),
-                                    prefixIcon: IconButton(
-                                      icon: const Icon(
-                                        Icons.person,
-                                        color: Colors.grey,
-                                      ),
-                                      onPressed: () {},
-                                    )),
-                                cursorColor: const Color(0xFF02AA03),
-                              ),
-                            ),
+                            // SizedBox(
+                            //     height:
+                            //         MediaQuery.of(context).size.height * 0.02),
+                            // Padding(
+                            //   padding:
+                            //       const EdgeInsets.symmetric(horizontal: 20.0),
+                            //   child: TextFormField(
+                            //     controller: userNameController,
+                            //     focusNode: _userNameFocusNode,
+                            //     style: const TextStyle(
+                            //       fontSize: 16.0,
+                            //     ),
+                            //     decoration: InputDecoration(
+                            //         labelText: 'Last Name',
+                            //         labelStyle: const TextStyle(
+                            //           color: Colors.grey,
+                            //           fontFamily: 'Inter',
+                            //           fontSize: 12.0,
+                            //           decoration: TextDecoration.none,
+                            //         ),
+                            //         floatingLabelBehavior:
+                            //             FloatingLabelBehavior.never,
+                            //         border: OutlineInputBorder(
+                            //           borderRadius: BorderRadius.circular(15),
+                            //           borderSide: const BorderSide(
+                            //               width: 3, color: Colors.grey),
+                            //         ),
+                            //         focusedBorder: OutlineInputBorder(
+                            //           borderRadius: BorderRadius.circular(15),
+                            //           borderSide: const BorderSide(
+                            //               width: 3, color: Color(0xFF02AA03)),
+                            //         ),
+                            //         prefixIcon: IconButton(
+                            //           icon: const Icon(
+                            //             Icons.person,
+                            //             color: Colors.grey,
+                            //           ),
+                            //           onPressed: () {},
+                            //         )),
+                            //     cursorColor: const Color(0xFF02AA03),
+                            //   ),
+                            // ),
                             SizedBox(
                                 height:
                                     MediaQuery.of(context).size.height * 0.02),
@@ -358,7 +358,7 @@ class RegisterPageState extends State<RegisterPage>
                                   fontSize: 16.0,
                                 ),
                                 decoration: InputDecoration(
-                                    labelText: 'WhatsApp Number',
+                                    labelText: 'Phone Number',
                                     labelStyle: const TextStyle(
                                       color: Colors.grey,
                                       fontFamily: 'Inter',
