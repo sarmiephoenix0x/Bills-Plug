@@ -1,7 +1,11 @@
 import 'package:bills_plug/register_page_second.dart';
 import 'package:flutter/material.dart';
-
 import 'Login_Page.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'main_app.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -11,18 +15,189 @@ class RegisterPage extends StatefulWidget {
   RegisterPageState createState() => RegisterPageState();
 }
 
-class RegisterPageState extends State<RegisterPage> {
-  final FocusNode _firstNameFocusNode = FocusNode();
-  final FocusNode _lastNameFocusNode = FocusNode();
-  final FocusNode _whatsappNumberFocusNode = FocusNode();
+class RegisterPageState extends State<RegisterPage>
+    with SingleTickerProviderStateMixin {
+  final FocusNode _nameFocusNode = FocusNode();
+  final FocusNode _userNameFocusNode = FocusNode();
+  final FocusNode _phoneNumberFocusNode = FocusNode();
   final FocusNode _emailFocusNode = FocusNode();
+  final FocusNode _countryFocusNode = FocusNode();
+  final FocusNode _passwordFocusNode = FocusNode();
 
-  final TextEditingController firstNameController = TextEditingController();
-  final TextEditingController lastNameController = TextEditingController();
-  final TextEditingController whatsappNumberController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController userNameController = TextEditingController();
+  final TextEditingController phoneNumberController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
+  final TextEditingController countryController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
   bool _isPasswordVisible = false;
+
+  final storage = const FlutterSecureStorage();
+  late SharedPreferences prefs;
+  bool isLoading = false;
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )..repeat(reverse: true);
+
+    _animation = Tween<double>(begin: 0.4, end: 0.6).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+    _initializePrefs();
+  }
+
+  Future<void> _initializePrefs() async {
+    prefs = await SharedPreferences.getInstance();
+  }
+
+  Future<void> _registerUser() async {
+    if (prefs == null) {
+      await _initializePrefs();
+    }
+    final String email = emailController.text.trim();
+    final String password = passwordController.text.trim();
+    final String phoneNumber = phoneNumberController.text.trim();
+    final String country = countryController.text.trim();
+    final String username = userNameController.text.trim();
+
+    if (username.isEmpty ||
+        email.isEmpty ||
+        phoneNumber.isEmpty ||
+        password.isEmpty ||
+        country.isEmpty) {
+      _showCustomSnackBar(
+        context,
+        'All fields are required.',
+        isError: true,
+      );
+      return;
+    }
+
+    final RegExp emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+    if (!emailRegex.hasMatch(email)) {
+      _showCustomSnackBar(
+        context,
+        'Please enter a valid email address.',
+        isError: true,
+      );
+      return;
+    }
+
+    if (password.length < 6) {
+      _showCustomSnackBar(
+        context,
+        'Password must be at least 6 characters.',
+        isError: true,
+      );
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    final response = await http.post(
+      Uri.parse('https://glad.payguru.com.ng/api/register'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'username': username,
+        'email': email,
+        'phone_number': phoneNumber,
+        'password': password,
+        'country': country,
+      }),
+    );
+
+    final Map<String, dynamic> responseData = jsonDecode(response.body);
+    print('Response Data: $responseData');
+
+    if (response.statusCode == 201) {
+      final Map<String, dynamic> user = responseData['user'];
+      final String accessToken = responseData['access_token'];
+      final String profilePhoto = responseData['profile_photo'];
+
+      user['profile_photo'] = profilePhoto;
+      await storage.write(key: 'accessToken', value: accessToken);
+      await prefs.setString('user', jsonEncode(user));
+
+      _showCustomSnackBar(
+        context,
+        'Sign up successful! Welcome, ${user['name']}',
+        isError: false,
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MainApp(key: UniqueKey()),
+        ),
+      );
+    } else if (response.statusCode == 400) {
+      setState(() {
+        isLoading = false;
+      });
+
+      final Map<String, dynamic> errors = responseData['errors'];
+      String errorMessage = 'Error: ';
+
+      // Collect error messages for each field
+      errors.forEach((field, messages) {
+        errorMessage += '$field: ${messages.join(", ")}\n';
+      });
+
+      _showCustomSnackBar(
+        context,
+        errorMessage,
+        isError: true,
+      );
+    } else {
+      setState(() {
+        isLoading = false;
+      });
+      _showCustomSnackBar(
+        context,
+        'An unexpected error occurred.',
+        isError: true,
+      );
+    }
+  }
+
+  void _showCustomSnackBar(BuildContext context, String message,
+      {bool isError = false}) {
+    final snackBar = SnackBar(
+      content: Row(
+        children: [
+          Icon(
+            isError ? Icons.error_outline : Icons.check_circle_outline,
+            color: isError ? Colors.red : Colors.green,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+      backgroundColor: isError ? Colors.red : Colors.green,
+      behavior: SnackBarBehavior.floating,
+      margin: const EdgeInsets.all(10),
+      duration: const Duration(seconds: 3),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +251,7 @@ class RegisterPageState extends State<RegisterPage> {
                           child: Column(children: [
                             SizedBox(
                                 height:
-                                MediaQuery.of(context).size.height * 0.03),
+                                    MediaQuery.of(context).size.height * 0.03),
                             const Text(
                               'Register',
                               style: TextStyle(
@@ -88,13 +263,13 @@ class RegisterPageState extends State<RegisterPage> {
                             ),
                             SizedBox(
                                 height:
-                                MediaQuery.of(context).size.height * 0.04),
+                                    MediaQuery.of(context).size.height * 0.04),
                             Padding(
                               padding:
-                              const EdgeInsets.symmetric(horizontal: 20.0),
+                                  const EdgeInsets.symmetric(horizontal: 20.0),
                               child: TextFormField(
-                                controller: firstNameController,
-                                focusNode: _firstNameFocusNode,
+                                controller: nameController,
+                                focusNode: _nameFocusNode,
                                 style: const TextStyle(
                                   fontSize: 16.0,
                                 ),
@@ -107,7 +282,7 @@ class RegisterPageState extends State<RegisterPage> {
                                       decoration: TextDecoration.none,
                                     ),
                                     floatingLabelBehavior:
-                                    FloatingLabelBehavior.never,
+                                        FloatingLabelBehavior.never,
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(15),
                                       borderSide: const BorderSide(
@@ -130,13 +305,13 @@ class RegisterPageState extends State<RegisterPage> {
                             ),
                             SizedBox(
                                 height:
-                                MediaQuery.of(context).size.height * 0.02),
+                                    MediaQuery.of(context).size.height * 0.02),
                             Padding(
                               padding:
-                              const EdgeInsets.symmetric(horizontal: 20.0),
+                                  const EdgeInsets.symmetric(horizontal: 20.0),
                               child: TextFormField(
-                                controller: lastNameController,
-                                focusNode: _lastNameFocusNode,
+                                controller: userNameController,
+                                focusNode: _userNameFocusNode,
                                 style: const TextStyle(
                                   fontSize: 16.0,
                                 ),
@@ -149,7 +324,7 @@ class RegisterPageState extends State<RegisterPage> {
                                       decoration: TextDecoration.none,
                                     ),
                                     floatingLabelBehavior:
-                                    FloatingLabelBehavior.never,
+                                        FloatingLabelBehavior.never,
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(15),
                                       borderSide: const BorderSide(
@@ -172,13 +347,13 @@ class RegisterPageState extends State<RegisterPage> {
                             ),
                             SizedBox(
                                 height:
-                                MediaQuery.of(context).size.height * 0.02),
+                                    MediaQuery.of(context).size.height * 0.02),
                             Padding(
                               padding:
-                              const EdgeInsets.symmetric(horizontal: 20.0),
+                                  const EdgeInsets.symmetric(horizontal: 20.0),
                               child: TextFormField(
-                                controller: whatsappNumberController,
-                                focusNode: _whatsappNumberFocusNode,
+                                controller: phoneNumberController,
+                                focusNode: _phoneNumberFocusNode,
                                 style: const TextStyle(
                                   fontSize: 16.0,
                                 ),
@@ -191,7 +366,7 @@ class RegisterPageState extends State<RegisterPage> {
                                       decoration: TextDecoration.none,
                                     ),
                                     floatingLabelBehavior:
-                                    FloatingLabelBehavior.never,
+                                        FloatingLabelBehavior.never,
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(15),
                                       borderSide: const BorderSide(
@@ -214,10 +389,10 @@ class RegisterPageState extends State<RegisterPage> {
                             ),
                             SizedBox(
                                 height:
-                                MediaQuery.of(context).size.height * 0.02),
+                                    MediaQuery.of(context).size.height * 0.02),
                             Padding(
                               padding:
-                              const EdgeInsets.symmetric(horizontal: 20.0),
+                                  const EdgeInsets.symmetric(horizontal: 20.0),
                               child: TextFormField(
                                 controller: emailController,
                                 focusNode: _emailFocusNode,
@@ -233,7 +408,7 @@ class RegisterPageState extends State<RegisterPage> {
                                       decoration: TextDecoration.none,
                                     ),
                                     floatingLabelBehavior:
-                                    FloatingLabelBehavior.never,
+                                        FloatingLabelBehavior.never,
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(15),
                                       borderSide: const BorderSide(
@@ -256,28 +431,71 @@ class RegisterPageState extends State<RegisterPage> {
                             ),
                             SizedBox(
                                 height:
-                                MediaQuery.of(context).size.height * 0.05),
+                                    MediaQuery.of(context).size.height * 0.02),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20.0),
+                              child: TextFormField(
+                                controller: countryController,
+                                focusNode: _countryFocusNode,
+                                style: const TextStyle(
+                                  fontSize: 16.0,
+                                ),
+                                decoration: InputDecoration(
+                                    labelText: 'Country',
+                                    labelStyle: const TextStyle(
+                                      color: Colors.grey,
+                                      fontFamily: 'Inter',
+                                      fontSize: 12.0,
+                                      decoration: TextDecoration.none,
+                                    ),
+                                    floatingLabelBehavior:
+                                        FloatingLabelBehavior.never,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: const BorderSide(
+                                          width: 3, color: Colors.grey),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: const BorderSide(
+                                          width: 3, color: Color(0xFF02AA03)),
+                                    ),
+                                    prefixIcon: IconButton(
+                                      icon: const Icon(
+                                        Icons.map,
+                                        color: Colors.grey,
+                                      ),
+                                      onPressed: () {},
+                                    )),
+                                cursorColor: const Color(0xFF02AA03),
+                              ),
+                            ),
+                            SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.05),
                             Container(
                               width: double.infinity,
                               height:
-                              (60 / MediaQuery.of(context).size.height) *
-                                  MediaQuery.of(context).size.height,
+                                  (60 / MediaQuery.of(context).size.height) *
+                                      MediaQuery.of(context).size.height,
                               padding:
-                              const EdgeInsets.symmetric(horizontal: 20.0),
+                                  const EdgeInsets.symmetric(horizontal: 20.0),
                               child: ElevatedButton(
                                 onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          RegisterPageSecond(key: UniqueKey()),
-                                    ),
-                                  );
+                                  _registerUser();
+                                  // Navigator.push(
+                                  //   context,
+                                  //   MaterialPageRoute(
+                                  //     builder: (context) =>
+                                  //         RegisterPageSecond(key: UniqueKey()),
+                                  //   ),
+                                  // );
                                 },
                                 style: ButtonStyle(
                                   backgroundColor:
-                                  WidgetStateProperty.resolveWith<Color>(
-                                        (Set<WidgetState> states) {
+                                      WidgetStateProperty.resolveWith<Color>(
+                                    (Set<WidgetState> states) {
                                       if (states
                                           .contains(WidgetState.pressed)) {
                                         return Colors.white;
@@ -286,8 +504,8 @@ class RegisterPageState extends State<RegisterPage> {
                                     },
                                   ),
                                   foregroundColor:
-                                  WidgetStateProperty.resolveWith<Color>(
-                                        (Set<WidgetState> states) {
+                                      WidgetStateProperty.resolveWith<Color>(
+                                    (Set<WidgetState> states) {
                                       if (states
                                           .contains(WidgetState.pressed)) {
                                         return const Color(0xFF02AA03);
@@ -296,19 +514,19 @@ class RegisterPageState extends State<RegisterPage> {
                                     },
                                   ),
                                   elevation:
-                                  WidgetStateProperty.all<double>(4.0),
+                                      WidgetStateProperty.all<double>(4.0),
                                   shape: WidgetStateProperty.all<
                                       RoundedRectangleBorder>(
                                     const RoundedRectangleBorder(
                                       side: BorderSide(
                                           width: 3, color: Color(0xFF02AA03)),
                                       borderRadius:
-                                      BorderRadius.all(Radius.circular(15)),
+                                          BorderRadius.all(Radius.circular(15)),
                                     ),
                                   ),
                                 ),
                                 child: const Text(
-                                  'Next',
+                                  'Register',
                                   style: TextStyle(
                                     fontFamily: 'Inter',
                                     fontWeight: FontWeight.bold,
@@ -318,11 +536,11 @@ class RegisterPageState extends State<RegisterPage> {
                             ),
                             SizedBox(
                                 height:
-                                MediaQuery.of(context).size.height * 0.03),
+                                    MediaQuery.of(context).size.height * 0.03),
                             Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20.0),
-                              child:Row(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20.0),
+                              child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   const Text(
@@ -335,8 +553,8 @@ class RegisterPageState extends State<RegisterPage> {
                                     ),
                                   ),
                                   SizedBox(
-                                      width:
-                                      MediaQuery.of(context).size.width * 0.01),
+                                      width: MediaQuery.of(context).size.width *
+                                          0.01),
                                   InkWell(
                                     onTap: () {
                                       Navigator.push(
@@ -368,6 +586,20 @@ class RegisterPageState extends State<RegisterPage> {
                       ),
                     ),
                   ),
+                  if (isLoading)
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Center(
+                          child: ScaleTransition(
+                            scale: _animation,
+                            child: Image.asset(
+                              'images/Loading.png',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                 ],
               ),
             ),

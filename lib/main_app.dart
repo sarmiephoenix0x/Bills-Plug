@@ -12,7 +12,7 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
-  int _selectedIndex = 0;
+  int _selectedIndex = 1;
   final List<bool> _hasNotification = [false, false, false, false, false];
   DateTime? currentBackPressTime;
 

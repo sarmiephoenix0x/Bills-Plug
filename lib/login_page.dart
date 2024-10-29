@@ -1,8 +1,11 @@
 import 'package:bills_plug/register_page.dart';
 import 'package:flutter/material.dart';
-
 import 'forgot_password.dart';
 import 'main_app.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -12,14 +15,183 @@ class LoginPage extends StatefulWidget {
   LoginPageState createState() => LoginPageState();
 }
 
-class LoginPageState extends State<LoginPage> {
+class LoginPageState extends State<LoginPage>
+    with SingleTickerProviderStateMixin {
   final FocusNode _phoneNumberFocusNode = FocusNode();
+  final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
 
   final TextEditingController phoneNumberController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   bool _isPasswordVisible = false;
+  final storage = const FlutterSecureStorage();
+  late SharedPreferences prefs;
+  bool isLoading = false;
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )..repeat(reverse: true);
+
+    _animation = Tween<double>(begin: 0.4, end: 0.6).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+    _initializePrefs();
+  }
+
+  Future<void> _initializePrefs() async {
+    prefs = await SharedPreferences.getInstance();
+  }
+
+  Future<void> _submitForm() async {
+    if (prefs == null) {
+      await _initializePrefs();
+    }
+
+    final String email = emailController.text.trim();
+    final String password = passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      _showCustomSnackBar(
+        context,
+        'All fields are required.',
+        isError: true,
+      );
+      return;
+    }
+
+    final RegExp emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+    if (!emailRegex.hasMatch(email)) {
+      _showCustomSnackBar(
+        context,
+        'Please enter a valid email address.',
+        isError: true,
+      );
+      return;
+    }
+
+    if (password.length < 6) {
+      _showCustomSnackBar(
+        context,
+        'Password must be at least 6 characters.',
+        isError: true,
+      );
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    final response = await http.post(
+      Uri.parse('https://glad.payguru.com.ng/api/login'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': email,
+        'password': password,
+      }),
+    );
+
+    final responseData = json.decode(response.body);
+    print('Response Data: $responseData');
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> user = responseData['user'];
+      final String accessToken = responseData['access_token'];
+      final String profilePhoto = responseData['profile_photo'];
+
+      user['profile_photo'] = profilePhoto;
+      await storage.write(key: 'accessToken', value: accessToken);
+      await prefs.setString('user', jsonEncode(user));
+
+      _showCustomSnackBar(
+        context,
+        'Login successful!',
+        isError: false,
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MainApp(key: UniqueKey()),
+        ),
+      );
+    } else if (response.statusCode == 400) {
+      setState(() {
+        isLoading = false;
+      });
+
+      final String error = responseData['error'] ?? 'Unknown error';
+      final String data = responseData.containsKey('data')
+          ? responseData['data']
+          : 'No additional data provided';
+
+      _showCustomSnackBar(
+        context,
+        'Error: $error - $data',
+        isError: true,
+      );
+    } else if (response.statusCode == 401) {
+      setState(() {
+        isLoading = false;
+      });
+
+      final String error = responseData['error'] ?? 'Unauthorized access';
+
+      _showCustomSnackBar(
+        context,
+        'Error: $error',
+        isError: true,
+      );
+    } else {
+      setState(() {
+        isLoading = false;
+      });
+
+      _showCustomSnackBar(
+        context,
+        'An unexpected error occurred.',
+        isError: true,
+      );
+    }
+  }
+
+  void _showCustomSnackBar(BuildContext context, String message,
+      {bool isError = false}) {
+    final snackBar = SnackBar(
+      content: Row(
+        children: [
+          Icon(
+            isError ? Icons.error_outline : Icons.check_circle_outline,
+            color: isError ? Colors.red : Colors.green,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+      backgroundColor: isError ? Colors.red : Colors.green,
+      behavior: SnackBarBehavior.floating,
+      margin: const EdgeInsets.all(10),
+      duration: const Duration(seconds: 3),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,17 +258,56 @@ class LoginPageState extends State<LoginPage> {
                             SizedBox(
                                 height:
                                     MediaQuery.of(context).size.height * 0.04),
+                            // Padding(
+                            //   padding:
+                            //       const EdgeInsets.symmetric(horizontal: 20.0),
+                            //   child: TextFormField(
+                            //     controller: phoneNumberController,
+                            //     focusNode: _phoneNumberFocusNode,
+                            //     style: const TextStyle(
+                            //       fontSize: 16.0,
+                            //     ),
+                            //     decoration: InputDecoration(
+                            //         labelText: 'Phone Number',
+                            //         labelStyle: const TextStyle(
+                            //           color: Colors.grey,
+                            //           fontFamily: 'Inter',
+                            //           fontSize: 12.0,
+                            //           decoration: TextDecoration.none,
+                            //         ),
+                            //         floatingLabelBehavior:
+                            //             FloatingLabelBehavior.never,
+                            //         border: OutlineInputBorder(
+                            //           borderRadius: BorderRadius.circular(15),
+                            //           borderSide: const BorderSide(
+                            //               width: 3, color: Colors.grey),
+                            //         ),
+                            //         focusedBorder: OutlineInputBorder(
+                            //           borderRadius: BorderRadius.circular(15),
+                            //           borderSide: const BorderSide(
+                            //               width: 3, color: Color(0xFF02AA03)),
+                            //         ),
+                            //         prefixIcon: IconButton(
+                            //           icon: const Icon(
+                            //             Icons.phone,
+                            //             color: Colors.grey,
+                            //           ),
+                            //           onPressed: () {},
+                            //         )),
+                            //     cursorColor: const Color(0xFF02AA03),
+                            //   ),
+                            // ),
                             Padding(
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 20.0),
                               child: TextFormField(
-                                controller: phoneNumberController,
-                                focusNode: _phoneNumberFocusNode,
+                                controller: emailController,
+                                focusNode: _emailFocusNode,
                                 style: const TextStyle(
                                   fontSize: 16.0,
                                 ),
                                 decoration: InputDecoration(
-                                    labelText: 'Phone Number',
+                                    labelText: 'Email',
                                     labelStyle: const TextStyle(
                                       color: Colors.grey,
                                       fontFamily: 'Inter',
@@ -117,7 +328,7 @@ class LoginPageState extends State<LoginPage> {
                                     ),
                                     prefixIcon: IconButton(
                                       icon: const Icon(
-                                        Icons.phone,
+                                        Icons.mail,
                                         color: Colors.grey,
                                       ),
                                       onPressed: () {},
@@ -227,13 +438,7 @@ class LoginPageState extends State<LoginPage> {
                                   const EdgeInsets.symmetric(horizontal: 20.0),
                               child: ElevatedButton(
                                 onPressed: () {
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          MainApp(key: UniqueKey()),
-                                    ),
-                                  );
+                                  _submitForm();
                                 },
                                 style: ButtonStyle(
                                   backgroundColor:
@@ -281,24 +486,24 @@ class LoginPageState extends State<LoginPage> {
                                 height:
                                     MediaQuery.of(context).size.height * 0.03),
                             Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20.0),
-                              child:Row(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20.0),
+                              child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Text(
-                                  "Don't have an account?",
-                                  style: TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontSize: 13.0,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
+                                children: [
+                                  const Text(
+                                    "Don't have an account?",
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 13.0,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
                                   ),
-                                ),
-                                SizedBox(
-                                    width:
-                                    MediaQuery.of(context).size.width * 0.01),
-                                 InkWell(
+                                  SizedBox(
+                                      width: MediaQuery.of(context).size.width *
+                                          0.01),
+                                  InkWell(
                                     onTap: () {
                                       Navigator.push(
                                         context,
@@ -321,34 +526,48 @@ class LoginPageState extends State<LoginPage> {
                                       ),
                                     ),
                                   ),
-                              ],
+                                ],
+                              ),
                             ),
-                      ),
                             SizedBox(
                                 height:
-                                MediaQuery.of(context).size.height * 0.12),
+                                    MediaQuery.of(context).size.height * 0.12),
                           ]),
                         ),
                       ),
                     ),
                   ),
-            Positioned(
-              bottom: 0,
-              child:SizedBox(
-                width: MediaQuery.of(context).size.width,
-                child:Container(
-                    padding: const EdgeInsets.all(20.0),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF3B4C3C),
+                  if (isLoading)
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Center(
+                          child: ScaleTransition(
+                            scale: _animation,
+                            child: Image.asset(
+                              'images/Loading.png',
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    child:Image.asset(
-                      "images/ContactUs.png",
-                      fit: BoxFit.cover,
-                      width: double.infinity,
+                  Positioned(
+                    bottom: 0,
+                    child: SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      child: Container(
+                        padding: const EdgeInsets.all(20.0),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF3B4C3C),
+                        ),
+                        child: Image.asset(
+                          "images/ContactUs.png",
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                        ),
+                      ),
                     ),
                   ),
-              ),
-            ),
                 ],
               ),
             ),
