@@ -2,6 +2,7 @@ import 'package:bills_plug/add_money_old_users.dart';
 import 'package:bills_plug/add_photo.dart';
 import 'package:bills_plug/airtime_and_data_page.dart';
 import 'package:bills_plug/notification.dart';
+import 'package:bills_plug/service_page.dart';
 import 'package:bills_plug/transaction.dart';
 import 'package:bills_plug/withdraw_money.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -693,7 +694,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           ),
                           const Spacer(),
                           InkWell(
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ServicePage(
+                                    key: UniqueKey(),
+                                  ),
+                                ),
+                              );
+                            },
                             child: Image.asset(
                               'images/MoreImg.png',
                               height: 50,

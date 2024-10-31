@@ -14,6 +14,8 @@ import 'add_money_new_users.dart';
 import 'cable_tv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:bills_plug/referral_page.dart';
+import 'package:bills_plug/networking.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -493,6 +495,69 @@ class _ProfilePageState extends State<ProfilePage>
                                 );
                               },
                               child: basicInfo("Reset Pin", "", Icons.key,
+                                  showArrow: true),
+                            ),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width,
+                              child: const Divider(
+                                color: Colors.grey,
+                                height: 20,
+                              ),
+                            ),
+                            InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ReferralPage(
+                                      key: UniqueKey(),
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: basicInfo("Referral", "", Icons.person_add,
+                                  showArrow: true),
+                            ),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width,
+                              child: const Divider(
+                                color: Colors.grey,
+                                height: 20,
+                              ),
+                            ),
+                            InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => Networking(
+                                      key: UniqueKey(),
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: basicInfo("Networking", "", Icons.public,
+                                  showArrow: true),
+                            ),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width,
+                              child: const Divider(
+                                color: Colors.grey,
+                                height: 20,
+                              ),
+                            ),
+                            InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => SelfServicePage(
+                                      key: UniqueKey(),
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: basicInfo("Billsplug Chat", "", Icons.chat,
                                   showArrow: true),
                             ),
                             SizedBox(

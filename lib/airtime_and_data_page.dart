@@ -2,6 +2,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart' hide CarouselController;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:intl/intl.dart';
 
 class AirtimeAndDataPage extends StatefulWidget {
   final int tabIndex;
@@ -16,7 +17,11 @@ class AirtimeAndDataPageState extends State<AirtimeAndDataPage>
     with SingleTickerProviderStateMixin {
   final FocusNode _phoneNumberFocusNode = FocusNode();
   final FocusNode _phoneNumber2FocusNode = FocusNode();
+  final FocusNode _amountFocusNode = FocusNode();
+  final FocusNode _amount2FocusNode = FocusNode();
 
+  final TextEditingController amountController = TextEditingController();
+  final TextEditingController amount2Controller = TextEditingController();
   final TextEditingController phoneNumberController = TextEditingController();
   final TextEditingController phoneNumber2Controller = TextEditingController();
 
@@ -37,6 +42,16 @@ class AirtimeAndDataPageState extends State<AirtimeAndDataPage>
   String? userBalance;
   late SharedPreferences prefs;
   bool paymentSuccessful = false;
+  int? _selectedPlanRadioValue = -1;
+  String planText = "Select a plan";
+  bool selectPlan = false;
+  bool autoRenewalActive = false;
+  bool autoRenewal = false;
+  bool selectTime = false;
+  String timeText = "Select Time";
+  int? _selectedTimeRadioValue = -1;
+  String startDateText = "dd/mm/yyyy";
+  String endDateText = "dd/mm/yyyy";
 
   @override
   void initState() {
@@ -59,6 +74,10 @@ class AirtimeAndDataPageState extends State<AirtimeAndDataPage>
     } else {
       return null;
     }
+  }
+
+  String _formatDate(DateTime date) {
+    return DateFormat('dd/MM/yyyy').format(date);
   }
 
   @override
@@ -371,35 +390,38 @@ class AirtimeAndDataPageState extends State<AirtimeAndDataPage>
                                   Padding(
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 20.0),
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 7.0, horizontal: 7.0),
-                                      decoration: const BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.all(
-                                          Radius.circular(5.0),
+                                    child: TextFormField(
+                                      controller: amountController,
+                                      focusNode: _amountFocusNode,
+                                      style: const TextStyle(
+                                        fontSize: 16.0,
+                                      ),
+                                      decoration: InputDecoration(
+                                        labelText: 'Input Amount',
+                                        labelStyle: const TextStyle(
+                                          color: Colors.grey,
+                                          fontFamily: 'Inter',
+                                          fontSize: 16.0,
+                                          decoration: TextDecoration.none,
                                         ),
+                                        floatingLabelBehavior:
+                                            FloatingLabelBehavior.never,
+                                        border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(15),
+                                          borderSide: BorderSide.none,
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(15),
+                                          borderSide: const BorderSide(
+                                              width: 3,
+                                              color: Color(0xFF02AA03)),
+                                        ),
+                                        filled: true,
+                                        fillColor: Colors.white,
                                       ),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Image.asset(
-                                            'images/NairaImg.png',
-                                            height: 15,
-                                          ),
-                                          const Text(
-                                            '0.00',
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontFamily: 'Inter',
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 17.0,
-                                              color: Colors.black,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                      cursorColor: const Color(0xFF02AA03),
                                     ),
                                   ),
                                   SizedBox(
@@ -707,30 +729,43 @@ class AirtimeAndDataPageState extends State<AirtimeAndDataPage>
                                   Padding(
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 20.0),
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 10.0, horizontal: 10.0),
-                                      decoration: const BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.all(
-                                          Radius.circular(5.0),
+                                    child: InkWell(
+                                      onTap: () {
+                                        setState(() {
+                                          selectPlan = true;
+                                        });
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 10.0, horizontal: 10.0),
+                                        decoration: const BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.all(
+                                            Radius.circular(5.0),
+                                          ),
                                         ),
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          const Spacer(),
-                                          InkWell(
-                                            onTap: () {
-                                              Navigator.pop(context);
-                                            },
-                                            child: Image.asset(
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Expanded(
+                                              flex: 5,
+                                              child: Text(
+                                                planText,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: const TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontSize: 16.0,
+                                                ),
+                                              ),
+                                            ),
+                                            const Spacer(),
+                                            Image.asset(
                                               'images/teenyicons_down-solid.png',
                                               height: 15,
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -758,35 +793,38 @@ class AirtimeAndDataPageState extends State<AirtimeAndDataPage>
                                   Padding(
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 20.0),
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 7.0, horizontal: 7.0),
-                                      decoration: const BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.all(
-                                          Radius.circular(5.0),
+                                    child: TextFormField(
+                                      controller: amount2Controller,
+                                      focusNode: _amount2FocusNode,
+                                      style: const TextStyle(
+                                        fontSize: 16.0,
+                                      ),
+                                      decoration: InputDecoration(
+                                        labelText: 'Input Amount',
+                                        labelStyle: const TextStyle(
+                                          color: Colors.grey,
+                                          fontFamily: 'Inter',
+                                          fontSize: 16.0,
+                                          decoration: TextDecoration.none,
                                         ),
+                                        floatingLabelBehavior:
+                                            FloatingLabelBehavior.never,
+                                        border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(15),
+                                          borderSide: BorderSide.none,
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(15),
+                                          borderSide: const BorderSide(
+                                              width: 3,
+                                              color: Color(0xFF02AA03)),
+                                        ),
+                                        filled: true,
+                                        fillColor: Colors.white,
                                       ),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Image.asset(
-                                            'images/NairaImg.png',
-                                            height: 15,
-                                          ),
-                                          const Text(
-                                            '0.00',
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontFamily: 'Inter',
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 17.0,
-                                              color: Colors.black,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                      cursorColor: const Color(0xFF02AA03),
                                     ),
                                   ),
                                   SizedBox(
@@ -854,8 +892,15 @@ class AirtimeAndDataPageState extends State<AirtimeAndDataPage>
                                           MainAxisAlignment.center,
                                       children: [
                                         Switch(
-                                          value: false,
-                                          onChanged: (bool value) {},
+                                          value: autoRenewalActive,
+                                          onChanged: (bool value) {
+                                            setState(() {
+                                              autoRenewalActive = value;
+                                              if (value == true) {
+                                                autoRenewal = value;
+                                              }
+                                            });
+                                          },
                                         ),
                                         const Spacer(),
                                       ],
@@ -1837,7 +1882,7 @@ class AirtimeAndDataPageState extends State<AirtimeAndDataPage>
                                             MediaQuery.of(context).size.height *
                                                 0.02),
                                     const Text(
-                                      'Airtime Sell was successful, the payment will be added to your wallet balance within 5 minutes',
+                                      'The recipient phone number will receive it within 1 minute',
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         fontSize: 16.0,
@@ -1925,6 +1970,564 @@ class AirtimeAndDataPageState extends State<AirtimeAndDataPage>
                         ),
                       ],
                     ),
+                  if (selectPlan)
+                    Stack(
+                      children: [
+                        ModalBarrier(
+                          dismissible: true,
+                          color: Colors.black.withOpacity(0.5),
+                        ),
+                        PopScope(
+                          canPop: false,
+                          onPopInvokedWithResult: (didPop, dynamic result) {
+                            if (!didPop) {
+                              setState(() {
+                                selectPlan = false;
+                              });
+                            }
+                          },
+                          child: Center(
+                            child: SingleChildScrollView(
+                              child: Container(
+                                margin: const EdgeInsets.symmetric(
+                                    horizontal: 20.0), // Centered padding
+                                padding: const EdgeInsets.all(
+                                    16.0), // Inner padding for content
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(25.0),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.black26,
+                                      spreadRadius: 2,
+                                      blurRadius: 10,
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize
+                                      .min, // Expands only as needed
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    const Text(
+                                      'Select a provider plan',
+                                      style: TextStyle(
+                                        fontSize: 20.0,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'Inter',
+                                      ),
+                                    ),
+                                    SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.02),
+                                    radioButton(
+                                        "MTN 250.0MB - SME - 14days", 0),
+                                    radioButton(
+                                        "MTN 500.0MB - SME - 30days", 1),
+                                    radioButton(
+                                        "MTN 500.0MB - CORPORATE - 30days", 2),
+                                    radioButton(
+                                        "MTN 500.0MB - GIFTING - 30days", 3),
+                                    radioButton("MTN 1.0GB - SME - 30days", 4),
+                                    radioButton(
+                                        "MTN 1.0GB - CORPORATE - 30days", 5),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  if (autoRenewal)
+                    Stack(
+                      children: [
+                        ModalBarrier(
+                          dismissible: true,
+                          color: Colors.black.withOpacity(0.5),
+                        ),
+                        PopScope(
+                          canPop: false,
+                          onPopInvokedWithResult: (didPop, dynamic result) {
+                            if (!didPop) {
+                              if (selectTime != true) {
+                                setState(() {
+                                  autoRenewal = false;
+                                });
+                              }
+                            }
+                          },
+                          child: Center(
+                            child: SingleChildScrollView(
+                              child: Container(
+                                margin: const EdgeInsets.symmetric(
+                                    horizontal: 20.0), // Centered padding
+                                padding: const EdgeInsets.all(
+                                    16.0), // Inner padding for content
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(25.0),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.black26,
+                                      spreadRadius: 2,
+                                      blurRadius: 10,
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize
+                                      .min, // Expands only as needed
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    const Text(
+                                      'Auto Renewal',
+                                      style: TextStyle(
+                                        fontSize: 18.0,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'Inter',
+                                      ),
+                                    ),
+                                    SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.04),
+                                    const Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(horizontal: 0.0),
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          'Service Time',
+                                          style: TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontSize: 16.0,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.02),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 0.0),
+                                      child: InkWell(
+                                        onTap: () {
+                                          setState(() {
+                                            selectTime = true;
+                                          });
+                                        },
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 10.0, horizontal: 10.0),
+                                          decoration: const BoxDecoration(
+                                            color: Color(0xFFF8F8F8),
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(5.0),
+                                            ),
+                                          ),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Expanded(
+                                                flex: 5,
+                                                child: Text(
+                                                  timeText,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: const TextStyle(
+                                                    fontFamily: 'Inter',
+                                                    fontSize: 16.0,
+                                                  ),
+                                                ),
+                                              ),
+                                              const Spacer(),
+                                              Image.asset(
+                                                'images/teenyicons_down-solid.png',
+                                                height: 15,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.04),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          flex: 5,
+                                          child: Column(
+                                            children: [
+                                              const Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 0.0),
+                                                child: Align(
+                                                  alignment:
+                                                      Alignment.centerLeft,
+                                                  child: Text(
+                                                    'Select start date',
+                                                    style: TextStyle(
+                                                      fontFamily: 'Inter',
+                                                      fontSize: 16.0,
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                  height: MediaQuery.of(context)
+                                                          .size
+                                                          .height *
+                                                      0.02),
+                                              GestureDetector(
+                                                onTap: () async {
+                                                  final DateTime? picked =
+                                                      await showDatePicker(
+                                                    context: context,
+                                                    initialDate: DateTime.now(),
+                                                    firstDate: DateTime(1900),
+                                                    lastDate: DateTime.now(),
+                                                  );
+                                                  if (picked != null) {
+                                                    setState(() {
+                                                      // Format the date in dd/MM/yyyy format before updating the controller
+                                                      startDateText =
+                                                          _formatDate(picked);
+                                                    });
+                                                  }
+                                                },
+                                                child: Container(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      vertical: 10.0,
+                                                      horizontal: 10.0),
+                                                  decoration:
+                                                      const BoxDecoration(
+                                                    color: Color(0xFFF8F8F8),
+                                                    borderRadius:
+                                                        BorderRadius.all(
+                                                      Radius.circular(5.0),
+                                                    ),
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      Expanded(
+                                                        flex: 5,
+                                                        child: Text(
+                                                          startDateText,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                          style:
+                                                              const TextStyle(
+                                                            fontFamily: 'Inter',
+                                                            fontSize: 16.0,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      const Spacer(),
+                                                      IconButton(
+                                                        icon: Icon(
+                                                          Icons.calendar_month,
+                                                          color:
+                                                              Theme.of(context)
+                                                                  .colorScheme
+                                                                  .onSurface,
+                                                        ),
+                                                        onPressed: () async {
+                                                          final DateTime?
+                                                              picked =
+                                                              await showDatePicker(
+                                                            context: context,
+                                                            initialDate:
+                                                                DateTime.now(),
+                                                            firstDate:
+                                                                DateTime(1900),
+                                                            lastDate:
+                                                                DateTime.now(),
+                                                          );
+                                                          if (picked != null) {
+                                                            setState(() {
+                                                              // Format the date in dd/MM/yyyy format before updating the controller
+                                                              startDateText =
+                                                                  _formatDate(
+                                                                      picked);
+                                                            });
+                                                          }
+                                                        },
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const Spacer(),
+                                        Expanded(
+                                          flex: 5,
+                                          child: Column(
+                                            children: [
+                                              const Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 0.0),
+                                                child: Align(
+                                                  alignment:
+                                                      Alignment.centerLeft,
+                                                  child: Text(
+                                                    'Select start date',
+                                                    style: TextStyle(
+                                                      fontFamily: 'Inter',
+                                                      fontSize: 16.0,
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                  height: MediaQuery.of(context)
+                                                          .size
+                                                          .height *
+                                                      0.02),
+                                              GestureDetector(
+                                                onTap: () async {
+                                                  final DateTime? picked =
+                                                      await showDatePicker(
+                                                    context: context,
+                                                    initialDate: DateTime.now(),
+                                                    firstDate: DateTime(1900),
+                                                    lastDate: DateTime.now(),
+                                                  );
+                                                  if (picked != null) {
+                                                    setState(() {
+                                                      // Format the date in dd/MM/yyyy format before updating the controller
+                                                      startDateText =
+                                                          _formatDate(picked);
+                                                    });
+                                                  }
+                                                },
+                                                child: Container(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      vertical: 10.0,
+                                                      horizontal: 10.0),
+                                                  decoration:
+                                                      const BoxDecoration(
+                                                    color: Color(0xFFF8F8F8),
+                                                    borderRadius:
+                                                        BorderRadius.all(
+                                                      Radius.circular(5.0),
+                                                    ),
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      Expanded(
+                                                        flex: 5,
+                                                        child: Text(
+                                                          startDateText,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                          style:
+                                                              const TextStyle(
+                                                            fontFamily: 'Inter',
+                                                            fontSize: 16.0,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      const Spacer(),
+                                                      IconButton(
+                                                        icon: Icon(
+                                                          Icons.calendar_month,
+                                                          color:
+                                                              Theme.of(context)
+                                                                  .colorScheme
+                                                                  .onSurface,
+                                                        ),
+                                                        onPressed: () async {
+                                                          final DateTime?
+                                                              picked =
+                                                              await showDatePicker(
+                                                            context: context,
+                                                            initialDate:
+                                                                DateTime.now(),
+                                                            firstDate:
+                                                                DateTime(1900),
+                                                            lastDate:
+                                                                DateTime.now(),
+                                                          );
+                                                          if (picked != null) {
+                                                            setState(() {
+                                                              // Format the date in dd/MM/yyyy format before updating the controller
+                                                              startDateText =
+                                                                  _formatDate(
+                                                                      picked);
+                                                            });
+                                                          }
+                                                        },
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.05),
+                                    Container(
+                                      width: double.infinity,
+                                      height: (60 /
+                                              MediaQuery.of(context)
+                                                  .size
+                                                  .height) *
+                                          MediaQuery.of(context).size.height,
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 20.0),
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            autoRenewal = false;
+                                          });
+                                        },
+                                        style: ButtonStyle(
+                                          backgroundColor: WidgetStateProperty
+                                              .resolveWith<Color>(
+                                            (Set<WidgetState> states) {
+                                              if (states.contains(
+                                                  WidgetState.pressed)) {
+                                                return Colors.white;
+                                              }
+                                              return const Color(0xFF02AA03);
+                                            },
+                                          ),
+                                          foregroundColor: WidgetStateProperty
+                                              .resolveWith<Color>(
+                                            (Set<WidgetState> states) {
+                                              if (states.contains(
+                                                  WidgetState.pressed)) {
+                                                return const Color(0xFF02AA03);
+                                              }
+                                              return Colors.white;
+                                            },
+                                          ),
+                                          elevation:
+                                              WidgetStateProperty.all<double>(
+                                                  4.0),
+                                          shape: WidgetStateProperty.all<
+                                              RoundedRectangleBorder>(
+                                            const RoundedRectangleBorder(
+                                              side: BorderSide(
+                                                  width: 3,
+                                                  color: Color(0xFF02AA03)),
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(15)),
+                                            ),
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          'Done',
+                                          style: TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  if (selectTime)
+                    Stack(
+                      children: [
+                        ModalBarrier(
+                          dismissible: true,
+                          color: Colors.black.withOpacity(0.5),
+                        ),
+                        PopScope(
+                          canPop: false,
+                          onPopInvokedWithResult: (didPop, dynamic result) {
+                            if (!didPop) {
+                              setState(() {
+                                selectTime = false;
+                              });
+                            }
+                          },
+                          child: Center(
+                            child: SingleChildScrollView(
+                              child: Container(
+                                margin: const EdgeInsets.symmetric(
+                                    horizontal: 20.0), // Centered padding
+                                padding: const EdgeInsets.all(
+                                    16.0), // Inner padding for content
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(25.0),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.black26,
+                                      spreadRadius: 2,
+                                      blurRadius: 10,
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize
+                                      .min, // Expands only as needed
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    const Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 20.0),
+                                      child: Text(
+                                        'Service Time',
+                                        textAlign: TextAlign.start,
+                                        style: TextStyle(
+                                          fontFamily: 'Inter',
+                                          fontSize: 16.0,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.02),
+                                    radioButton2("Daily", 0),
+                                    radioButton2("Bi-Daily", 1),
+                                    radioButton2("Weekly", 2),
+                                    radioButton2("Bi-Weekly", 3),
+                                    radioButton2("Monthly", 4),
+                                    radioButton2("Bi-Monthly", 5),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                 ],
               ),
             ),
@@ -1934,10 +2537,58 @@ class AirtimeAndDataPageState extends State<AirtimeAndDataPage>
     );
   }
 
+  Widget radioButton(String text, int value) {
+    return RadioListTile<int>(
+      value: value,
+      activeColor: const Color(0xFF02AA03),
+      groupValue: _selectedPlanRadioValue,
+      onChanged: (int? value) {
+        setState(() {
+          _selectedPlanRadioValue = value!;
+          planText = text;
+        });
+      },
+      title: Text(
+        text,
+        softWrap: true,
+        style: const TextStyle(
+          fontFamily: 'Inter',
+          fontWeight: FontWeight.bold,
+          fontSize: 16.0,
+        ),
+      ),
+      controlAffinity: ListTileControlAffinity.trailing,
+    );
+  }
+
+  Widget radioButton2(String text, int value) {
+    return RadioListTile<int>(
+      value: value,
+      activeColor: const Color(0xFF02AA03),
+      groupValue: _selectedTimeRadioValue,
+      onChanged: (int? value) {
+        setState(() {
+          _selectedTimeRadioValue = value!;
+          timeText = text;
+        });
+      },
+      title: Text(
+        text,
+        softWrap: true,
+        style: const TextStyle(
+          fontFamily: 'Inter',
+          fontWeight: FontWeight.bold,
+          fontSize: 16.0,
+        ),
+      ),
+      controlAffinity: ListTileControlAffinity.trailing,
+    );
+  }
+
   Widget airtime(String amount) {
     return InkWell(
       onTap: () {
-        Navigator.pop(context);
+        amountController.text = amount;
       },
       child: Container(
         width: (70.0 / MediaQuery.of(context).size.width) *

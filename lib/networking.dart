@@ -1,33 +1,35 @@
 import 'package:bills_plug/add_photo.dart';
-import 'package:bills_plug/airtime_to_cash.dart';
-import 'package:bills_plug/betting_wallet.dart';
-import 'package:bills_plug/data_pin.dart';
-import 'package:bills_plug/electricity_bill.dart';
-import 'package:bills_plug/exam_pin.dart';
-import 'package:bills_plug/jamb_e-pin.dart';
 import 'package:bills_plug/notification.dart';
-import 'package:bills_plug/recharge_card_printing.dart';
-import 'package:bills_plug/transaction.dart';
 import 'package:flutter/material.dart';
-import 'package:bills_plug/airtime_and_data_page.dart';
-import 'cable_tv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
-class ServicePage extends StatefulWidget {
-  const ServicePage({super.key});
+class Networking extends StatefulWidget {
+  const Networking({super.key});
 
   @override
-  State<ServicePage> createState() => _ServicePageState();
+  State<Networking> createState() => _NetworkingState();
 }
 
-class _ServicePageState extends State<ServicePage>
-    with TickerProviderStateMixin {
+class _NetworkingState extends State<Networking> with TickerProviderStateMixin {
   String? profileImg;
   late SharedPreferences prefs;
   String? firstName;
   String? lastName;
   String? fullName;
+  final List<Network> network = [
+    Network(id: '1', network: 'MTN'),
+    Network(id: '4', network: 'AIRTEL'),
+    Network(id: '2', network: 'GLO'),
+    Network(id: '3', network: '9MOBILE'),
+  ];
+
+  final List<Airtime> airtime = [
+    Airtime(id: 'MTN', suscriber: '2%', vendor: '2%'),
+    Airtime(id: 'GLO', suscriber: '2%', vendor: '4%'),
+    Airtime(id: '9MOBILE', suscriber: '2%', vendor: '3%'),
+    Airtime(id: 'AIRTEL', suscriber: '2%', vendor: '2%'),
+  ];
 
   @override
   void initState() {
@@ -264,7 +266,7 @@ class _ServicePageState extends State<ServicePage>
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const Text(
-                                      "Payment Services",
+                                      "Networks",
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         fontFamily: 'Inter',
@@ -279,188 +281,39 @@ class _ServicePageState extends State<ServicePage>
                                         height: 20,
                                       ),
                                     ),
-                                    Wrap(
-                                      runSpacing: 10.0,
-                                      children: [
-                                        InkWell(
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    AirtimeAndDataPage(
-                                                  key: UniqueKey(),
-                                                  tabIndex: 0,
-                                                ),
-                                              ),
-                                            );
+                                    SizedBox(
+                                      width: MediaQuery.of(context).size.width,
+                                      child: DataTable(
+                                        headingTextStyle: const TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16.0,
+                                            color: Colors.white),
+                                        headingRowColor: WidgetStateProperty
+                                            .resolveWith<Color>(
+                                          (Set<WidgetState> states) {
+                                            return const Color(0xFF02AA03);
                                           },
-                                          child: services(
-                                              'images/Airtime.png', 'Airtime'),
                                         ),
-                                        InkWell(
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    AirtimeAndDataPage(
-                                                  key: UniqueKey(),
-                                                  tabIndex: 1,
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                          child: services(
-                                              'images/Data.png', 'Data'),
-                                        ),
-                                        InkWell(
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    CableTVPage(
-                                                        key: UniqueKey()),
-                                              ),
-                                            );
-                                          },
-                                          child: services(
-                                              'images/CableTV.png', 'Cable TV'),
-                                        ),
-                                        InkWell(
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    ExamPin(key: UniqueKey()),
-                                              ),
-                                            );
-                                          },
-                                          child: services('images/ExamPins.png',
-                                              'Exam Pins'),
-                                        ),
-                                        InkWell(
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    DataPin(key: UniqueKey()),
-                                              ),
-                                            );
-                                          },
-                                          child: services('images/DataPins.png',
-                                              'Data Pin'),
-                                        ),
-                                        InkWell(
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    ElectricityBill(
-                                                        key: UniqueKey()),
-                                              ),
-                                            );
-                                          },
-                                          child: services(
-                                              'images/Electricity.png',
-                                              'Electricity'),
-                                        ),
-                                        InkWell(
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    BettingWallet(
-                                                        key: UniqueKey()),
-                                              ),
-                                            );
-                                          },
-                                          child: services('images/Betting.png',
-                                              'Fund Betting Wallet'),
-                                        ),
-                                        InkWell(
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    AirtimeToCashPage(
-                                                  key: UniqueKey(),
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                          child: services(
-                                              'images/Airtime2Cash.png',
-                                              'Airtime2cash'),
-                                        ),
-                                        InkWell(
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    RechargeCardPrinting(
-                                                        key: UniqueKey()),
-                                              ),
-                                            );
-                                          },
-                                          child: services(
-                                              'images/RechargeCardPrinting.png',
-                                              'Recharge card printing'),
-                                        ),
-                                        InkWell(
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    JambEPin(key: UniqueKey()),
-                                              ),
-                                            );
-                                          },
-                                          child: services('images/ExamPins.png',
-                                              'Jamb E-PIN'),
-                                        ),
-                                      ],
+                                        columnSpacing: 16.0,
+                                        columns: const [
+                                          DataColumn(label: Text('Id')),
+                                          DataColumn(label: Text('Network')),
+                                        ],
+                                        rows: network.map((network) {
+                                          return DataRow(cells: [
+                                            DataCell(Text(network.id)),
+                                            DataCell(Text(network.network)),
+                                          ]);
+                                        }).toList(),
+                                      ),
                                     ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.05),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 20.0),
-                              child: Container(
-                                width: MediaQuery.of(context).size.width,
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 12.0, horizontal: 20.0),
-                                decoration: const BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(15.0),
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black26,
-                                      spreadRadius: 2,
-                                      blurRadius: 10,
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
+                                    SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.05),
                                     const Text(
-                                      "Others",
+                                      "Airtime",
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         fontFamily: 'Inter',
@@ -475,45 +328,34 @@ class _ServicePageState extends State<ServicePage>
                                         height: 20,
                                       ),
                                     ),
-                                    Wrap(
-                                      runSpacing: 10.0,
-                                      children: [
-                                        InkWell(
-                                          onTap: () {},
-                                          child: services(
-                                              'images/Pricing.png', 'Pricing'),
-                                        ),
-                                        InkWell(
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    TransactionPage(
-                                                  key: UniqueKey(),
-                                                ),
-                                              ),
-                                            );
+                                    SizedBox(
+                                      width: MediaQuery.of(context).size.width,
+                                      child: DataTable(
+                                        headingTextStyle: const TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16.0,
+                                            color: Colors.white),
+                                        headingRowColor: WidgetStateProperty
+                                            .resolveWith<Color>(
+                                          (Set<WidgetState> states) {
+                                            return const Color(0xFF02AA03);
                                           },
-                                          child: services(
-                                              'images/History.png', 'History'),
                                         ),
-                                        InkWell(
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    NotificationPage(
-                                                  key: UniqueKey(),
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                          child: services('images/mdi_bell.png',
-                                              'Notification'),
-                                        ),
-                                      ],
+                                        columnSpacing: 16.0,
+                                        columns: const [
+                                          DataColumn(label: Text('Id')),
+                                          DataColumn(label: Text('Suscriber')),
+                                          DataColumn(label: Text('Vendors')),
+                                        ],
+                                        rows: airtime.map((airtime) {
+                                          return DataRow(cells: [
+                                            DataCell(Text(airtime.id)),
+                                            DataCell(Text(airtime.suscriber)),
+                                            DataCell(Text(airtime.vendor)),
+                                          ]);
+                                        }).toList(),
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -532,38 +374,19 @@ class _ServicePageState extends State<ServicePage>
       },
     );
   }
+}
 
-  Widget services(String img, String content) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      child: Container(
-        width: 100,
-        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
-        decoration: const BoxDecoration(
-          color: Color(0xFFF7FFF1),
-          borderRadius: BorderRadius.all(
-            Radius.circular(25.0),
-          ),
-        ),
-        child: Column(
-          children: [
-            Image.asset(
-              img,
-              height: 30,
-            ),
-            SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-            Text(
-              content,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.bold,
-                fontSize: 14.0,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+class Network {
+  final String id;
+  final String network;
+
+  Network({required this.id, required this.network});
+}
+
+class Airtime {
+  final String id;
+  final String suscriber;
+  final String vendor;
+
+  Airtime({required this.id, required this.suscriber, required this.vendor});
 }

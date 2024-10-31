@@ -12,7 +12,9 @@ class WithdrawMoneyPageState extends State<WithdrawMoneyPage>
     with SingleTickerProviderStateMixin {
   final FocusNode _accountNumberFocusNode = FocusNode();
   final FocusNode _bankFocusNode = FocusNode();
+  final FocusNode _amountFocusNode = FocusNode();
 
+  final TextEditingController amountController = TextEditingController();
   final TextEditingController accountNumberController = TextEditingController();
   final TextEditingController bankController = TextEditingController();
   bool _showInitialContent = true;
@@ -95,37 +97,40 @@ class WithdrawMoneyPageState extends State<WithdrawMoneyPage>
                                     Padding(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 20.0),
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 7.0, horizontal: 7.0),
-                                        decoration: const BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(5.0),
+                                      child: TextFormField(
+                                        controller: amountController,
+                                        focusNode: _amountFocusNode,
+                                        style: const TextStyle(
+                                          fontSize: 16.0,
+                                        ),
+                                        decoration: InputDecoration(
+                                          labelText: 'Input Amount',
+                                          labelStyle: const TextStyle(
+                                            color: Colors.grey,
+                                            fontFamily: 'Inter',
+                                            fontSize: 16.0,
+                                            decoration: TextDecoration.none,
                                           ),
+                                          floatingLabelBehavior:
+                                              FloatingLabelBehavior.never,
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                            borderSide: BorderSide.none,
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                            borderSide: const BorderSide(
+                                                width: 3,
+                                                color: Color(0xFF02AA03)),
+                                          ),
+                                          filled: true,
+                                          fillColor: Colors.white,
                                         ),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Image.asset(
-                                              'images/NairaImg.png',
-                                              height: 15,
-                                            ),
-                                            const Text(
-                                              '0.00',
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                fontFamily: 'Inter',
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 17.0,
-                                                color: Colors.black,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                                        cursorColor: const Color(0xFF02AA03),
                                       ),
-                                    )
+                                    ),
                                   ],
                                 )
                               : Column(
