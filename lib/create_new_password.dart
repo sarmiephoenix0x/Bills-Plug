@@ -120,7 +120,7 @@ class CreateNewPasswordState extends State<CreateNewPassword>
                                       fontSize: 16.0,
                                     ),
                                     decoration: InputDecoration(
-                                      labelText: 'Create New Pin',
+                                      labelText: 'Create New Password',
                                       labelStyle: const TextStyle(
                                         color: Colors.grey,
                                         fontFamily: 'Inter',
@@ -167,7 +167,7 @@ class CreateNewPasswordState extends State<CreateNewPassword>
                                       fontSize: 16.0,
                                     ),
                                     decoration: InputDecoration(
-                                      labelText: 'Confirm New Pin',
+                                      labelText: 'Confirm New Password',
                                       labelStyle: const TextStyle(
                                         color: Colors.grey,
                                         fontFamily: 'Inter',

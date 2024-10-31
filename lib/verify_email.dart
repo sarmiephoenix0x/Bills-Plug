@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:bills_plug/create_new_password.dart';
 
 class VerifyEmail extends StatefulWidget {
   const VerifyEmail({super.key});
@@ -268,7 +269,17 @@ class VerifyEmailState extends State<VerifyEmail>
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 20.0),
                                     child: ElevatedButton(
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                CreateNewPassword(
+                                              key: UniqueKey(),
+                                            ),
+                                          ),
+                                        );
+                                      },
                                       style: ButtonStyle(
                                         backgroundColor: WidgetStateProperty
                                             .resolveWith<Color>(

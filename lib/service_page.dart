@@ -1,7 +1,18 @@
+import 'package:bills_plug/add_photo.dart';
 import 'package:bills_plug/airtime_to_cash.dart';
+import 'package:bills_plug/betting_wallet.dart';
+import 'package:bills_plug/data_pin.dart';
+import 'package:bills_plug/electricity_bill.dart';
+import 'package:bills_plug/exam_pin.dart';
+import 'package:bills_plug/jamb_e-pin.dart';
+import 'package:bills_plug/notification.dart';
+import 'package:bills_plug/recharge_card_printing.dart';
+import 'package:bills_plug/transaction.dart';
 import 'package:flutter/material.dart';
 import 'package:bills_plug/airtime_and_data_page.dart';
 import 'cable_tv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class ServicePage extends StatefulWidget {
   const ServicePage({super.key});
@@ -13,6 +24,47 @@ class ServicePage extends StatefulWidget {
 class _ServicePageState extends State<ServicePage>
     with TickerProviderStateMixin {
   String? profileImg;
+  late SharedPreferences prefs;
+  String? firstName;
+  String? lastName;
+  String? fullName;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializePrefs();
+  }
+
+  Future<void> _initializePrefs() async {
+    prefs = await SharedPreferences.getInstance();
+    firstName = await getFirstName();
+    lastName = await getLastName();
+    if (mounted) {
+      setState(() {
+        fullName = "$firstName $lastName";
+      });
+    }
+  }
+
+  Future<String?> getFirstName() async {
+    final String? userJson = prefs.getString('user');
+    if (userJson != null) {
+      final Map<String, dynamic> userMap = jsonDecode(userJson);
+      return userMap['firstname'];
+    } else {
+      return null;
+    }
+  }
+
+  Future<String?> getLastName() async {
+    final String? userJson = prefs.getString('user');
+    if (userJson != null) {
+      final Map<String, dynamic> userMap = jsonDecode(userJson);
+      return userMap['lastname'];
+    } else {
+      return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +91,7 @@ class _ServicePageState extends State<ServicePage>
                                   left: 20.0,
                                   right: 20.0,
                                   top: 20.0,
-                                  bottom: 40),
+                                  bottom: 20.0),
                               decoration: const BoxDecoration(
                                 color: Color(0xFF02AA03),
                               ),
@@ -50,54 +102,78 @@ class _ServicePageState extends State<ServicePage>
                                         CrossAxisAlignment.center,
                                     children: [
                                       if (profileImg == null)
-                                        ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(55),
-                                          child: Container(
-                                            width: (60 /
-                                                    MediaQuery.of(context)
-                                                        .size
-                                                        .width) *
-                                                MediaQuery.of(context)
-                                                    .size
-                                                    .width,
-                                            height: (60 /
-                                                    MediaQuery.of(context)
-                                                        .size
-                                                        .height) *
-                                                MediaQuery.of(context)
-                                                    .size
-                                                    .height,
-                                            color: Colors.grey,
-                                            child: Image.asset(
-                                              'images/ProfilePic.png',
-                                              fit: BoxFit.cover,
+                                        InkWell(
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => AddPhoto(
+                                                  key: UniqueKey(),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(55),
+                                            child: Container(
+                                              width: (60 /
+                                                      MediaQuery.of(context)
+                                                          .size
+                                                          .width) *
+                                                  MediaQuery.of(context)
+                                                      .size
+                                                      .width,
+                                              height: (60 /
+                                                      MediaQuery.of(context)
+                                                          .size
+                                                          .height) *
+                                                  MediaQuery.of(context)
+                                                      .size
+                                                      .height,
+                                              color: Colors.grey,
+                                              child: Image.asset(
+                                                'images/ProfilePic.png',
+                                                fit: BoxFit.cover,
+                                              ),
                                             ),
                                           ),
                                         )
                                       else if (profileImg != null)
-                                        ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(55),
-                                          child: Container(
-                                            width: (60 /
-                                                    MediaQuery.of(context)
-                                                        .size
-                                                        .width) *
-                                                MediaQuery.of(context)
-                                                    .size
-                                                    .width,
-                                            height: (60 /
-                                                    MediaQuery.of(context)
-                                                        .size
-                                                        .height) *
-                                                MediaQuery.of(context)
-                                                    .size
-                                                    .height,
-                                            color: Colors.grey,
-                                            child: Image.network(
-                                              profileImg!,
-                                              fit: BoxFit.cover,
+                                        InkWell(
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => AddPhoto(
+                                                  key: UniqueKey(),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(55),
+                                            child: Container(
+                                              width: (60 /
+                                                      MediaQuery.of(context)
+                                                          .size
+                                                          .width) *
+                                                  MediaQuery.of(context)
+                                                      .size
+                                                      .width,
+                                              height: (60 /
+                                                      MediaQuery.of(context)
+                                                          .size
+                                                          .height) *
+                                                  MediaQuery.of(context)
+                                                      .size
+                                                      .height,
+                                              color: Colors.grey,
+                                              child: Image.network(
+                                                profileImg!,
+                                                fit: BoxFit.cover,
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -106,46 +182,50 @@ class _ServicePageState extends State<ServicePage>
                                                   .size
                                                   .width *
                                               0.02),
-                                      const Expanded(
+                                      Expanded(
                                         child: Column(
                                           mainAxisAlignment:
                                               MainAxisAlignment.center,
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
-                                            Text(
-                                              "Hello",
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                fontFamily: 'Inter',
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16.0,
-                                                color: Colors.white,
+                                            if (fullName != null)
+                                              Text(
+                                                fullName!,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: const TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16.0,
+                                                  color: Colors.white,
+                                                ),
+                                              )
+                                            else
+                                              const Text(
+                                                "Unknown User",
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16.0,
+                                                  color: Colors.white,
+                                                ),
                                               ),
-                                            ),
-                                            Text(
-                                              "William John",
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                fontFamily: 'Inter',
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16.0,
-                                                color: Colors.white,
-                                              ),
-                                            ),
                                           ],
                                         ),
                                       ),
                                       const Spacer(),
                                       InkWell(
                                         onTap: () {
-                                          // Navigator.push(
-                                          //   context,
-                                          //   MaterialPageRoute(
-                                          //     builder: (context) =>
-                                          //         TransactionPin(key: UniqueKey()),
-                                          //   ),
-                                          // );
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  NotificationPage(
+                                                key: UniqueKey(),
+                                              ),
+                                            ),
+                                          );
                                         },
                                         child: Image.asset(
                                           'images/Notification.png',
@@ -249,23 +329,57 @@ class _ServicePageState extends State<ServicePage>
                                               'images/CableTV.png', 'Cable TV'),
                                         ),
                                         InkWell(
-                                          onTap: () {},
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    ExamPin(key: UniqueKey()),
+                                              ),
+                                            );
+                                          },
                                           child: services('images/ExamPins.png',
                                               'Exam Pins'),
                                         ),
                                         InkWell(
-                                          onTap: () {},
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    DataPin(key: UniqueKey()),
+                                              ),
+                                            );
+                                          },
                                           child: services('images/DataPins.png',
                                               'Data Pin'),
                                         ),
                                         InkWell(
-                                          onTap: () {},
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    ElectricityBill(
+                                                        key: UniqueKey()),
+                                              ),
+                                            );
+                                          },
                                           child: services(
                                               'images/Electricity.png',
                                               'Electricity'),
                                         ),
                                         InkWell(
-                                          onTap: () {},
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    BettingWallet(
+                                                        key: UniqueKey()),
+                                              ),
+                                            );
+                                          },
                                           child: services('images/Betting.png',
                                               'Fund Betting Wallet'),
                                         ),
@@ -286,13 +400,30 @@ class _ServicePageState extends State<ServicePage>
                                               'Airtime2cash'),
                                         ),
                                         InkWell(
-                                          onTap: () {},
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    RechargeCardPrinting(
+                                                        key: UniqueKey()),
+                                              ),
+                                            );
+                                          },
                                           child: services(
                                               'images/RechargeCardPrinting.png',
                                               'Recharge card printing'),
                                         ),
                                         InkWell(
-                                          onTap: () {},
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    JambEPin(key: UniqueKey()),
+                                              ),
+                                            );
+                                          },
                                           child: services('images/ExamPins.png',
                                               'Jamb E-PIN'),
                                         ),
@@ -353,12 +484,32 @@ class _ServicePageState extends State<ServicePage>
                                               'images/Pricing.png', 'Pricing'),
                                         ),
                                         InkWell(
-                                          onTap: () {},
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    TransactionPage(
+                                                  key: UniqueKey(),
+                                                ),
+                                              ),
+                                            );
+                                          },
                                           child: services(
                                               'images/History.png', 'History'),
                                         ),
                                         InkWell(
-                                          onTap: () {},
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    NotificationPage(
+                                                  key: UniqueKey(),
+                                                ),
+                                              ),
+                                            );
+                                          },
                                           child: services('images/mdi_bell.png',
                                               'Notification'),
                                         ),

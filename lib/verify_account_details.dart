@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:bills_plug/verify_email.dart';
+import 'package:bills_plug/verify_phone_number.dart';
 
 class VerifyAccountDetails extends StatefulWidget {
   const VerifyAccountDetails({super.key});
@@ -108,9 +110,21 @@ class VerifyAccountDetailsState extends State<VerifyAccountDetails>
                                 SizedBox(
                                     height: MediaQuery.of(context).size.height *
                                         0.03),
-                                verify(
-                                  Icons.comment,
-                                  "SMS OTP",
+                                InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => VerifyPhoneNumber(
+                                          key: UniqueKey(),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: verify(
+                                    Icons.comment,
+                                    "SMS OTP",
+                                  ),
                                 ),
                                 SizedBox(
                                   width: MediaQuery.of(context).size.width,
@@ -119,9 +133,21 @@ class VerifyAccountDetailsState extends State<VerifyAccountDetails>
                                     height: 20,
                                   ),
                                 ),
-                                verify(
-                                  Icons.mail,
-                                  "Email OTP",
+                                InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => VerifyEmail(
+                                          key: UniqueKey(),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: verify(
+                                    Icons.mail,
+                                    "Email OTP",
+                                  ),
                                 ),
                               ],
                             ),

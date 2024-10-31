@@ -1,5 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart' hide CarouselController;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class CableTVPage extends StatefulWidget {
   const CableTVPage({super.key});
@@ -26,10 +28,28 @@ class CableTVPageState extends State<CableTVPage>
 
   bool _addToBeneficiary = false;
   bool paymentSectionCableTVOpen = false;
+  String? userBalance;
+  late SharedPreferences prefs;
 
   @override
   void initState() {
     super.initState();
+    _initializePrefs();
+  }
+
+  Future<void> _initializePrefs() async {
+    prefs = await SharedPreferences.getInstance();
+    userBalance = await getUserBalance();
+  }
+
+  Future<String?> getUserBalance() async {
+    final String? userJson = prefs.getString('user');
+    if (userJson != null) {
+      final Map<String, dynamic> userMap = jsonDecode(userJson);
+      return userMap['balance'];
+    } else {
+      return null;
+    }
   }
 
   @override
@@ -718,15 +738,31 @@ class CableTVPageState extends State<CableTVPage>
                                               'images/NairaImg.png',
                                               height: 15,
                                             ),
-                                            const Text(
-                                              "(15750.00)",
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                fontFamily: 'Inter',
-                                                fontSize: 16.0,
-                                                color: Colors.black,
-                                              ),
-                                            ),
+                                            if (userBalance != null)
+                                              Text(
+                                                double.tryParse(userBalance!) !=
+                                                        null
+                                                    ? "(${double.parse(userBalance!).toStringAsFixed(2)})"
+                                                    : "(0.00)",
+                                                overflow: TextOverflow.ellipsis,
+                                                style: const TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16.0,
+                                                  color: Colors.white,
+                                                ),
+                                              )
+                                            else
+                                              const Text(
+                                                "(0.00)",
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16.0,
+                                                  color: Colors.white,
+                                                ),
+                                              )
                                           ],
                                         ),
                                       ],

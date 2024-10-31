@@ -1,22 +1,25 @@
-import 'package:bills_plug/airtime_to_cash.dart';
+import 'package:bills_plug/add_photo.dart';
+import 'package:bills_plug/notification.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart' hide CarouselController;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
-class AirtimeToCashSellPage extends StatefulWidget {
-  const AirtimeToCashSellPage({super.key});
+class ElectricityBill extends StatefulWidget {
+  const ElectricityBill({super.key});
 
   @override
   // ignore: library_private_types_in_public_api
-  AirtimeToCashSellPageState createState() => AirtimeToCashSellPageState();
+  ElectricityBillState createState() => ElectricityBillState();
 }
 
-class AirtimeToCashSellPageState extends State<AirtimeToCashSellPage>
+class ElectricityBillState extends State<ElectricityBill>
     with SingleTickerProviderStateMixin {
-  final FocusNode _phoneNumberFocusNode = FocusNode();
+  final FocusNode _amountFocusNode = FocusNode();
+  final FocusNode _meterNumberFocusNode = FocusNode();
 
-  final TextEditingController phoneNumberController = TextEditingController();
+  final TextEditingController amountController = TextEditingController();
+  final TextEditingController meterNumberController = TextEditingController();
 
   List<String> imagePaths = [
     "images/AdImg.png",
@@ -26,12 +29,15 @@ class AirtimeToCashSellPageState extends State<AirtimeToCashSellPage>
   int _current = 0;
 
   final CarouselController _controller = CarouselController();
-
-  bool paymentSectionAirtimeToCashSellOpen = false;
-  bool paymentSectionAirtimeToCash = false;
-  bool paymentSuccessful = false;
-  String? userBalance;
+  bool paymentSectionDataOpen = false;
   late SharedPreferences prefs;
+  String? profileImg;
+  String? firstName;
+  String? lastName;
+  String? fullName;
+  String? userBalance;
+  String? _type = 'Prepaid';
+  bool paymentSuccessful = false;
 
   @override
   void initState() {
@@ -41,7 +47,34 @@ class AirtimeToCashSellPageState extends State<AirtimeToCashSellPage>
 
   Future<void> _initializePrefs() async {
     prefs = await SharedPreferences.getInstance();
+    firstName = await getFirstName();
+    lastName = await getLastName();
     userBalance = await getUserBalance();
+    if (mounted) {
+      setState(() {
+        fullName = "$firstName $lastName";
+      });
+    }
+  }
+
+  Future<String?> getFirstName() async {
+    final String? userJson = prefs.getString('user');
+    if (userJson != null) {
+      final Map<String, dynamic> userMap = jsonDecode(userJson);
+      return userMap['firstname'];
+    } else {
+      return null;
+    }
+  }
+
+  Future<String?> getLastName() async {
+    final String? userJson = prefs.getString('user');
+    if (userJson != null) {
+      final Map<String, dynamic> userMap = jsonDecode(userJson);
+      return userMap['lastname'];
+    } else {
+      return null;
+    }
   }
 
   Future<String?> getUserBalance() async {
@@ -66,7 +99,7 @@ class AirtimeToCashSellPageState extends State<AirtimeToCashSellPage>
         return Scaffold(
           body: SafeArea(
             child: Align(
-              alignment: Alignment.topCenter,
+              alignment: Alignment.bottomCenter,
               child: Stack(
                 alignment: Alignment.center,
                 children: [
@@ -77,6 +110,225 @@ class AirtimeToCashSellPageState extends State<AirtimeToCashSellPage>
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
+                          Container(
+                            padding: const EdgeInsets.only(
+                                left: 20.0,
+                                right: 20.0,
+                                top: 20.0,
+                                bottom: 20.0),
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF02AA03),
+                            ),
+                            child: Column(
+                              children: [
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    if (profileImg == null)
+                                      InkWell(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => AddPhoto(
+                                                key: UniqueKey(),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(55),
+                                          child: Container(
+                                            width: (60 /
+                                                    MediaQuery.of(context)
+                                                        .size
+                                                        .width) *
+                                                MediaQuery.of(context)
+                                                    .size
+                                                    .width,
+                                            height: (60 /
+                                                    MediaQuery.of(context)
+                                                        .size
+                                                        .height) *
+                                                MediaQuery.of(context)
+                                                    .size
+                                                    .height,
+                                            color: Colors.grey,
+                                            child: Image.asset(
+                                              'images/ProfilePic.png',
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                    else if (profileImg != null)
+                                      InkWell(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => AddPhoto(
+                                                key: UniqueKey(),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(55),
+                                          child: Container(
+                                            width: (60 /
+                                                    MediaQuery.of(context)
+                                                        .size
+                                                        .width) *
+                                                MediaQuery.of(context)
+                                                    .size
+                                                    .width,
+                                            height: (60 /
+                                                    MediaQuery.of(context)
+                                                        .size
+                                                        .height) *
+                                                MediaQuery.of(context)
+                                                    .size
+                                                    .height,
+                                            color: Colors.grey,
+                                            child: Image.network(
+                                              profileImg!,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    SizedBox(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.02),
+                                    Expanded(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          if (fullName != null)
+                                            Text(
+                                              fullName!,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                fontFamily: 'Inter',
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16.0,
+                                                color: Colors.white,
+                                              ),
+                                            )
+                                          else
+                                            const Text(
+                                              "Unknown User",
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                fontFamily: 'Inter',
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16.0,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    InkWell(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                NotificationPage(
+                                              key: UniqueKey(),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      child: Image.asset(
+                                        'images/Notification.png',
+                                        height: 40,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 0.02),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 20.0),
+                            child: CarouselSlider(
+                              options: CarouselOptions(
+                                enlargeCenterPage: false,
+                                viewportFraction: 1.0,
+                                enableInfiniteScroll: false,
+                                initialPage: 0,
+                                onPageChanged: (index, reason) {
+                                  setState(() {
+                                    _current = index;
+                                  });
+                                },
+                              ),
+                              carouselController: _controller,
+                              items: imagePaths.map((item) {
+                                return Image.asset(
+                                  item,
+                                  width: double.infinity,
+                                  fit: BoxFit.contain,
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(
+                              imagePaths.length,
+                              (index) => Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 5.0),
+                                child: Image.asset(
+                                  _current == index
+                                      ? "images/ActiveElipses.png"
+                                      : "images/InActiveElipses.png",
+                                  width:
+                                      (10 / MediaQuery.of(context).size.width) *
+                                          MediaQuery.of(context).size.width,
+                                  height: (10 /
+                                          MediaQuery.of(context).size.height) *
+                                      MediaQuery.of(context).size.height,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 0.04),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 20.0),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Electricity Bill',
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 28.0,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 0.04),
                           SizedBox(
                               height:
                                   MediaQuery.of(context).size.height * 0.02),
@@ -84,327 +336,228 @@ class AirtimeToCashSellPageState extends State<AirtimeToCashSellPage>
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 20.0),
                             child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                InkWell(
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: Image.asset(
-                                    'images/BackButton.png',
-                                    height: 40,
-                                  ),
-                                ),
-                                SizedBox(
-                                    width: MediaQuery.of(context).size.width *
-                                        0.05),
-                                const Text(
-                                  'Airtime2cash',
-                                  style: TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20.0,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                                const Spacer(),
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                              height:
-                                  MediaQuery.of(context).size.height * 0.05),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20.0),
-                                child: CarouselSlider(
-                                  options: CarouselOptions(
-                                    enlargeCenterPage: false,
-                                    viewportFraction: 1.0,
-                                    enableInfiniteScroll: false,
-                                    initialPage: 0,
-                                    onPageChanged: (index, reason) {
-                                      setState(() {
-                                        _current = index;
-                                      });
-                                    },
-                                  ),
-                                  carouselController: _controller,
-                                  items: imagePaths.map((item) {
-                                    return Image.asset(
-                                      item,
-                                      width: double.infinity,
-                                      fit: BoxFit.contain,
-                                    );
-                                  }).toList(),
-                                ),
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: List.generate(
-                                  imagePaths.length,
-                                  (index) => Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 5.0),
-                                    child: Image.asset(
-                                      _current == index
-                                          ? "images/ActiveElipses.png"
-                                          : "images/InActiveElipses.png",
-                                      width: (10 /
-                                              MediaQuery.of(context)
-                                                  .size
-                                                  .width) *
+                                Container(
+                                  width:
+                                      (80 / MediaQuery.of(context).size.width) *
                                           MediaQuery.of(context).size.width,
-                                      height: (10 /
-                                              MediaQuery.of(context)
-                                                  .size
-                                                  .height) *
-                                          MediaQuery.of(context).size.height,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      0.04),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20.0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(55),
-                                      child: SizedBox(
-                                        width: (60 /
-                                                MediaQuery.of(context)
-                                                    .size
-                                                    .width) *
-                                            MediaQuery.of(context).size.width,
-                                        height: (60 /
-                                                MediaQuery.of(context)
-                                                    .size
-                                                    .height) *
-                                            MediaQuery.of(context).size.height,
-                                        child: Image.asset(
-                                          'images/MTNImg.png',
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                0.01),
-                                    const Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'MTN',
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                              fontSize: 15,
-                                              fontFamily: 'Inter',
-                                              color: Colors.black,
-                                            ),
-                                          ),
-                                          Text(
-                                            '0905 525 9546',
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              fontFamily: 'Inter',
-                                              color: Colors.black,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const Spacer(),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          const Text(
-                                            'Airtime Balance',
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                              fontSize: 15,
-                                              fontFamily: 'Inter',
-                                              color: Colors.black,
-                                            ),
-                                          ),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Image.asset(
-                                                'images/NairaImg.png',
-                                                height: 15,
-                                              ),
-                                              const Text(
-                                                '1500.00',
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                  fontFamily: 'Inter',
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 18.0,
-                                                  color: Color(0xFF02AA03),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      0.04),
-                              const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 20.0),
-                                child: Text(
-                                  'Amount to Sell',
-                                  style: TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18.0,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      0.04),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20.0),
-                                child: Center(
-                                  child: Wrap(
-                                    spacing: 10.0,
-                                    runSpacing: 10.0,
-                                    children: [
-                                      airtime("50"),
-                                      airtime("100"),
-                                      airtime("200"),
-                                      airtime("500"),
-                                      airtime("1,000"),
-                                      airtime("2,000"),
-                                      airtime("3,000"),
-                                      airtime("4,000"),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      0.04),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20.0),
-                                child: Container(
+                                  height: (110 /
+                                          MediaQuery.of(context).size.height) *
+                                      MediaQuery.of(context).size.width,
                                   padding: const EdgeInsets.symmetric(
-                                      vertical: 7.0, horizontal: 7.0),
+                                      vertical: 0.0, horizontal: 0.0),
                                   decoration: const BoxDecoration(
                                     color: Colors.white,
                                     borderRadius: BorderRadius.all(
                                       Radius.circular(5.0),
                                     ),
                                   ),
-                                  child: Row(
+                                  child: Image.asset(
+                                    'images/AEDC.png',
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                SizedBox(
+                                    width: MediaQuery.of(context).size.width *
+                                        0.02),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Image.asset(
-                                        'images/NairaImg.png',
-                                        height: 15,
-                                      ),
                                       const Text(
-                                        '0.00',
-                                        textAlign: TextAlign.center,
+                                        'Meter Number',
+                                        textAlign: TextAlign.start,
                                         style: TextStyle(
                                           fontFamily: 'Inter',
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 17.0,
-                                          color: Colors.black,
+                                          fontSize: 14.0,
+                                          color: Colors.grey,
                                         ),
+                                      ),
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.01),
+                                      TextFormField(
+                                        controller: meterNumberController,
+                                        focusNode: _meterNumberFocusNode,
+                                        style: const TextStyle(
+                                          fontSize: 16.0,
+                                        ),
+                                        decoration: InputDecoration(
+                                          labelText: 'Meter Number',
+                                          labelStyle: const TextStyle(
+                                            color: Colors.grey,
+                                            fontFamily: 'Inter',
+                                            fontSize: 12.0,
+                                            decoration: TextDecoration.none,
+                                          ),
+                                          floatingLabelBehavior:
+                                              FloatingLabelBehavior.never,
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                            borderSide: BorderSide.none,
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                            borderSide: const BorderSide(
+                                                width: 3,
+                                                color: Color(0xFF02AA03)),
+                                          ),
+                                          filled: true,
+                                          fillColor: Colors.white,
+                                        ),
+                                        cursorColor: const Color(0xFF02AA03),
                                       ),
                                     ],
                                   ),
                                 ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 0.04),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 20.0),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Meter Type',
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 14.0,
+                                  color: Colors.grey,
+                                ),
                               ),
-                              SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      0.05),
-                              Container(
-                                width: double.infinity,
-                                height:
-                                    (60 / MediaQuery.of(context).size.height) *
-                                        MediaQuery.of(context).size.height,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20.0),
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      paymentSectionAirtimeToCash = true;
-                                    });
+                            ),
+                          ),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 0.02),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 20.0),
+                            child: _typeDropdown(),
+                          ),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 0.04),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 20.0),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Amount To Pay',
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 14.0,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 0.02),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 20.0),
+                            child: TextFormField(
+                              controller: amountController,
+                              focusNode: _amountFocusNode,
+                              style: const TextStyle(
+                                fontSize: 16.0,
+                              ),
+                              decoration: InputDecoration(
+                                labelText: '',
+                                labelStyle: const TextStyle(
+                                  color: Colors.grey,
+                                  fontFamily: 'Inter',
+                                  fontSize: 12.0,
+                                  decoration: TextDecoration.none,
+                                ),
+                                floatingLabelBehavior:
+                                    FloatingLabelBehavior.never,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                  borderSide: BorderSide.none,
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                  borderSide: const BorderSide(
+                                      width: 3, color: Color(0xFF02AA03)),
+                                ),
+                                filled: true,
+                                fillColor: Colors.white,
+                              ),
+                              cursorColor: const Color(0xFF02AA03),
+                            ),
+                          ),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 0.05),
+                          Container(
+                            width: double.infinity,
+                            height: (60 / MediaQuery.of(context).size.height) *
+                                MediaQuery.of(context).size.height,
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 20.0),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  paymentSectionDataOpen = true;
+                                });
+                              },
+                              style: ButtonStyle(
+                                backgroundColor:
+                                    WidgetStateProperty.resolveWith<Color>(
+                                  (Set<WidgetState> states) {
+                                    if (states.contains(WidgetState.pressed)) {
+                                      return Colors.white;
+                                    }
+                                    return const Color(0xFF02AA03);
                                   },
-                                  style: ButtonStyle(
-                                    backgroundColor:
-                                        WidgetStateProperty.resolveWith<Color>(
-                                      (Set<WidgetState> states) {
-                                        if (states
-                                            .contains(WidgetState.pressed)) {
-                                          return Colors.white;
-                                        }
-                                        return const Color(0xFF02AA03);
-                                      },
-                                    ),
-                                    foregroundColor:
-                                        WidgetStateProperty.resolveWith<Color>(
-                                      (Set<WidgetState> states) {
-                                        if (states
-                                            .contains(WidgetState.pressed)) {
-                                          return const Color(0xFF02AA03);
-                                        }
-                                        return Colors.white;
-                                      },
-                                    ),
-                                    elevation:
-                                        WidgetStateProperty.all<double>(4.0),
-                                    shape: WidgetStateProperty.all<
-                                        RoundedRectangleBorder>(
-                                      const RoundedRectangleBorder(
-                                        side: BorderSide(
-                                            width: 3, color: Color(0xFF02AA03)),
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(15)),
-                                      ),
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    'Sell',
-                                    style: TextStyle(
-                                      fontFamily: 'Inter',
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                ),
+                                foregroundColor:
+                                    WidgetStateProperty.resolveWith<Color>(
+                                  (Set<WidgetState> states) {
+                                    if (states.contains(WidgetState.pressed)) {
+                                      return const Color(0xFF02AA03);
+                                    }
+                                    return Colors.white;
+                                  },
+                                ),
+                                elevation: WidgetStateProperty.all<double>(4.0),
+                                shape: WidgetStateProperty.all<
+                                    RoundedRectangleBorder>(
+                                  const RoundedRectangleBorder(
+                                    side: BorderSide(
+                                        width: 3, color: Color(0xFF02AA03)),
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(15)),
                                   ),
                                 ),
                               ),
-                            ],
+                              child: const Text(
+                                'Purchase Pin',
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                  if (paymentSectionAirtimeToCash == true)
+                  if (paymentSectionDataOpen == true)
                     Positioned(
                       bottom: 0,
                       child: Container(
@@ -440,7 +593,7 @@ class AirtimeToCashSellPageState extends State<AirtimeToCashSellPage>
                                     InkWell(
                                       onTap: () {
                                         setState(() {
-                                          paymentSectionAirtimeToCash = false;
+                                          paymentSectionDataOpen = false;
                                         });
                                       },
                                       child: Image.asset(
@@ -505,7 +658,7 @@ class AirtimeToCashSellPageState extends State<AirtimeToCashSellPage>
                                   const Expanded(
                                     flex: 5,
                                     child: Text(
-                                      'Network',
+                                      'Electricity Type',
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         fontSize: 18,
@@ -515,50 +668,23 @@ class AirtimeToCashSellPageState extends State<AirtimeToCashSellPage>
                                     ),
                                   ),
                                   const Spacer(),
-                                  Expanded(
-                                    flex: 5,
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(55),
-                                          child: SizedBox(
-                                            width: (30 /
-                                                    MediaQuery.of(context)
-                                                        .size
-                                                        .width) *
-                                                MediaQuery.of(context)
-                                                    .size
-                                                    .width,
-                                            height: (30 /
-                                                    MediaQuery.of(context)
-                                                        .size
-                                                        .height) *
-                                                MediaQuery.of(context)
-                                                    .size
-                                                    .height,
-                                            child: Image.asset(
-                                              'images/MTNImg.png',
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                0.01),
-                                        const Text(
-                                          'MTN',
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontFamily: 'Inter',
-                                            color: Colors.black,
-                                          ),
-                                        ),
-                                      ],
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(55),
+                                    child: SizedBox(
+                                      width: (40 /
+                                              MediaQuery.of(context)
+                                                  .size
+                                                  .width) *
+                                          MediaQuery.of(context).size.width,
+                                      height: (40 /
+                                              MediaQuery.of(context)
+                                                  .size
+                                                  .height) *
+                                          MediaQuery.of(context).size.height,
+                                      child: Image.asset(
+                                        'images/AEDC.png',
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -572,7 +698,7 @@ class AirtimeToCashSellPageState extends State<AirtimeToCashSellPage>
                                   Expanded(
                                     flex: 5,
                                     child: Text(
-                                      'Phone Number',
+                                      'Meter Number',
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         fontSize: 18,
@@ -600,13 +726,13 @@ class AirtimeToCashSellPageState extends State<AirtimeToCashSellPage>
                               SizedBox(
                                   height: MediaQuery.of(context).size.height *
                                       0.02),
-                              Row(
+                              const Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Expanded(
+                                  Expanded(
                                     flex: 5,
                                     child: Text(
-                                      'Airtime Amount',
+                                      'Meter Username',
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         fontSize: 18,
@@ -615,28 +741,20 @@ class AirtimeToCashSellPageState extends State<AirtimeToCashSellPage>
                                       ),
                                     ),
                                   ),
-                                  const Spacer(),
+                                  Spacer(),
                                   Expanded(
                                     flex: 5,
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        Image.asset(
-                                          'images/NairaImg.png',
-                                          height: 15,
-                                        ),
-                                        const Text(
-                                          '1,400.00',
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontFamily: 'Inter',
-                                            color: Colors.black,
-                                          ),
-                                        ),
-                                      ],
+                                    child: Text(
+                                      'William Gift',
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.end,
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontFamily: 'Inter',
+                                        color: Colors.black,
+                                      ),
                                     ),
-                                  ),
+                                  )
                                 ],
                               ),
                               SizedBox(
@@ -648,7 +766,7 @@ class AirtimeToCashSellPageState extends State<AirtimeToCashSellPage>
                                   const Expanded(
                                     flex: 5,
                                     child: Text(
-                                      'Amount To Receive',
+                                      'Discount',
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         fontSize: 18,
@@ -663,6 +781,14 @@ class AirtimeToCashSellPageState extends State<AirtimeToCashSellPage>
                                     child: Row(
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
+                                        const Text(
+                                          '-',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontFamily: 'Inter',
+                                            color: Colors.black,
+                                          ),
+                                        ),
                                         Image.asset(
                                           'images/NairaImg.png',
                                           height: 15,
@@ -763,7 +889,7 @@ class AirtimeToCashSellPageState extends State<AirtimeToCashSellPage>
                                 child: ElevatedButton(
                                   onPressed: () {
                                     setState(() {
-                                      paymentSectionAirtimeToCash = false;
+                                      paymentSectionDataOpen = false;
                                       paymentSuccessful = true;
                                     });
                                   },
@@ -913,7 +1039,7 @@ class AirtimeToCashSellPageState extends State<AirtimeToCashSellPage>
                                             MediaQuery.of(context).size.height *
                                                 0.02),
                                     const Text(
-                                      'Airtime Sell was successful, the payment will be added to your wallet balance within 5 minutes',
+                                      'Your Electricity bill for 001FD28910 has been sent and received within 1 hour',
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         fontSize: 16.0,
@@ -1010,40 +1136,54 @@ class AirtimeToCashSellPageState extends State<AirtimeToCashSellPage>
     );
   }
 
-  Widget airtime(String amount) {
-    return InkWell(
-      onTap: () {
-        Navigator.pop(context);
-      },
-      child: Container(
-        width: (70.0 / MediaQuery.of(context).size.width) *
-            MediaQuery.of(context).size.width,
-        padding: const EdgeInsets.symmetric(vertical: 7.0, horizontal: 7.0),
-        decoration: const BoxDecoration(
-          color: Color(0xFFE3EEE8),
-          borderRadius: BorderRadius.all(
-            Radius.circular(5.0),
+  Widget _typeDropdown() {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(width: 0, color: Colors.grey),
+      ),
+      child: DropdownButtonFormField<String>(
+        value: _type,
+        icon: const Icon(Icons.arrow_drop_down),
+        elevation: 16,
+        isExpanded: true,
+        style: const TextStyle(color: Colors.black, fontSize: 16),
+        decoration: InputDecoration(
+          labelText: '',
+          labelStyle: const TextStyle(
+            color: Colors.grey,
+            fontFamily: 'Inter',
+            fontSize: 12.0,
+            decoration: TextDecoration.none,
           ),
+          floatingLabelBehavior: FloatingLabelBehavior.never,
+          border: InputBorder.none, // Remove default border
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: const BorderSide(width: 3, color: Color(0xFF02AA03)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: const BorderSide(width: 0, color: Colors.grey),
+          ),
+          filled: true,
+          fillColor: Colors.white,
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              'images/NairaImg.png',
-              height: 10,
-            ),
-            Text(
-              amount,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.bold,
-                fontSize: 15.0,
-                color: Colors.black,
-              ),
-            ),
-          ],
-        ),
+        onChanged: (String? newValue) {
+          setState(() {
+            _type = newValue;
+          });
+        },
+        hint: const Text('Select Meter Type'),
+        items: <String>['Prepaid', 'Postpaid']
+            .map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value,
+                style:
+                    TextStyle(color: Theme.of(context).colorScheme.onSurface)),
+          );
+        }).toList(),
       ),
     );
   }

@@ -266,7 +266,7 @@ class TransactionPinState extends State<TransactionPin>
                                         ),
                                       ),
                                       child: const Text(
-                                        'Update Password',
+                                        'Update Pin',
                                         style: TextStyle(
                                           fontFamily: 'Inter',
                                           fontWeight: FontWeight.bold,

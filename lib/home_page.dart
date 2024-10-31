@@ -1,5 +1,8 @@
 import 'package:bills_plug/add_money_old_users.dart';
+import 'package:bills_plug/add_photo.dart';
 import 'package:bills_plug/airtime_and_data_page.dart';
+import 'package:bills_plug/notification.dart';
+import 'package:bills_plug/transaction.dart';
 import 'package:bills_plug/withdraw_money.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart' hide CarouselController;
@@ -22,7 +25,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   bool _isBalanceVisible = false;
   List<String> imagePaths = [
     "images/AdImg.png",
-    "images/AdImg.png",
+    "images/AdImg2.png",
     "images/AdImg.png",
   ];
   int _current = 0;
@@ -128,40 +131,68 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               if (profileImg == null)
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(55),
-                                  child: Container(
-                                    width: (60 /
-                                            MediaQuery.of(context).size.width) *
-                                        MediaQuery.of(context).size.width,
-                                    height: (60 /
-                                            MediaQuery.of(context)
-                                                .size
-                                                .height) *
-                                        MediaQuery.of(context).size.height,
-                                    color: Colors.grey,
-                                    child: Image.asset(
-                                      'images/ProfilePic.png',
-                                      fit: BoxFit.cover,
+                                InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => AddPhoto(
+                                          key: UniqueKey(),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(55),
+                                    child: Container(
+                                      width: (60 /
+                                              MediaQuery.of(context)
+                                                  .size
+                                                  .width) *
+                                          MediaQuery.of(context).size.width,
+                                      height: (60 /
+                                              MediaQuery.of(context)
+                                                  .size
+                                                  .height) *
+                                          MediaQuery.of(context).size.height,
+                                      color: Colors.grey,
+                                      child: Image.asset(
+                                        'images/ProfilePic.png',
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
                                   ),
                                 )
                               else if (profileImg != null)
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(55),
-                                  child: Container(
-                                    width: (60 /
-                                            MediaQuery.of(context).size.width) *
-                                        MediaQuery.of(context).size.width,
-                                    height: (60 /
-                                            MediaQuery.of(context)
-                                                .size
-                                                .height) *
-                                        MediaQuery.of(context).size.height,
-                                    color: Colors.grey,
-                                    child: Image.network(
-                                      profileImg!,
-                                      fit: BoxFit.cover,
+                                InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => AddPhoto(
+                                          key: UniqueKey(),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(55),
+                                    child: Container(
+                                      width: (60 /
+                                              MediaQuery.of(context)
+                                                  .size
+                                                  .width) *
+                                          MediaQuery.of(context).size.width,
+                                      height: (60 /
+                                              MediaQuery.of(context)
+                                                  .size
+                                                  .height) *
+                                          MediaQuery.of(context).size.height,
+                                      color: Colors.grey,
+                                      child: Image.network(
+                                        profileImg!,
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -210,7 +241,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               ),
                               const Spacer(),
                               InkWell(
-                                onTap: () {},
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => NotificationPage(
+                                        key: UniqueKey(),
+                                      ),
+                                    ),
+                                  );
+                                },
                                 child: Image.asset(
                                   'images/Notification.png',
                                   height: 40,
@@ -512,28 +552,37 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             ),
                           ),
                           const Spacer(),
-                          Row(
-                            children: [
-                              const Text(
-                                'See all',
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14.0,
-                                  color: Colors.grey,
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => TransactionPage(
+                                    key: UniqueKey(),
+                                  ),
                                 ),
-                              ),
-                              SizedBox(
-                                  width: MediaQuery.of(context).size.width *
-                                      0.008),
-                              InkWell(
-                                onTap: () {},
-                                child: Image.asset(
+                              );
+                            },
+                            child: Row(
+                              children: [
+                                const Text(
+                                  'See all',
+                                  style: TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14.0,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                                SizedBox(
+                                    width: MediaQuery.of(context).size.width *
+                                        0.008),
+                                Image.asset(
                                   'images/mdi_arrow-bottom.png',
                                   height: 25,
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ],
                       ),

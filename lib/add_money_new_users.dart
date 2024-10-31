@@ -1,6 +1,9 @@
 import 'package:bills_plug/add_money_new_users2.dart';
+import 'package:bills_plug/notification.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class AddMoneyNewUsers extends StatefulWidget {
   const AddMoneyNewUsers({super.key});
@@ -18,6 +21,47 @@ class _AddMoneyNewUsersState extends State<AddMoneyNewUsers>
 
   final TextEditingController detailsController = TextEditingController();
   final TextEditingController dobController = TextEditingController();
+  late SharedPreferences prefs;
+  String? firstName;
+  String? lastName;
+  String? fullName;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializePrefs();
+  }
+
+  Future<void> _initializePrefs() async {
+    prefs = await SharedPreferences.getInstance();
+    firstName = await getFirstName();
+    lastName = await getLastName();
+    if (mounted) {
+      setState(() {
+        fullName = "$firstName $lastName";
+      });
+    }
+  }
+
+  Future<String?> getFirstName() async {
+    final String? userJson = prefs.getString('user');
+    if (userJson != null) {
+      final Map<String, dynamic> userMap = jsonDecode(userJson);
+      return userMap['firstname'];
+    } else {
+      return null;
+    }
+  }
+
+  Future<String?> getLastName() async {
+    final String? userJson = prefs.getString('user');
+    if (userJson != null) {
+      final Map<String, dynamic> userMap = jsonDecode(userJson);
+      return userMap['lastname'];
+    } else {
+      return null;
+    }
+  }
 
   String _formatDate(DateTime date) {
     return DateFormat('dd/MM/yyyy').format(date);
@@ -78,37 +122,48 @@ class _AddMoneyNewUsersState extends State<AddMoneyNewUsers>
                             ),
                           SizedBox(
                               width: MediaQuery.of(context).size.width * 0.02),
-                          const Expanded(
+                          Expanded(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  "Hello",
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16.0,
-                                    color: Colors.white,
+                                if (fullName != null)
+                                  Text(
+                                    fullName!,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16.0,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                else
+                                  const Text(
+                                    "Unknown User",
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16.0,
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  "William John",
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16.0,
-                                    color: Colors.white,
-                                  ),
-                                ),
                               ],
                             ),
                           ),
                           const Spacer(),
                           InkWell(
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => NotificationPage(
+                                    key: UniqueKey(),
+                                  ),
+                                ),
+                              );
+                            },
                             child: Image.asset(
                               'images/Notification.png',
                               height: 40,
@@ -404,7 +459,7 @@ class _AddMoneyNewUsersState extends State<AddMoneyNewUsers>
       ),
       child: DropdownButtonFormField<String>(
         value: _type,
-        icon: const Icon(Icons.arrow_downward),
+        icon: const Icon(Icons.arrow_drop_down),
         elevation: 16,
         isExpanded: true,
         style: const TextStyle(color: Colors.black, fontSize: 16),

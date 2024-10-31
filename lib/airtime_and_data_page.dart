@@ -1,5 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart' hide CarouselController;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class AirtimeAndDataPage extends StatefulWidget {
   final int tabIndex;
@@ -13,14 +15,16 @@ class AirtimeAndDataPage extends StatefulWidget {
 class AirtimeAndDataPageState extends State<AirtimeAndDataPage>
     with SingleTickerProviderStateMixin {
   final FocusNode _phoneNumberFocusNode = FocusNode();
+  final FocusNode _phoneNumber2FocusNode = FocusNode();
 
   final TextEditingController phoneNumberController = TextEditingController();
+  final TextEditingController phoneNumber2Controller = TextEditingController();
 
   TabController? _tabController;
 
   List<String> imagePaths = [
     "images/AdImg.png",
-    "images/AdImg.png",
+    "images/AdImg2.png",
     "images/AdImg.png",
   ];
   int _current = 0;
@@ -30,12 +34,30 @@ class AirtimeAndDataPageState extends State<AirtimeAndDataPage>
   bool _addToBeneficiary = false;
   bool paymentSectionAirtimeOpen = false;
   bool paymentSectionDataOpen = false;
+  String? userBalance;
+  late SharedPreferences prefs;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _tabController!.index = widget.tabIndex;
+    _initializePrefs();
+  }
+
+  Future<void> _initializePrefs() async {
+    prefs = await SharedPreferences.getInstance();
+    userBalance = await getUserBalance();
+  }
+
+  Future<String?> getUserBalance() async {
+    final String? userJson = prefs.getString('user');
+    if (userJson != null) {
+      final Map<String, dynamic> userMap = jsonDecode(userJson);
+      return userMap['balance'];
+    } else {
+      return null;
+    }
   }
 
   @override
@@ -49,7 +71,6 @@ class AirtimeAndDataPageState extends State<AirtimeAndDataPage>
     return OrientationBuilder(
       builder: (context, orientation) {
         return Scaffold(
-          resizeToAvoidBottomInset: true,
           body: SafeArea(
             child: Align(
               alignment: Alignment.bottomCenter,
@@ -120,8 +141,7 @@ class AirtimeAndDataPageState extends State<AirtimeAndDataPage>
                             indicatorColor: const Color(0xFF02AA03),
                           ),
                         ),
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.75,
+                        Flexible(
                           child: TabBarView(
                             controller: _tabController,
                             children: [
@@ -236,23 +256,18 @@ class AirtimeAndDataPageState extends State<AirtimeAndDataPage>
                                                     .size
                                                     .width *
                                                 0.02),
-                                        InkWell(
-                                          onTap: () {
-                                            Navigator.pop(context);
-                                          },
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(
-                                                vertical: 7.0, horizontal: 7.0),
-                                            decoration: const BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius: BorderRadius.all(
-                                                Radius.circular(5.0),
-                                              ),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 7.0, horizontal: 7.0),
+                                          decoration: const BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(5.0),
                                             ),
-                                            child: Image.asset(
-                                              'images/MTNImg.png',
-                                              height: 30,
-                                            ),
+                                          ),
+                                          child: Image.asset(
+                                            'images/MTNImg.png',
+                                            height: 30,
                                           ),
                                         ),
                                         SizedBox(
@@ -488,10 +503,6 @@ class AirtimeAndDataPageState extends State<AirtimeAndDataPage>
                                       ),
                                     ),
                                   ),
-                                  SizedBox(
-                                      height: MediaQuery.of(context)
-                                          .viewInsets
-                                          .bottom),
                                 ],
                               ),
                               ListView(
@@ -605,23 +616,18 @@ class AirtimeAndDataPageState extends State<AirtimeAndDataPage>
                                                     .size
                                                     .width *
                                                 0.02),
-                                        InkWell(
-                                          onTap: () {
-                                            Navigator.pop(context);
-                                          },
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(
-                                                vertical: 7.0, horizontal: 7.0),
-                                            decoration: const BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius: BorderRadius.all(
-                                                Radius.circular(5.0),
-                                              ),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 7.0, horizontal: 7.0),
+                                          decoration: const BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(5.0),
                                             ),
-                                            child: Image.asset(
-                                              'images/MTNImg.png',
-                                              height: 30,
-                                            ),
+                                          ),
+                                          child: Image.asset(
+                                            'images/MTNImg.png',
+                                            height: 30,
                                           ),
                                         ),
                                         SizedBox(
@@ -631,8 +637,8 @@ class AirtimeAndDataPageState extends State<AirtimeAndDataPage>
                                                 0.02),
                                         Expanded(
                                           child: TextFormField(
-                                            controller: phoneNumberController,
-                                            focusNode: _phoneNumberFocusNode,
+                                            controller: phoneNumber2Controller,
+                                            focusNode: _phoneNumber2FocusNode,
                                             style: const TextStyle(
                                               fontSize: 16.0,
                                             ),
@@ -917,10 +923,6 @@ class AirtimeAndDataPageState extends State<AirtimeAndDataPage>
                                       ),
                                     ),
                                   ),
-                                  SizedBox(
-                                      height: MediaQuery.of(context)
-                                          .viewInsets
-                                          .bottom),
                                 ],
                               ),
                             ],
@@ -1242,15 +1244,31 @@ class AirtimeAndDataPageState extends State<AirtimeAndDataPage>
                                               'images/NairaImg.png',
                                               height: 15,
                                             ),
-                                            const Text(
-                                              "(15750.00)",
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                fontFamily: 'Inter',
-                                                fontSize: 16.0,
-                                                color: Colors.black,
-                                              ),
-                                            ),
+                                            if (userBalance != null)
+                                              Text(
+                                                double.tryParse(userBalance!) !=
+                                                        null
+                                                    ? "(${double.parse(userBalance!).toStringAsFixed(2)})"
+                                                    : "(0.00)",
+                                                overflow: TextOverflow.ellipsis,
+                                                style: const TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16.0,
+                                                  color: Colors.white,
+                                                ),
+                                              )
+                                            else
+                                              const Text(
+                                                "(0.00)",
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16.0,
+                                                  color: Colors.white,
+                                                ),
+                                              )
                                           ],
                                         ),
                                       ],
@@ -1630,15 +1648,31 @@ class AirtimeAndDataPageState extends State<AirtimeAndDataPage>
                                               'images/NairaImg.png',
                                               height: 15,
                                             ),
-                                            const Text(
-                                              "(15750.00)",
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                fontFamily: 'Inter',
-                                                fontSize: 16.0,
-                                                color: Colors.black,
-                                              ),
-                                            ),
+                                            if (userBalance != null)
+                                              Text(
+                                                double.tryParse(userBalance!) !=
+                                                        null
+                                                    ? "(${double.parse(userBalance!).toStringAsFixed(2)})"
+                                                    : "(0.00)",
+                                                overflow: TextOverflow.ellipsis,
+                                                style: const TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16.0,
+                                                  color: Colors.white,
+                                                ),
+                                              )
+                                            else
+                                              const Text(
+                                                "(0.00)",
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16.0,
+                                                  color: Colors.white,
+                                                ),
+                                              )
                                           ],
                                         ),
                                       ],

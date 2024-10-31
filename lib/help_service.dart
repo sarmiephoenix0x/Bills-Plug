@@ -1,7 +1,5 @@
-import 'package:bills_plug/airtime_to_cash.dart';
 import 'package:flutter/material.dart';
-import 'package:bills_plug/airtime_and_data_page.dart';
-import 'cable_tv.dart';
+import 'self_service.dart';
 
 class HelpServicePage extends StatefulWidget {
   const HelpServicePage({super.key});
@@ -39,7 +37,7 @@ class _HelpServicePageState extends State<HelpServicePage>
                                   left: 20.0,
                                   right: 20.0,
                                   top: 20.0,
-                                  bottom: 40),
+                                  bottom: 20.0),
                               decoration: const BoxDecoration(
                                 color: Color(0xFF02AA03),
                               ),
@@ -128,32 +126,110 @@ class _HelpServicePageState extends State<HelpServicePage>
                                     Padding(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 20.0, vertical: 12.0),
-                                      child: help("Wallet Funding"),
+                                      child: InkWell(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  SelfServicePage(
+                                                key: UniqueKey(),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        child: help("Wallet Funding"),
+                                      ),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 20.0, vertical: 12.0),
-                                      child: help("Airtime Purchase"),
+                                      child: InkWell(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  SelfServicePage(
+                                                key: UniqueKey(),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        child: help("Airtime Purchase"),
+                                      ),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 20.0, vertical: 12.0),
-                                      child: help("Databundle Purchase"),
+                                      child: InkWell(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  SelfServicePage(
+                                                key: UniqueKey(),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        child: help("Databundle Purchase"),
+                                      ),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 20.0, vertical: 12.0),
-                                      child: help("CableTV Subscription"),
+                                      child: InkWell(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  SelfServicePage(
+                                                key: UniqueKey(),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        child: help("CableTV Subscription"),
+                                      ),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 20.0, vertical: 12.0),
-                                      child: help("Electricity Payment"),
+                                      child: InkWell(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  SelfServicePage(
+                                                key: UniqueKey(),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        child: help("Electricity Payment"),
+                                      ),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 20.0, vertical: 12.0),
-                                      child: help("Betting Wallet"),
+                                      child: InkWell(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  SelfServicePage(
+                                                key: UniqueKey(),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        child: help("Betting Wallet"),
+                                      ),
                                     ),
                                     Container(
                                       width: MediaQuery.of(context).size.width,
@@ -175,7 +251,20 @@ class _HelpServicePageState extends State<HelpServicePage>
                                     Padding(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 20.0, vertical: 12.0),
-                                      child: help("Submit a ticket"),
+                                      child: InkWell(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  SelfServicePage(
+                                                key: UniqueKey(),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        child: help("Submit a ticket"),
+                                      ),
                                     ),
                                     Container(
                                       width: MediaQuery.of(context).size.width,
@@ -214,7 +303,7 @@ class _HelpServicePageState extends State<HelpServicePage>
                                                       .size
                                                       .height *
                                                   0.02),
-                                          Text(
+                                          const Text(
                                             "09055259546",
                                             overflow: TextOverflow.ellipsis,
                                             style: TextStyle(

@@ -1,16 +1,19 @@
 import 'package:bills_plug/add_money_old_users.dart';
+import 'package:bills_plug/add_photo.dart';
 import 'package:bills_plug/airtime_and_data_page.dart';
-import 'package:bills_plug/create_new_password.dart';
+import 'package:bills_plug/notification.dart';
+import 'package:bills_plug/self_service.dart';
+import 'package:bills_plug/transaction.dart';
 import 'package:bills_plug/transaction_pin.dart';
 import 'package:bills_plug/upgrade_to_agent.dart';
 import 'package:bills_plug/verify_account_details.dart';
-import 'package:bills_plug/verify_email.dart';
-import 'package:bills_plug/verify_phone_number.dart';
 import 'package:bills_plug/withdraw_money.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart' hide CarouselController;
 import 'add_money_new_users.dart';
 import 'cable_tv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -32,6 +35,59 @@ class _ProfilePageState extends State<ProfilePage>
 
   // Use the fully qualified CarouselController from the carousel_slider package
   final CarouselController _controller = CarouselController();
+  late SharedPreferences prefs;
+  String? firstName;
+  String? lastName;
+  String? fullName;
+  String? userBalance;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializePrefs();
+  }
+
+  Future<void> _initializePrefs() async {
+    prefs = await SharedPreferences.getInstance();
+    firstName = await getFirstName();
+    lastName = await getLastName();
+    userBalance = await getUserBalance();
+    if (mounted) {
+      setState(() {
+        fullName = "$firstName $lastName";
+      });
+    }
+  }
+
+  Future<String?> getFirstName() async {
+    final String? userJson = prefs.getString('user');
+    if (userJson != null) {
+      final Map<String, dynamic> userMap = jsonDecode(userJson);
+      return userMap['firstname'];
+    } else {
+      return null;
+    }
+  }
+
+  Future<String?> getLastName() async {
+    final String? userJson = prefs.getString('user');
+    if (userJson != null) {
+      final Map<String, dynamic> userMap = jsonDecode(userJson);
+      return userMap['lastname'];
+    } else {
+      return null;
+    }
+  }
+
+  Future<String?> getUserBalance() async {
+    final String? userJson = prefs.getString('user');
+    if (userJson != null) {
+      final Map<String, dynamic> userMap = jsonDecode(userJson);
+      return userMap['balance'];
+    } else {
+      return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,84 +111,115 @@ class _ProfilePageState extends State<ProfilePage>
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               if (profileImg == null)
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(55),
-                                  child: Container(
-                                    width: (60 /
-                                            MediaQuery.of(context).size.width) *
-                                        MediaQuery.of(context).size.width,
-                                    height: (60 /
-                                            MediaQuery.of(context)
-                                                .size
-                                                .height) *
-                                        MediaQuery.of(context).size.height,
-                                    color: Colors.grey,
-                                    child: Image.asset(
-                                      'images/ProfilePic.png',
-                                      fit: BoxFit.cover,
+                                InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => AddPhoto(
+                                          key: UniqueKey(),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(55),
+                                    child: Container(
+                                      width: (60 /
+                                              MediaQuery.of(context)
+                                                  .size
+                                                  .width) *
+                                          MediaQuery.of(context).size.width,
+                                      height: (60 /
+                                              MediaQuery.of(context)
+                                                  .size
+                                                  .height) *
+                                          MediaQuery.of(context).size.height,
+                                      color: Colors.grey,
+                                      child: Image.asset(
+                                        'images/ProfilePic.png',
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
                                   ),
                                 )
                               else if (profileImg != null)
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(55),
-                                  child: Container(
-                                    width: (60 /
-                                            MediaQuery.of(context).size.width) *
-                                        MediaQuery.of(context).size.width,
-                                    height: (60 /
-                                            MediaQuery.of(context)
-                                                .size
-                                                .height) *
-                                        MediaQuery.of(context).size.height,
-                                    color: Colors.grey,
-                                    child: Image.network(
-                                      profileImg!,
-                                      fit: BoxFit.cover,
+                                InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => AddPhoto(
+                                          key: UniqueKey(),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(55),
+                                    child: Container(
+                                      width: (60 /
+                                              MediaQuery.of(context)
+                                                  .size
+                                                  .width) *
+                                          MediaQuery.of(context).size.width,
+                                      height: (60 /
+                                              MediaQuery.of(context)
+                                                  .size
+                                                  .height) *
+                                          MediaQuery.of(context).size.height,
+                                      color: Colors.grey,
+                                      child: Image.network(
+                                        profileImg!,
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
                                   ),
                                 ),
                               SizedBox(
                                   width:
                                       MediaQuery.of(context).size.width * 0.02),
-                              const Expanded(
+                              Expanded(
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      "Hello",
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontFamily: 'Inter',
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16.0,
-                                        color: Colors.white,
+                                    if (fullName != null)
+                                      Text(
+                                        fullName!,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontFamily: 'Inter',
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16.0,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    else
+                                      const Text(
+                                        "Unknown User",
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontFamily: 'Inter',
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16.0,
+                                          color: Colors.white,
+                                        ),
                                       ),
-                                    ),
-                                    Text(
-                                      "William John",
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontFamily: 'Inter',
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16.0,
-                                        color: Colors.white,
-                                      ),
-                                    ),
                                   ],
                                 ),
                               ),
                               const Spacer(),
                               InkWell(
                                 onTap: () {
-                                  // Navigator.push(
-                                  //   context,
-                                  //   MaterialPageRoute(
-                                  //     builder: (context) =>
-                                  //         TransactionPin(key: UniqueKey()),
-                                  //   ),
-                                  // );
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => NotificationPage(
+                                        key: UniqueKey(),
+                                      ),
+                                    ),
+                                  );
                                 },
                                 child: Image.asset(
                                   'images/Notification.png',
@@ -169,16 +256,32 @@ class _ProfilePageState extends State<ProfilePage>
                                           height: 20,
                                           color: Colors.white,
                                         ),
-                                        const Text(
-                                          "0.00",
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontFamily: 'Inter',
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 27.0,
-                                            color: Colors.white,
-                                          ),
-                                        ),
+                                        if (userBalance != null)
+                                          Text(
+                                            double.tryParse(userBalance!) !=
+                                                    null
+                                                ? double.parse(userBalance!)
+                                                    .toStringAsFixed(2)
+                                                : "0.00",
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              fontFamily: 'Inter',
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 27.0,
+                                              color: Colors.white,
+                                            ),
+                                          )
+                                        else
+                                          const Text(
+                                            "0.00",
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontFamily: 'Inter',
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 27.0,
+                                              color: Colors.white,
+                                            ),
+                                          )
                                       ],
                                     ),
                                   ],
@@ -313,9 +416,21 @@ class _ProfilePageState extends State<ProfilePage>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            basicInfo(
-                                "Transaction History", "", Icons.history_edu,
-                                showArrow: true),
+                            InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => TransactionPage(
+                                      key: UniqueKey(),
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: basicInfo(
+                                  "Transaction History", "", Icons.history_edu,
+                                  showArrow: true),
+                            ),
                             SizedBox(
                               width: MediaQuery.of(context).size.width,
                               child: const Divider(
@@ -323,8 +438,21 @@ class _ProfilePageState extends State<ProfilePage>
                                 height: 20,
                               ),
                             ),
-                            basicInfo("Self Help", "", Icons.self_improvement,
-                                showArrow: true),
+                            InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => SelfServicePage(
+                                      key: UniqueKey(),
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: basicInfo(
+                                  "Self Help", "", Icons.self_improvement,
+                                  showArrow: true),
+                            ),
                             SizedBox(
                               width: MediaQuery.of(context).size.width,
                               child: const Divider(
@@ -332,8 +460,20 @@ class _ProfilePageState extends State<ProfilePage>
                                 height: 20,
                               ),
                             ),
-                            basicInfo("Password", "", Icons.lock,
-                                showArrow: true),
+                            InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => VerifyAccountDetails(
+                                      key: UniqueKey(),
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: basicInfo("Password", "", Icons.lock,
+                                  showArrow: true),
+                            ),
                             SizedBox(
                               width: MediaQuery.of(context).size.width,
                               child: const Divider(
@@ -341,8 +481,20 @@ class _ProfilePageState extends State<ProfilePage>
                                 height: 20,
                               ),
                             ),
-                            basicInfo("Reset Pin", "", Icons.key,
-                                showArrow: true),
+                            InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => TransactionPin(
+                                      key: UniqueKey(),
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: basicInfo("Reset Pin", "", Icons.key,
+                                  showArrow: true),
+                            ),
                             SizedBox(
                               width: MediaQuery.of(context).size.width,
                               child: const Divider(
