@@ -831,9 +831,7 @@ class DataPinState extends State<DataPin> with SingleTickerProviderStateMixin {
                                                 overflow: TextOverflow.ellipsis,
                                                 style: const TextStyle(
                                                   fontFamily: 'Inter',
-                                                  fontWeight: FontWeight.bold,
                                                   fontSize: 16.0,
-                                                  color: Colors.white,
                                                 ),
                                               )
                                             else
@@ -842,9 +840,7 @@ class DataPinState extends State<DataPin> with SingleTickerProviderStateMixin {
                                                 overflow: TextOverflow.ellipsis,
                                                 style: TextStyle(
                                                   fontFamily: 'Inter',
-                                                  fontWeight: FontWeight.bold,
                                                   fontSize: 16.0,
-                                                  color: Colors.white,
                                                 ),
                                               )
                                           ],

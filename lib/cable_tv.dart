@@ -30,6 +30,7 @@ class CableTVPageState extends State<CableTVPage>
   bool paymentSectionCableTVOpen = false;
   String? userBalance;
   late SharedPreferences prefs;
+  bool paymentSuccessful = false;
 
   @override
   void initState() {
@@ -747,9 +748,7 @@ class CableTVPageState extends State<CableTVPage>
                                                 overflow: TextOverflow.ellipsis,
                                                 style: const TextStyle(
                                                   fontFamily: 'Inter',
-                                                  fontWeight: FontWeight.bold,
                                                   fontSize: 16.0,
-                                                  color: Colors.white,
                                                 ),
                                               )
                                             else
@@ -758,9 +757,7 @@ class CableTVPageState extends State<CableTVPage>
                                                 overflow: TextOverflow.ellipsis,
                                                 style: TextStyle(
                                                   fontFamily: 'Inter',
-                                                  fontWeight: FontWeight.bold,
                                                   fontSize: 16.0,
-                                                  color: Colors.white,
                                                 ),
                                               )
                                           ],
@@ -785,6 +782,7 @@ class CableTVPageState extends State<CableTVPage>
                                   onPressed: () {
                                     setState(() {
                                       paymentSectionCableTVOpen = false;
+                                      paymentSuccessful = true;
                                     });
                                   },
                                   style: ButtonStyle(
@@ -836,6 +834,190 @@ class CableTVPageState extends State<CableTVPage>
                           ),
                         ),
                       ),
+                    ),
+                  if (paymentSuccessful)
+                    Stack(
+                      children: [
+                        ModalBarrier(
+                          dismissible: false,
+                          color: Colors.black.withOpacity(0.5),
+                        ),
+                        PopScope(
+                          canPop: false,
+                          onPopInvokedWithResult: (didPop, dynamic result) {
+                            if (!didPop) {
+                              setState(() {
+                                paymentSuccessful = false;
+                              });
+                            }
+                          },
+                          child: Center(
+                            child: SingleChildScrollView(
+                              child: Container(
+                                margin: const EdgeInsets.symmetric(
+                                    horizontal: 20.0), // Centered padding
+                                padding: const EdgeInsets.all(
+                                    16.0), // Inner padding for content
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(25.0),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.black26,
+                                      spreadRadius: 2,
+                                      blurRadius: 10,
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize
+                                      .min, // Expands only as needed
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    // Close button
+                                    Align(
+                                      alignment: Alignment.topRight,
+                                      child: InkWell(
+                                        onTap: () {
+                                          setState(() {
+                                            paymentSuccessful = false;
+                                          });
+                                        },
+                                        child: Image.asset(
+                                          'images/CloseBut.png',
+                                          height: 25,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.02),
+
+                                    // Receipt title and content
+                                    const Text(
+                                      'Payment Successful',
+                                      style: TextStyle(
+                                        fontSize: 20.0,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'Inter',
+                                      ),
+                                    ),
+                                    SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.02),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Image.asset(
+                                          'images/NairaImg.png',
+                                          height: 20,
+                                        ),
+                                        const Text(
+                                          '1,370.00',
+                                          style: TextStyle(
+                                            fontSize: 24,
+                                            fontFamily: 'Inter',
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.02),
+                                    const Text(
+                                      'Airtime Sell was successful, the payment will be added to your wallet balance within 5 minutes',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 16.0,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'Inter',
+                                        color: Color(0xFF02AA03),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.02),
+                                    Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 12.0, horizontal: 12.0),
+                                          decoration: const BoxDecoration(
+                                            color: Color(0xFFDAF3DB),
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(15.0),
+                                            ),
+                                          ),
+                                          child: Column(
+                                            children: [
+                                              Image.asset(
+                                                'images/ShareReceipt.png',
+                                                height: 20,
+                                              ),
+                                              SizedBox(
+                                                  height: MediaQuery.of(context)
+                                                          .size
+                                                          .height *
+                                                      0.02),
+                                              const Text(
+                                                'Share Receipt',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontSize: 14.0,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const Spacer(),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 12.0, horizontal: 12.0),
+                                          decoration: const BoxDecoration(
+                                            color: Color(0xFFDAF3DB),
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(15.0),
+                                            ),
+                                          ),
+                                          child: Column(
+                                            children: [
+                                              Image.asset(
+                                                'images/Download.png',
+                                                height: 20,
+                                              ),
+                                              SizedBox(
+                                                  height: MediaQuery.of(context)
+                                                          .size
+                                                          .height *
+                                                      0.02),
+                                              const Text(
+                                                'View Receipt',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontSize: 14.0,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                 ],
               ),
