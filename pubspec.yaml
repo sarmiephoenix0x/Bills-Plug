@@ -162,6 +162,16 @@ flutter:
     - images/TinyForwardArrow.png
     - images/BackButton_White.png
     - images/CloseBut_White.png
+    - images/AddMoneyImg2.png
+    - images/DStv.png
+    - images/Filter_btn.png
+    - images/GoTV_JinjaImg.png
+    - images/GoTV_JolliImg.png
+    - images/GoTV_MaxImg.png
+    - images/GoTV_SmallieImg.png
+    - images/Startimes.png
+    - images/Success-filled.png
+    - images/WAECImg.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

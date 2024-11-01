@@ -266,227 +266,261 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Expanded(
+                                flex: 10,
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      "Available Balance",
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontFamily: 'Inter',
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14.0,
-                                        color: Colors.white,
-                                      ),
-                                    ),
                                     Row(
                                       children: [
-                                        Image.asset(
-                                          'images/NairaImg.png',
-                                          height: 20,
-                                          color: Colors.white,
+                                        const Text(
+                                          "Total Balance",
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14.0,
+                                            color: Colors.white,
+                                          ),
                                         ),
-                                        if (userBalance != null)
-                                          Text(
-                                            double.tryParse(userBalance!) !=
-                                                    null
-                                                ? double.parse(userBalance!)
-                                                    .toStringAsFixed(2)
-                                                : "0.00",
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              fontFamily: 'Inter',
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 27.0,
-                                              color: Colors.white,
-                                            ),
-                                          )
-                                        else
-                                          const Text(
-                                            "0.00",
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                              fontFamily: 'Inter',
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 27.0,
-                                              color: Colors.white,
-                                            ),
-                                          )
+                                        IconButton(
+                                          icon: Icon(
+                                              _isBalanceVisible
+                                                  ? Icons.visibility
+                                                  : Icons.visibility_off,
+                                              color: Colors.white),
+                                          onPressed: () {
+                                            setState(() {
+                                              _isBalanceVisible =
+                                                  !_isBalanceVisible;
+                                            });
+                                          },
+                                        ),
                                       ],
                                     ),
+                                    if (_isBalanceVisible != false)
+                                      Row(
+                                        children: [
+                                          Image.asset(
+                                            'images/NairaImg.png',
+                                            height: 20,
+                                            color: Colors.white,
+                                          ),
+                                          if (userBalance != null)
+                                            Text(
+                                              double.tryParse(userBalance!) !=
+                                                      null
+                                                  ? double.parse(userBalance!)
+                                                      .toStringAsFixed(2)
+                                                  : "0.00",
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                fontFamily: 'Inter',
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 27.0,
+                                                color: Colors.white,
+                                              ),
+                                            )
+                                          else
+                                            const Text(
+                                              "0.00",
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                fontFamily: 'Inter',
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 27.0,
+                                                color: Colors.white,
+                                              ),
+                                            )
+                                        ],
+                                      )
+                                    else
+                                      const Text(
+                                        "****",
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontFamily: 'Inter',
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 27.0,
+                                          color: Colors.white,
+                                        ),
+                                      ),
                                   ],
                                 ),
                               ),
                               const Spacer(),
-                              IconButton(
-                                icon: Icon(
-                                    _isBalanceVisible
-                                        ? Icons.visibility
-                                        : Icons.visibility_off,
-                                    color: Colors.white),
-                                onPressed: () {
-                                  setState(() {
-                                    _isBalanceVisible = !_isBalanceVisible;
-                                  });
+                              InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => AddMoneyOldUsers(
+                                        key: UniqueKey(),
+                                      ),
+                                    ),
+                                  );
                                 },
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                              height:
-                                  MediaQuery.of(context).size.height * 0.02),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              SizedBox(
-                                height:
-                                    (50 / MediaQuery.of(context).size.height) *
-                                        MediaQuery.of(context).size.height,
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    // Navigator.push(
-                                    //   context,
-                                    //   MaterialPageRoute(
-                                    //     builder: (context) =>
-                                    //         AddMoneyOldUsers(key: UniqueKey()),
-                                    //   ),
-                                    // );
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            AddMoneyNewUsers(key: UniqueKey()),
-                                      ),
-                                    );
-                                  },
-                                  style: ButtonStyle(
-                                    backgroundColor:
-                                        WidgetStateProperty.resolveWith<Color>(
-                                      (Set<WidgetState> states) {
-                                        if (states
-                                            .contains(WidgetState.pressed)) {
-                                          return const Color(0xFF02AA03);
-                                        }
-                                        return const Color(0xFFEEF1F4);
-                                      },
-                                    ),
-                                    foregroundColor:
-                                        WidgetStateProperty.resolveWith<Color>(
-                                      (Set<WidgetState> states) {
-                                        if (states
-                                            .contains(WidgetState.pressed)) {
-                                          return Colors.white;
-                                        }
-                                        return const Color(0xFF02AA03);
-                                      },
-                                    ),
-                                    elevation:
-                                        WidgetStateProperty.all<double>(0),
-                                    shape: WidgetStateProperty.all<
-                                        RoundedRectangleBorder>(
-                                      const RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(35)),
-                                      ),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Image.asset(
-                                        'images/AddMoneyImg.png',
-                                        height: 20,
-                                      ),
-                                      SizedBox(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.03),
-                                      const Text(
-                                        'Add Money',
-                                        style: TextStyle(
-                                          fontFamily: 'Inter',
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 14.0,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.02),
-                              SizedBox(
-                                height:
-                                    (50 / MediaQuery.of(context).size.height) *
-                                        MediaQuery.of(context).size.height,
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            WithdrawMoneyPage(key: UniqueKey()),
-                                      ),
-                                    );
-                                  },
-                                  style: ButtonStyle(
-                                    backgroundColor:
-                                        WidgetStateProperty.resolveWith<Color>(
-                                      (Set<WidgetState> states) {
-                                        if (states
-                                            .contains(WidgetState.pressed)) {
-                                          return const Color(0xFF02AA03);
-                                        }
-                                        return const Color(0xFFEEF1F4);
-                                      },
-                                    ),
-                                    foregroundColor:
-                                        WidgetStateProperty.resolveWith<Color>(
-                                      (Set<WidgetState> states) {
-                                        if (states
-                                            .contains(WidgetState.pressed)) {
-                                          return Colors.white;
-                                        }
-                                        return const Color(0xFF02AA03);
-                                      },
-                                    ),
-                                    elevation:
-                                        WidgetStateProperty.all<double>(0),
-                                    shape: WidgetStateProperty.all<
-                                        RoundedRectangleBorder>(
-                                      const RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(35)),
-                                      ),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Image.asset(
-                                        'images/WithdrawImg.png',
-                                        height: 20,
-                                      ),
-                                      SizedBox(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.03),
-                                      const Text(
-                                        'Withdraw',
-                                        style: TextStyle(
-                                          fontFamily: 'Inter',
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 14.0,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                child: Image.asset(
+                                  'images/AddMoneyImg2.png',
+                                  height: 40,
                                 ),
                               ),
                             ],
                           ),
+                          // SizedBox(
+                          //     height:
+                          //         MediaQuery.of(context).size.height * 0.02),
+                          // Row(
+                          //   mainAxisAlignment: MainAxisAlignment.start,
+                          //   children: [
+                          //     SizedBox(
+                          //       height:
+                          //           (50 / MediaQuery.of(context).size.height) *
+                          //               MediaQuery.of(context).size.height,
+                          //       child: ElevatedButton(
+                          //         onPressed: () {
+                          //           // Navigator.push(
+                          //           //   context,
+                          //           //   MaterialPageRoute(
+                          //           //     builder: (context) =>
+                          //           //         AddMoneyOldUsers(key: UniqueKey()),
+                          //           //   ),
+                          //           // );
+                          //           Navigator.push(
+                          //             context,
+                          //             MaterialPageRoute(
+                          //               builder: (context) =>
+                          //                   AddMoneyNewUsers(key: UniqueKey()),
+                          //             ),
+                          //           );
+                          //         },
+                          //         style: ButtonStyle(
+                          //           backgroundColor:
+                          //               WidgetStateProperty.resolveWith<Color>(
+                          //             (Set<WidgetState> states) {
+                          //               if (states
+                          //                   .contains(WidgetState.pressed)) {
+                          //                 return const Color(0xFF02AA03);
+                          //               }
+                          //               return const Color(0xFFEEF1F4);
+                          //             },
+                          //           ),
+                          //           foregroundColor:
+                          //               WidgetStateProperty.resolveWith<Color>(
+                          //             (Set<WidgetState> states) {
+                          //               if (states
+                          //                   .contains(WidgetState.pressed)) {
+                          //                 return Colors.white;
+                          //               }
+                          //               return const Color(0xFF02AA03);
+                          //             },
+                          //           ),
+                          //           elevation:
+                          //               WidgetStateProperty.all<double>(0),
+                          //           shape: WidgetStateProperty.all<
+                          //               RoundedRectangleBorder>(
+                          //             const RoundedRectangleBorder(
+                          //               borderRadius: BorderRadius.all(
+                          //                   Radius.circular(35)),
+                          //             ),
+                          //           ),
+                          //         ),
+                          //         child: Row(
+                          //           children: [
+                          //             Image.asset(
+                          //               'images/AddMoneyImg.png',
+                          //               height: 20,
+                          //             ),
+                          //             SizedBox(
+                          //                 width: MediaQuery.of(context)
+                          //                         .size
+                          //                         .width *
+                          //                     0.03),
+                          //             const Text(
+                          //               'Add Money',
+                          //               style: TextStyle(
+                          //                 fontFamily: 'Inter',
+                          //                 fontWeight: FontWeight.bold,
+                          //                 fontSize: 14.0,
+                          //               ),
+                          //             ),
+                          //           ],
+                          //         ),
+                          //       ),
+                          //     ),
+                          //     SizedBox(
+                          //         width:
+                          //             MediaQuery.of(context).size.width * 0.02),
+                          //     SizedBox(
+                          //       height:
+                          //           (50 / MediaQuery.of(context).size.height) *
+                          //               MediaQuery.of(context).size.height,
+                          //       child: ElevatedButton(
+                          //         onPressed: () {
+                          //           Navigator.push(
+                          //             context,
+                          //             MaterialPageRoute(
+                          //               builder: (context) =>
+                          //                   WithdrawMoneyPage(key: UniqueKey()),
+                          //             ),
+                          //           );
+                          //         },
+                          //         style: ButtonStyle(
+                          //           backgroundColor:
+                          //               WidgetStateProperty.resolveWith<Color>(
+                          //             (Set<WidgetState> states) {
+                          //               if (states
+                          //                   .contains(WidgetState.pressed)) {
+                          //                 return const Color(0xFF02AA03);
+                          //               }
+                          //               return const Color(0xFFEEF1F4);
+                          //             },
+                          //           ),
+                          //           foregroundColor:
+                          //               WidgetStateProperty.resolveWith<Color>(
+                          //             (Set<WidgetState> states) {
+                          //               if (states
+                          //                   .contains(WidgetState.pressed)) {
+                          //                 return Colors.white;
+                          //               }
+                          //               return const Color(0xFF02AA03);
+                          //             },
+                          //           ),
+                          //           elevation:
+                          //               WidgetStateProperty.all<double>(0),
+                          //           shape: WidgetStateProperty.all<
+                          //               RoundedRectangleBorder>(
+                          //             const RoundedRectangleBorder(
+                          //               borderRadius: BorderRadius.all(
+                          //                   Radius.circular(35)),
+                          //             ),
+                          //           ),
+                          //         ),
+                          //         child: Row(
+                          //           children: [
+                          //             Image.asset(
+                          //               'images/WithdrawImg.png',
+                          //               height: 20,
+                          //             ),
+                          //             SizedBox(
+                          //                 width: MediaQuery.of(context)
+                          //                         .size
+                          //                         .width *
+                          //                     0.03),
+                          //             const Text(
+                          //               'Withdraw',
+                          //               style: TextStyle(
+                          //                 fontFamily: 'Inter',
+                          //                 fontWeight: FontWeight.bold,
+                          //                 fontSize: 14.0,
+                          //               ),
+                          //             ),
+                          //           ],
+                          //         ),
+                          //       ),
+                          //     ),
+                          //   ],
+                          // ),
                         ],
                       ),
                     ),
@@ -616,7 +650,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ],
                 ),
                 Positioned(
-                  top: 250,
+                  top: 200,
                   left: 0,
                   right: 0,
                   child: Padding(
@@ -653,9 +687,26 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                 ),
                               );
                             },
-                            child: Image.asset(
-                              'images/DataImg.png',
-                              height: 50,
+                            child: Column(
+                              children: [
+                                Image.asset(
+                                  'images/DataImg.png',
+                                  height: 50,
+                                ),
+                                SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.005),
+                                const Text(
+                                  'Data',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12.0,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           const Spacer(),
@@ -671,9 +722,26 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                 ),
                               );
                             },
-                            child: Image.asset(
-                              'images/AirtimeImg.png',
-                              height: 50,
+                            child: Column(
+                              children: [
+                                Image.asset(
+                                  'images/AirtimeImg.png',
+                                  height: 50,
+                                ),
+                                SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.005),
+                                const Text(
+                                  'Airtime',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12.0,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           const Spacer(),
@@ -687,9 +755,26 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                 ),
                               );
                             },
-                            child: Image.asset(
-                              'images/CableTVImg.png',
-                              height: 50,
+                            child: Column(
+                              children: [
+                                Image.asset(
+                                  'images/CableTVImg.png',
+                                  height: 50,
+                                ),
+                                SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.005),
+                                const Text(
+                                  'Cable TV',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12.0,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           const Spacer(),
@@ -704,9 +789,26 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                 ),
                               );
                             },
-                            child: Image.asset(
-                              'images/MoreImg.png',
-                              height: 50,
+                            child: Column(
+                              children: [
+                                Image.asset(
+                                  'images/MoreImg.png',
+                                  height: 50,
+                                ),
+                                SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.005),
+                                const Text(
+                                  'More',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12.0,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],

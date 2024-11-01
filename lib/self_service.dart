@@ -122,7 +122,7 @@ class _SelfServicePageState extends State<SelfServicePage>
                                 decoration: const BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.all(
-                                    Radius.circular(25.0),
+                                    Radius.circular(15.0),
                                   ),
                                   boxShadow: [
                                     BoxShadow(

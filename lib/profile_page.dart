@@ -242,67 +242,96 @@ class _ProfilePageState extends State<ProfilePage>
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      "Total Balance",
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontFamily: 'Inter',
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14.0,
-                                        color: Colors.white,
-                                      ),
-                                    ),
                                     Row(
                                       children: [
-                                        Image.asset(
-                                          'images/NairaImg.png',
-                                          height: 20,
-                                          color: Colors.white,
+                                        const Text(
+                                          "Total Balance",
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14.0,
+                                            color: Colors.white,
+                                          ),
                                         ),
-                                        if (userBalance != null)
-                                          Text(
-                                            double.tryParse(userBalance!) !=
-                                                    null
-                                                ? double.parse(userBalance!)
-                                                    .toStringAsFixed(2)
-                                                : "0.00",
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              fontFamily: 'Inter',
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 27.0,
-                                              color: Colors.white,
-                                            ),
-                                          )
-                                        else
-                                          const Text(
-                                            "0.00",
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                              fontFamily: 'Inter',
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 27.0,
-                                              color: Colors.white,
-                                            ),
-                                          )
+                                        IconButton(
+                                          icon: Icon(
+                                              _isBalanceVisible
+                                                  ? Icons.visibility
+                                                  : Icons.visibility_off,
+                                              color: Colors.white),
+                                          onPressed: () {
+                                            setState(() {
+                                              _isBalanceVisible =
+                                                  !_isBalanceVisible;
+                                            });
+                                          },
+                                        ),
                                       ],
                                     ),
+                                    if (_isBalanceVisible != false)
+                                      Row(
+                                        children: [
+                                          Image.asset(
+                                            'images/NairaImg.png',
+                                            height: 20,
+                                            color: Colors.white,
+                                          ),
+                                          if (userBalance != null)
+                                            Text(
+                                              double.tryParse(userBalance!) !=
+                                                      null
+                                                  ? double.parse(userBalance!)
+                                                      .toStringAsFixed(2)
+                                                  : "0.00",
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                fontFamily: 'Inter',
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 27.0,
+                                                color: Colors.white,
+                                              ),
+                                            )
+                                          else
+                                            const Text(
+                                              "0.00",
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                fontFamily: 'Inter',
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 27.0,
+                                                color: Colors.white,
+                                              ),
+                                            )
+                                        ],
+                                      )
+                                    else
+                                      const Text(
+                                        "****",
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontFamily: 'Inter',
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 27.0,
+                                          color: Colors.white,
+                                        ),
+                                      ),
                                   ],
                                 ),
                               ),
                               const Spacer(),
-                              IconButton(
-                                icon: Icon(
-                                    _isBalanceVisible
-                                        ? Icons.visibility
-                                        : Icons.visibility_off,
-                                    color: Colors.white),
-                                onPressed: () {
-                                  setState(() {
-                                    _isBalanceVisible = !_isBalanceVisible;
-                                  });
-                                },
-                              ),
+                              // IconButton(
+                              //   icon: Icon(
+                              //       _isBalanceVisible
+                              //           ? Icons.visibility
+                              //           : Icons.visibility_off,
+                              //       color: Colors.white),
+                              //   onPressed: () {
+                              //     setState(() {
+                              //       _isBalanceVisible = !_isBalanceVisible;
+                              //     });
+                              //   },
+                              // ),
                             ],
                           ),
                         ],
@@ -318,7 +347,7 @@ class _ProfilePageState extends State<ProfilePage>
                         decoration: const BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.all(
-                            Radius.circular(25.0),
+                            Radius.circular(15.0),
                           ),
                           boxShadow: [
                             BoxShadow(
@@ -406,7 +435,7 @@ class _ProfilePageState extends State<ProfilePage>
                         decoration: const BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.all(
-                            Radius.circular(25.0),
+                            Radius.circular(15.0),
                           ),
                           boxShadow: [
                             BoxShadow(

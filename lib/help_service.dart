@@ -89,7 +89,7 @@ class _HelpServicePageState extends State<HelpServicePage>
                                 decoration: const BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.all(
-                                    Radius.circular(25.0),
+                                    Radius.circular(15.0),
                                   ),
                                   boxShadow: [
                                     BoxShadow(
@@ -109,8 +109,8 @@ class _HelpServicePageState extends State<HelpServicePage>
                                       decoration: const BoxDecoration(
                                         color: Color(0xFFD9D9D9),
                                         borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(25.0),
-                                          topRight: Radius.circular(25.0),
+                                          topLeft: Radius.circular(15.0),
+                                          topRight: Radius.circular(15.0),
                                         ),
                                       ),
                                       child: const Text(
