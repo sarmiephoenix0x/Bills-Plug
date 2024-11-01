@@ -1,6 +1,8 @@
 import 'package:bills_plug/add_photo.dart';
+import 'package:bills_plug/airtime.dart';
 import 'package:bills_plug/airtime_to_cash.dart';
 import 'package:bills_plug/betting_wallet.dart';
+import 'package:bills_plug/data.dart';
 import 'package:bills_plug/data_pin.dart';
 import 'package:bills_plug/electricity_bill.dart';
 import 'package:bills_plug/exam_pin.dart';
@@ -288,9 +290,8 @@ class _ServicePageState extends State<ServicePage>
                                               context,
                                               MaterialPageRoute(
                                                 builder: (context) =>
-                                                    AirtimeAndDataPage(
+                                                    AirtimePage(
                                                   key: UniqueKey(),
-                                                  tabIndex: 0,
                                                 ),
                                               ),
                                             );
@@ -303,10 +304,8 @@ class _ServicePageState extends State<ServicePage>
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) =>
-                                                    AirtimeAndDataPage(
+                                                builder: (context) => DataPage(
                                                   key: UniqueKey(),
-                                                  tabIndex: 1,
                                                 ),
                                               ),
                                             );

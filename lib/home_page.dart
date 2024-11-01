@@ -1,6 +1,8 @@
 import 'package:bills_plug/add_money_old_users.dart';
 import 'package:bills_plug/add_photo.dart';
+import 'package:bills_plug/airtime.dart';
 import 'package:bills_plug/airtime_and_data_page.dart';
+import 'package:bills_plug/data.dart';
 import 'package:bills_plug/notification.dart';
 import 'package:bills_plug/service_page.dart';
 import 'package:bills_plug/transaction.dart';
@@ -354,7 +356,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => AddMoneyOldUsers(
+                                      builder: (context) => AddMoneyNewUsers(
                                         key: UniqueKey(),
                                       ),
                                     ),
@@ -680,9 +682,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => AirtimeAndDataPage(
+                                  builder: (context) => DataPage(
                                     key: UniqueKey(),
-                                    tabIndex: 1,
                                   ),
                                 ),
                               );
@@ -715,9 +716,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => AirtimeAndDataPage(
+                                  builder: (context) => AirtimePage(
                                     key: UniqueKey(),
-                                    tabIndex: 0,
                                   ),
                                 ),
                               );
