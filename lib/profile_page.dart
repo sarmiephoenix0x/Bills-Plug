@@ -16,6 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:bills_plug/referral_page.dart';
 import 'package:bills_plug/networking.dart';
+import 'package:bills_plug/billsplug_chat.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -551,7 +552,7 @@ class _ProfilePageState extends State<ProfilePage>
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => SelfServicePage(
+                                    builder: (context) => BillsplugChat(
                                       key: UniqueKey(),
                                     ),
                                   ),
