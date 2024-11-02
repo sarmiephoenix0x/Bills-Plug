@@ -14,9 +14,9 @@ class CableTVPage extends StatefulWidget {
 
 class CableTVPageState extends State<CableTVPage>
     with SingleTickerProviderStateMixin {
-  final FocusNode _phoneNumberFocusNode = FocusNode();
+  final FocusNode _iucNumberFocusNode = FocusNode();
 
-  final TextEditingController phoneNumberController = TextEditingController();
+  final TextEditingController iucNumberController = TextEditingController();
 
   List<String> imagePaths = [
     "images/AdImg.png",
@@ -45,6 +45,8 @@ class CableTVPageState extends State<CableTVPage>
   int? _selectedTimeRadioValue = -1;
   String startDateText = "dd/mm/yyyy";
   String endDateText = "dd/mm/yyyy";
+  String currentSubscriptionType = "";
+  String currentAmount = "";
 
   @override
   void initState() {
@@ -271,8 +273,8 @@ class CableTVPageState extends State<CableTVPage>
                                                       .height *
                                                   0.02),
                                           TextFormField(
-                                            controller: phoneNumberController,
-                                            focusNode: _phoneNumberFocusNode,
+                                            controller: iucNumberController,
+                                            focusNode: _iucNumberFocusNode,
                                             style: const TextStyle(
                                               fontSize: 16.0,
                                             ),
@@ -491,33 +493,62 @@ class CableTVPageState extends State<CableTVPage>
                                     backgroundColor:
                                         WidgetStateProperty.resolveWith<Color>(
                                       (Set<WidgetState> states) {
-                                        if (states
-                                            .contains(WidgetState.pressed)) {
-                                          return Colors.white;
+                                        if (planText != "Select a plan" &&
+                                            optionText != "Select an option" &&
+                                            iucNumberController.text
+                                                .trim()
+                                                .isNotEmpty) {
+                                          if (states
+                                              .contains(WidgetState.pressed)) {
+                                            return Colors.white;
+                                          }
+                                          return const Color(0xFF02AA03);
+                                        } else {
+                                          return Colors.grey;
                                         }
-                                        return const Color(0xFF02AA03);
                                       },
                                     ),
                                     foregroundColor:
                                         WidgetStateProperty.resolveWith<Color>(
                                       (Set<WidgetState> states) {
-                                        if (states
-                                            .contains(WidgetState.pressed)) {
-                                          return const Color(0xFF02AA03);
+                                        if (planText != "Select a plan" &&
+                                            optionText != "Select an option" &&
+                                            iucNumberController.text
+                                                .trim()
+                                                .isNotEmpty) {
+                                          if (states
+                                              .contains(WidgetState.pressed)) {
+                                            return const Color(0xFF02AA03);
+                                          }
+                                          return Colors.white;
+                                        } else {
+                                          return Colors.white;
                                         }
-                                        return Colors.white;
                                       },
                                     ),
                                     elevation:
                                         WidgetStateProperty.all<double>(4.0),
-                                    shape: WidgetStateProperty.all<
+                                    shape: WidgetStateProperty.resolveWith<
                                         RoundedRectangleBorder>(
-                                      const RoundedRectangleBorder(
-                                        side: BorderSide(
-                                            width: 3, color: Color(0xFF02AA03)),
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(15)),
-                                      ),
+                                      (Set<WidgetState> states) {
+                                        final bool isFilled = planText !=
+                                                "Select a plan" &&
+                                            optionText != "Select an option" &&
+                                            iucNumberController.text
+                                                .trim()
+                                                .isNotEmpty;
+
+                                        return RoundedRectangleBorder(
+                                          side: BorderSide(
+                                            width: 3,
+                                            color: isFilled
+                                                ? const Color(0xFF02AA03)
+                                                : Colors.grey,
+                                          ),
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(15)),
+                                        );
+                                      },
                                     ),
                                   ),
                                   child: const Text(
@@ -535,359 +566,401 @@ class CableTVPageState extends State<CableTVPage>
                       ),
                     ),
                   ),
-                  if (paymentSectionCableTVOpen == true)
-                    Positioned(
-                      bottom: 0,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12.0),
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(25.0),
-                            topRight: Radius.circular(25.0),
+                  Stack(
+                    children: [
+                      // Overlay to close the payment section when tapped
+                      if (paymentSectionCableTVOpen)
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              paymentSectionCableTVOpen = false;
+                            });
+                          },
+                          child: Container(
+                            // Make the overlay fill the screen and slightly transparent
+                            color: Colors.black.withOpacity(0.4),
+                            width: MediaQuery.of(context).size.width,
+                            height: MediaQuery.of(context).size.height,
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black26,
-                              spreadRadius: 2,
-                              blurRadius: 10,
-                            ),
-                          ],
                         ),
-                        child: SizedBox(
-                          width: MediaQuery.of(context).size.width,
-                          child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 20.0),
-                            child: Column(children: [
-                              SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      0.02),
-                              Padding(
+                      if (paymentSectionCableTVOpen == true)
+                        Positioned(
+                          bottom: 0,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 12.0),
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(25.0),
+                                topRight: Radius.circular(25.0),
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                  spreadRadius: 2,
+                                  blurRadius: 10,
+                                ),
+                              ],
+                            ),
+                            child: SizedBox(
+                              width: MediaQuery.of(context).size.width,
+                              child: Padding(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 20.0),
-                                child: Row(
-                                  children: [
-                                    InkWell(
-                                      onTap: () {
-                                        setState(() {
-                                          paymentSectionCableTVOpen = false;
-                                        });
-                                      },
-                                      child: Image.asset(
-                                        'images/CloseBut.png',
-                                        height: 25,
-                                      ),
-                                    ),
-                                    const Spacer(),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      0.03),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset(
-                                    'images/NairaImg.png',
-                                    height: 15,
-                                  ),
-                                  const Text(
-                                    '1,370.00',
-                                    style: TextStyle(
-                                      fontSize: 24,
-                                      fontFamily: 'Inter',
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      0.04),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Expanded(
-                                    flex: 5,
-                                    child: Text(
-                                      'Decoder',
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontFamily: 'Inter',
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  ),
-                                  const Spacer(),
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(55),
-                                    child: SizedBox(
-                                      width: (50 /
-                                              MediaQuery.of(context)
-                                                  .size
-                                                  .width) *
-                                          MediaQuery.of(context).size.width,
-                                      height: (50 /
-                                              MediaQuery.of(context)
-                                                  .size
-                                                  .height) *
-                                          MediaQuery.of(context).size.height,
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 7.0, horizontal: 7.0),
-                                        decoration: const BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(5.0),
-                                          ),
-                                        ),
-                                        child: Image.asset(
-                                          'images/GoTVImg.png',
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      0.02),
-                              const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Expanded(
-                                    flex: 5,
-                                    child: Text(
-                                      'Subscription Type',
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontFamily: 'Inter',
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  ),
-                                  Spacer(),
-                                  Expanded(
-                                    flex: 5,
-                                    child: Text(
-                                      'GOTV Supa Plus',
-                                      overflow: TextOverflow.ellipsis,
-                                      textAlign: TextAlign.end,
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontFamily: 'Inter',
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                  )
-                                ],
-                              ),
-                              SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      0.02),
-                              const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Expanded(
-                                    flex: 5,
-                                    child: Text(
-                                      'Phone Number',
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontFamily: 'Inter',
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  ),
-                                  Spacer(),
-                                  Expanded(
-                                    flex: 5,
-                                    child: Text(
-                                      '0905 525 9546',
-                                      overflow: TextOverflow.ellipsis,
-                                      textAlign: TextAlign.end,
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontFamily: 'Inter',
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      0.02),
-                              const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Expanded(
-                                    flex: 5,
-                                    child: Text(
-                                      'IUC Number',
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontFamily: 'Inter',
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  ),
-                                  Spacer(),
-                                  Expanded(
-                                    flex: 5,
-                                    child: Text(
-                                      '1234567890',
-                                      overflow: TextOverflow.ellipsis,
-                                      textAlign: TextAlign.end,
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontFamily: 'Inter',
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      0.05),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Image.asset(
-                                    "images/icons/AppIcon.png",
-                                    fit: BoxFit.contain,
-                                    width: 40,
-                                  ),
+                                child: Column(children: [
                                   SizedBox(
-                                      width: MediaQuery.of(context).size.width *
-                                          0.02),
-                                  Expanded(
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.02),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 20.0),
+                                    child: Row(
                                       children: [
-                                        const Text(
-                                          "Balance",
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontFamily: 'Inter',
-                                            fontSize: 16.0,
-                                            color: Colors.black,
+                                        InkWell(
+                                          onTap: () {
+                                            setState(() {
+                                              paymentSectionCableTVOpen = false;
+                                            });
+                                          },
+                                          child: Image.asset(
+                                            'images/CloseBut.png',
+                                            height: 25,
                                           ),
                                         ),
-                                        Row(
-                                          children: [
-                                            Image.asset(
-                                              'images/NairaImg.png',
-                                              height: 15,
-                                            ),
-                                            if (userBalance != null)
-                                              Text(
-                                                double.tryParse(userBalance!) !=
-                                                        null
-                                                    ? "(${double.parse(userBalance!).toStringAsFixed(2)})"
-                                                    : "(0.00)",
-                                                overflow: TextOverflow.ellipsis,
-                                                style: const TextStyle(
-                                                  fontFamily: 'Inter',
-                                                  fontSize: 16.0,
-                                                ),
-                                              )
-                                            else
-                                              const Text(
-                                                "(0.00)",
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
-                                                  fontFamily: 'Inter',
-                                                  fontSize: 16.0,
-                                                ),
-                                              )
-                                          ],
-                                        ),
+                                        const Spacer(),
                                       ],
                                     ),
                                   ),
-                                  const Spacer(),
-                                ],
-                              ),
-                              SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      0.02),
-                              Container(
-                                width: double.infinity,
-                                height:
-                                    (60 / MediaQuery.of(context).size.height) *
+                                  SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.03),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Image.asset(
+                                        'images/NairaImg.png',
+                                        height: 15,
+                                      ),
+                                      Text(
+                                        NumberFormat('#,###.##').format(
+                                            double.parse(currentAmount
+                                                .replaceAll(',', ''))),
+                                        style: const TextStyle(
+                                          fontSize: 24,
+                                          fontFamily: 'Inter',
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.04),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Expanded(
+                                        flex: 5,
+                                        child: Text(
+                                          'Decoder',
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontFamily: 'Inter',
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ),
+                                      const Spacer(),
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(55),
+                                        child: SizedBox(
+                                          width: (50 /
+                                                  MediaQuery.of(context)
+                                                      .size
+                                                      .width) *
+                                              MediaQuery.of(context).size.width,
+                                          height: (50 /
+                                                  MediaQuery.of(context)
+                                                      .size
+                                                      .height) *
+                                              MediaQuery.of(context)
+                                                  .size
+                                                  .height,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 7.0, horizontal: 7.0),
+                                            decoration: const BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius: BorderRadius.all(
+                                                Radius.circular(5.0),
+                                              ),
+                                            ),
+                                            child: Image.asset(
+                                              'images/GoTVImg.png',
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.02),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Expanded(
+                                        flex: 5,
+                                        child: Text(
+                                          'Subscription Type',
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontFamily: 'Inter',
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ),
+                                      const Spacer(),
+                                      Expanded(
+                                        flex: 5,
+                                        child: Text(
+                                          currentSubscriptionType,
+                                          overflow: TextOverflow.ellipsis,
+                                          textAlign: TextAlign.end,
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontFamily: 'Inter',
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                  SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.02),
+                                  const Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Expanded(
+                                        flex: 5,
+                                        child: Text(
+                                          'Phone Number',
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontFamily: 'Inter',
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ),
+                                      Spacer(),
+                                      Expanded(
+                                        flex: 5,
+                                        child: Text(
+                                          '0905 525 9546',
+                                          overflow: TextOverflow.ellipsis,
+                                          textAlign: TextAlign.end,
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontFamily: 'Inter',
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.02),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Expanded(
+                                        flex: 5,
+                                        child: Text(
+                                          'IUC Number',
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontFamily: 'Inter',
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ),
+                                      const Spacer(),
+                                      Expanded(
+                                        flex: 5,
+                                        child: Text(
+                                          iucNumberController.text.trim(),
+                                          overflow: TextOverflow.ellipsis,
+                                          textAlign: TextAlign.end,
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontFamily: 'Inter',
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.05),
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Image.asset(
+                                        "images/icons/AppIcon.png",
+                                        fit: BoxFit.contain,
+                                        width: 40,
+                                      ),
+                                      SizedBox(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.02),
+                                      Expanded(
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            const Text(
+                                              "Balance",
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                fontFamily: 'Inter',
+                                                fontSize: 16.0,
+                                                color: Colors.black,
+                                              ),
+                                            ),
+                                            Row(
+                                              children: [
+                                                Image.asset(
+                                                  'images/NairaImg.png',
+                                                  height: 15,
+                                                ),
+                                                if (userBalance != null)
+                                                  Text(
+                                                    double.tryParse(
+                                                                userBalance!) !=
+                                                            null
+                                                        ? "(${double.parse(userBalance!).toStringAsFixed(2)})"
+                                                        : "(0.00)",
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: const TextStyle(
+                                                      fontFamily: 'Inter',
+                                                      fontSize: 16.0,
+                                                    ),
+                                                  )
+                                                else
+                                                  const Text(
+                                                    "(0.00)",
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                      fontFamily: 'Inter',
+                                                      fontSize: 16.0,
+                                                    ),
+                                                  )
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const Spacer(),
+                                    ],
+                                  ),
+                                  SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.02),
+                                  Container(
+                                    width: double.infinity,
+                                    height: (60 /
+                                            MediaQuery.of(context)
+                                                .size
+                                                .height) *
                                         MediaQuery.of(context).size.height,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20.0),
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      paymentSectionCableTVOpen = false;
-                                      paymentSuccessful = true;
-                                    });
-                                  },
-                                  style: ButtonStyle(
-                                    backgroundColor:
-                                        WidgetStateProperty.resolveWith<Color>(
-                                      (Set<WidgetState> states) {
-                                        if (states
-                                            .contains(WidgetState.pressed)) {
-                                          return Colors.white;
-                                        }
-                                        return const Color(0xFF02AA03);
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 20.0),
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          paymentSectionCableTVOpen = false;
+                                          paymentSuccessful = true;
+                                        });
                                       },
-                                    ),
-                                    foregroundColor:
-                                        WidgetStateProperty.resolveWith<Color>(
-                                      (Set<WidgetState> states) {
-                                        if (states
-                                            .contains(WidgetState.pressed)) {
-                                          return const Color(0xFF02AA03);
-                                        }
-                                        return Colors.white;
-                                      },
-                                    ),
-                                    elevation:
-                                        WidgetStateProperty.all<double>(4.0),
-                                    shape: WidgetStateProperty.all<
-                                        RoundedRectangleBorder>(
-                                      const RoundedRectangleBorder(
-                                        side: BorderSide(
-                                            width: 3, color: Color(0xFF02AA03)),
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(15)),
+                                      style: ButtonStyle(
+                                        backgroundColor: WidgetStateProperty
+                                            .resolveWith<Color>(
+                                          (Set<WidgetState> states) {
+                                            if (states.contains(
+                                                WidgetState.pressed)) {
+                                              return Colors.white;
+                                            }
+                                            return const Color(0xFF02AA03);
+                                          },
+                                        ),
+                                        foregroundColor: WidgetStateProperty
+                                            .resolveWith<Color>(
+                                          (Set<WidgetState> states) {
+                                            if (states.contains(
+                                                WidgetState.pressed)) {
+                                              return const Color(0xFF02AA03);
+                                            }
+                                            return Colors.white;
+                                          },
+                                        ),
+                                        elevation:
+                                            WidgetStateProperty.all<double>(
+                                                4.0),
+                                        shape: WidgetStateProperty.all<
+                                            RoundedRectangleBorder>(
+                                          const RoundedRectangleBorder(
+                                            side: BorderSide(
+                                                width: 3,
+                                                color: Color(0xFF02AA03)),
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(15)),
+                                          ),
+                                        ),
+                                      ),
+                                      child: const Text(
+                                        'Pay',
+                                        style: TextStyle(
+                                          fontFamily: 'Inter',
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                  child: const Text(
-                                    'Pay',
-                                    style: TextStyle(
-                                      fontFamily: 'Inter',
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
+                                  SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.02),
+                                ]),
                               ),
-                              SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      0.02),
-                            ]),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
+                    ],
+                  ),
                   if (selectPlan)
                     Stack(
                       children: [
@@ -1099,9 +1172,9 @@ class CableTVPageState extends State<CableTVPage>
                                           'images/NairaImg.png',
                                           height: 20,
                                         ),
-                                        const Text(
-                                          '1,370.00',
-                                          style: TextStyle(
+                                        Text(
+                                          currentAmount,
+                                          style: const TextStyle(
                                             fontSize: 24,
                                             fontFamily: 'Inter',
                                             fontWeight: FontWeight.bold,
@@ -1701,6 +1774,8 @@ class CableTVPageState extends State<CableTVPage>
   }
 
   Widget radioButton(String text, int value) {
+    RegExp exp = RegExp(r"(.+)\s\(NGN([0-9,]+)\.00\)");
+    Match? match = exp.firstMatch(text);
     return RadioListTile<int>(
       value: value,
       activeColor: const Color(0xFF02AA03),
@@ -1709,6 +1784,10 @@ class CableTVPageState extends State<CableTVPage>
         setState(() {
           _selectedPlanRadioValue = value!;
           planText = text;
+          if (match != null) {
+            currentSubscriptionType = match.group(1) ?? '';
+            currentAmount = match.group(2) ?? '';
+          }
         });
       },
       title: Text(
