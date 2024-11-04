@@ -88,8 +88,8 @@ class AirtimePageState extends State<AirtimePage>
 
   @override
   void dispose() {
-    super.dispose();
     _controller.dispose();
+    super.dispose();
   }
 
   void handleOtpInputComplete(String code) {

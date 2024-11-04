@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 
 class DataPage extends StatefulWidget {
   const DataPage({super.key});
@@ -59,10 +60,25 @@ class DataPageState extends State<DataPage>
   List<Map<String, dynamic>> plans = [];
   late Future<List<Plan>> futurePlans;
   final storage = const FlutterSecureStorage();
+  bool isLoading = false;
+  late AnimationController _controller;
+  late Animation<double> _animation;
+  String pinCode = "";
+  String networkName = "MTN";
+  bool inputPin = false;
+  String planID = "0";
 
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )..repeat(reverse: true);
+
+    _animation = Tween<double>(begin: 0.4, end: 0.6).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
     futurePlans = fetchPlans();
     _initializePrefs();
   }
@@ -82,10 +98,18 @@ class DataPageState extends State<DataPage>
     }
   }
 
-  // @override
-  // void dispose() {
-  //   super.dispose();
-  // }
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void handleOtpInputComplete(String code) {
+    setState(() {
+      pinCode = code;
+    });
+    _submitDataPurchase(pinCode);
+  }
 
   Future<List<Plan>> fetchPlans() async {
     final accessToken = await storage.read(key: 'billsplug_accessToken');
@@ -105,8 +129,63 @@ class DataPageState extends State<DataPage>
     }
   }
 
+  Future<void> _submitDataPurchase(String pin) async {
+    setState(() {
+      isLoading = true;
+    });
+    final accessToken = await storage.read(key: 'billsplug_accessToken');
+    final url = Uri.parse("https://glad.payguru.com.ng/api/data/purchase");
+    final requestBody = {
+      "phone_number": phoneNumberController.text.trim(),
+      "network": networkName,
+      "plan_id": planID,
+      "da": 0,
+      "pin": pin,
+    };
+
+    try {
+      // Perform the POST request with the required fields
+      final response =
+          await http.post(url, body: json.encode(requestBody), headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      });
+
+      if (response.statusCode == 200) {
+        setState(() {
+          isLoading = false;
+        });
+        inputPin = false;
+        paymentSuccessful = true;
+        print("Airtime purchase successful");
+        // handle successful response here
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+        final errors = json.decode(response.body)['errors'];
+        print("Error: $errors");
+        // handle error response here
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      print("An error occurred: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (currentNetwork == 0) {
+      networkName = "MTN";
+    } else if (currentNetwork == 1) {
+      networkName = "AIRTEL";
+    } else if (currentNetwork == 2) {
+      networkName = "GLO";
+    } else if (currentNetwork == 3) {
+      networkName = "9MOBILE";
+    }
     return OrientationBuilder(
       builder: (context, orientation) {
         return Scaffold(
@@ -335,8 +414,8 @@ class DataPageState extends State<DataPage>
                                     planWidgets = plans
                                         .where((plan) => plan.name.contains(
                                             "MTN")) // Filtering based on your logic
-                                        .map((plan) => planOptions(
-                                            plan.name, plan.userPrice))
+                                        .map((plan) => planOptions(plan.name,
+                                            plan.userPrice, plan.planId))
                                         .toList();
                                   } else {
                                     planWidgets = [];
@@ -812,7 +891,7 @@ class DataPageState extends State<DataPage>
                                       onPressed: () {
                                         setState(() {
                                           paymentSectionDataOpen = false;
-                                          paymentSuccessful = true;
+                                          inputPin = true;
                                         });
                                       },
                                       style: ButtonStyle(
@@ -1057,6 +1136,110 @@ class DataPageState extends State<DataPage>
                         ),
                       ],
                     ),
+                  if (inputPin)
+                    Stack(
+                      children: [
+                        ModalBarrier(
+                          dismissible: false,
+                          color: Colors.black.withOpacity(0.5),
+                        ),
+                        PopScope(
+                          canPop: false,
+                          onPopInvokedWithResult: (didPop, dynamic result) {
+                            if (!didPop) {
+                              setState(() {
+                                inputPin = false;
+                              });
+                            }
+                          },
+                          child: Center(
+                            child: SingleChildScrollView(
+                              child: Container(
+                                margin: const EdgeInsets.symmetric(
+                                    horizontal: 20.0), // Centered padding
+                                padding: const EdgeInsets.all(
+                                    16.0), // Inner padding for content
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(25.0),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.black26,
+                                      spreadRadius: 2,
+                                      blurRadius: 10,
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize
+                                      .min, // Expands only as needed
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.03),
+                                    const Text(
+                                      'Input PIN',
+                                      style: TextStyle(
+                                        fontSize: 24,
+                                        fontFamily: 'Inter',
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.04),
+                                    OtpTextField(
+                                      numberOfFields: 4,
+                                      fieldWidth: (50 /
+                                              MediaQuery.of(context)
+                                                  .size
+                                                  .width) *
+                                          MediaQuery.of(context).size.width,
+                                      focusedBorderColor: const Color(
+                                          0xFF02AA03), // Border color when focused
+                                      enabledBorderColor: Colors.grey,
+                                      borderColor: Colors.grey,
+                                      showFieldAsBox: true,
+                                      onCodeChanged: (String code) {
+                                        // Handle real-time OTP input changes
+                                      },
+                                      onSubmit: (String code) =>
+                                          handleOtpInputComplete(code),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  if (isLoading)
+                    Positioned.fill(
+                      child: AbsorbPointer(
+                        absorbing:
+                            true, // Blocks interaction with widgets behind
+                        child: Container(
+                          color: Colors.black
+                              .withOpacity(0.5), // Semi-transparent background
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ScaleTransition(
+                                scale: _animation,
+                                child: Image.asset(
+                                  'images/Loading.png',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -1176,7 +1359,7 @@ class DataPageState extends State<DataPage>
     );
   }
 
-  Widget planOptions(String text, String amount) {
+  Widget planOptions(String text, String amount, String planId) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
       child: InkWell(
@@ -1184,6 +1367,7 @@ class DataPageState extends State<DataPage>
           setState(() {
             currentPlanOptionText = text;
             currentAmount = amount;
+            planId = planID;
           });
         },
         child: Container(
@@ -1277,13 +1461,15 @@ class DataPageState extends State<DataPage>
 class Plan {
   final String name;
   final String userPrice;
+  final String planId;
 
-  Plan({required this.name, required this.userPrice});
+  Plan({required this.planId, required this.name, required this.userPrice});
 
   factory Plan.fromJson(Map<String, dynamic> json) {
     return Plan(
       name: json['name'],
       userPrice: json['user_price'],
+      planId: json['plan_id'] ?? "0",
     );
   }
 }
