@@ -90,13 +90,14 @@ class TransactionPageState extends State<TransactionPage>
 
         // You can also log or process transactions here if needed
         for (var item in newTransactions) {
+          int id = item['id'] ?? 0;
           String type = item['trx_type'] ?? 'Unknown'; // Handle potential null
           String timeStamp =
               item['created_at'] ?? 'No timestamp'; // Handle potential null
           String amount = item['amount'] ?? '0.00'; // Handle potential null
 
           // Print the transaction for debugging
-          print('Transaction: $type, $timeStamp, $amount');
+          print('Transaction: $id, $type, $timeStamp, $amount');
         }
 
         setState(() {
@@ -316,6 +317,7 @@ class TransactionPageState extends State<TransactionPage>
                                           MediaQuery.of(context).size.height *
                                               0.04),
                                   ..._transactions.map((transaction) {
+                                    int id = transaction['id'] ?? 0;
                                     String type = transaction['trx_type'] ??
                                         'Unknown'; // Access the raw data directly
                                     String timeStamp = transaction[
@@ -325,7 +327,8 @@ class TransactionPageState extends State<TransactionPage>
                                         '0.00'; // Handle potential null
 
                                     return transactionWidget(
-                                      'images/MTNImg.png', // You can choose to update this based on transaction type
+                                      id,
+                                      'images/MTNImg.png',
                                       type,
                                       timeStamp,
                                       amount,
@@ -413,6 +416,7 @@ class TransactionPageState extends State<TransactionPage>
                                           MediaQuery.of(context).size.height *
                                               0.04),
                                   transactionWidget(
+                                      0,
                                       'images/MTNImg.png',
                                       '10.0GB MTN Data',
                                       '08 Feb, 12:12 PM',
@@ -496,6 +500,7 @@ class TransactionPageState extends State<TransactionPage>
                                           MediaQuery.of(context).size.height *
                                               0.04),
                                   transactionWidget(
+                                      0,
                                       'images/GoTVImg.png',
                                       'Subscription',
                                       '08 Feb, 12:12 PM',
@@ -1064,7 +1069,7 @@ class TransactionPageState extends State<TransactionPage>
   }
 
   Widget transactionWidget(
-      String img, String type, String timeStamp, String amount) {
+      int id, String img, String type, String timeStamp, String amount) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
       child: InkWell(
@@ -1074,6 +1079,10 @@ class TransactionPageState extends State<TransactionPage>
             MaterialPageRoute(
               builder: (context) => TransactionDetails(
                 key: UniqueKey(),
+                id: id,
+                type: type,
+                amount: amount,
+                timeStamp: timeStamp,
               ),
             ),
           );

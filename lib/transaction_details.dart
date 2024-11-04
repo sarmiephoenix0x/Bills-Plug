@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
 
 class TransactionDetails extends StatefulWidget {
-  const TransactionDetails({super.key});
+  final int id;
+  final String type;
+  final String amount;
+  final String timeStamp;
+  const TransactionDetails(
+      {super.key,
+      required this.id,
+      required this.type,
+      required this.amount,
+      required this.timeStamp});
 
   @override
   State<TransactionDetails> createState() => _TransactionDetailsState();
@@ -11,6 +20,21 @@ class _TransactionDetailsState extends State<TransactionDetails>
     with TickerProviderStateMixin {
   String? profileImg;
   bool network = true;
+
+  String _formatValue(String value) {
+    // Try to parse the value as a number
+    final number = double.tryParse(value);
+
+    // Check if the value has a decimal part and format only if it does
+    if (number != null) {
+      return number % 1 != 0
+          ? number.toStringAsFixed(2)
+          : number.toStringAsFixed(0);
+    }
+
+    // Return the original value if it's not a number
+    return value;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -165,14 +189,14 @@ class _TransactionDetailsState extends State<TransactionDetails>
                                     Padding(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 20.0, vertical: 12.0),
-                                      child: basicInfo(
-                                          "Transaction ID", "12730016", false),
+                                      child: basicInfo("Transaction ID",
+                                          widget.id.toString(), false),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 20.0, vertical: 12.0),
                                       child: basicInfo(
-                                          "Amount", "12,500.00", true),
+                                          "Amount", widget.amount, true),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.symmetric(
@@ -191,7 +215,7 @@ class _TransactionDetailsState extends State<TransactionDetails>
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 20.0, vertical: 12.0),
                                         child: basicInfo(
-                                            "Data Type", "Corporate", false),
+                                            "Data Type", widget.type, false),
                                       ),
                                       Padding(
                                         padding: const EdgeInsets.symmetric(
@@ -222,8 +246,8 @@ class _TransactionDetailsState extends State<TransactionDetails>
                                     Padding(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 20.0, vertical: 12.0),
-                                      child: basicInfo("Date",
-                                          "08 Feb, 2024 12:12PM", false),
+                                      child: basicInfo(
+                                          "Date", widget.timeStamp, false),
                                     ),
                                   ],
                                 ),
@@ -379,25 +403,30 @@ class _TransactionDetailsState extends State<TransactionDetails>
             ),
           ),
           const Spacer(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              if (amount == true)
-                Image.asset(
-                  'images/NairaImg.png',
-                  height: 15,
-                ),
-              if (value != "")
-                Text(
-                  value,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontFamily: 'Inter',
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15.0,
+          Expanded(
+            flex: 5,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (amount == true)
+                  Image.asset(
+                    'images/NairaImg.png',
+                    height: 15,
                   ),
-                ),
-            ],
+                if (value != "")
+                  Flexible(
+                    child: Text(
+                      _formatValue(value),
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15.0,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
           if (img != "")
             ClipRRect(

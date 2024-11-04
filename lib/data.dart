@@ -139,7 +139,6 @@ class DataPageState extends State<DataPage>
       "phone_number": phoneNumberController.text.trim(),
       "network": networkName,
       "plan_id": planID,
-      "da": 0,
       "pin": pin,
     };
 
