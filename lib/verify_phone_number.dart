@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bills_plug/create_new_password.dart';
+import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 
 class VerifyPhoneNumber extends StatefulWidget {
   const VerifyPhoneNumber({super.key});
@@ -11,74 +12,30 @@ class VerifyPhoneNumber extends StatefulWidget {
 
 class VerifyPhoneNumberState extends State<VerifyPhoneNumber>
     with SingleTickerProviderStateMixin {
-  final int _numberOfFields = 4;
-  List<TextEditingController> controllers = [];
-  List<FocusNode> focusNodes = [];
-  List<String> inputs = List.generate(4, (index) => '');
+  String otpCode = "";
 
   @override
   void initState() {
     super.initState();
-    controllers =
-        List.generate(_numberOfFields, (index) => TextEditingController());
-    focusNodes = List.generate(_numberOfFields, (index) => FocusNode());
-    focusNodes[0].requestFocus(); // Focus on the first field initially
-
-    // for (var i = 0; i < _numberOfFields; i++) {
-    //   controllers[i].addListener(() => onKeyPressed(controllers[i].text, i));
-    // }
   }
 
   @override
   void dispose() {
-    for (var controller in controllers) {
-      controller.dispose();
-    }
-    for (var focusNode in focusNodes) {
-      focusNode.dispose();
-    }
     super.dispose();
   }
 
-  void onKeyPressed(String value, int index) {
+  void handleOtpInputComplete(String code) {
     setState(() {
-      if (value.isEmpty) {
-        // Handle backspace
-        for (int i = inputs.length - 1; i >= 0; i--) {
-          if (inputs[i].isNotEmpty) {
-            inputs[i] = '';
-            if (i > 0) {
-              FocusScope.of(context).requestFocus(focusNodes[i - 1]);
-            }
-            controllers[i].selection =
-                TextSelection.collapsed(offset: controllers[i].text.length);
-            break;
-          }
-        }
-      } else if (index != -1) {
-        // Handle text input
-        inputs[index] = value;
-        controllers[index].selection =
-            TextSelection.collapsed(offset: controllers[index].text.length);
-
-        if (index < _numberOfFields - 1) {
-          // Move focus to the next field
-          FocusScope.of(context).requestFocus(focusNodes[index + 1]);
-        }
-
-        bool allFieldsFilled = inputs.every((element) => element.isNotEmpty);
-        if (allFieldsFilled) {
-          // Handle all fields filled case
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (context) => CreateAccount_Profile_Page(
-          //         key: UniqueKey(), isLoadedFromFirstPage: "false"),
-          //   ),
-          // );
-        }
-      }
+      otpCode = code;
     });
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CreateNewPassword(
+          key: UniqueKey(),
+        ),
+      ),
+    );
   }
 
   @override
@@ -177,53 +134,21 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumber>
                                       height:
                                           MediaQuery.of(context).size.height *
                                               0.03),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children:
-                                        List.generate(_numberOfFields, (index) {
-                                      return SizedBox(
-                                        width: 50,
-                                        child: TextFormField(
-                                          controller: controllers[index],
-                                          focusNode: focusNodes[index],
-                                          keyboardType: TextInputType.number,
-                                          textAlign: TextAlign.center,
-                                          maxLength: 1,
-                                          decoration: InputDecoration(
-                                            counterText: '',
-                                            border: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                            ),
-                                            focusedBorder: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                              borderSide: const BorderSide(
-                                                color: Color(0xFF02AA03),
-                                              ),
-                                            ),
-                                          ),
-                                          cursorColor: const Color(0xFF02AA03),
-                                          enabled: index == 0 ||
-                                              controllers[index - 1]
-                                                  .text
-                                                  .isNotEmpty,
-                                          onChanged: (value) {
-                                            if (value.length == 1) {
-                                              onKeyPressed(value, index);
-                                            } else if (value.isEmpty) {
-                                              onKeyPressed(value, index);
-                                            }
-                                          },
-                                          onFieldSubmitted: (value) {
-                                            if (value.isNotEmpty) {
-                                              onKeyPressed(value, index);
-                                            }
-                                          },
-                                        ),
-                                      );
-                                    }),
+                                  OtpTextField(
+                                    numberOfFields: 4,
+                                    fieldWidth: (50 /
+                                            MediaQuery.of(context).size.width) *
+                                        MediaQuery.of(context).size.width,
+                                    focusedBorderColor: const Color(
+                                        0xFF02AA03), // Border color when focused
+                                    enabledBorderColor: Colors.grey,
+                                    borderColor: Colors.grey,
+                                    showFieldAsBox: true,
+                                    onCodeChanged: (String code) {
+                                      // Handle real-time OTP input changes
+                                    },
+                                    onSubmit: (String code) =>
+                                        handleOtpInputComplete(code),
                                   ),
                                   SizedBox(
                                       height:
@@ -259,68 +184,68 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumber>
                                       height:
                                           MediaQuery.of(context).size.height *
                                               0.05),
-                                  Container(
-                                    width: double.infinity,
-                                    height: (60 /
-                                            MediaQuery.of(context)
-                                                .size
-                                                .height) *
-                                        MediaQuery.of(context).size.height,
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 20.0),
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                CreateNewPassword(
-                                              key: UniqueKey(),
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      style: ButtonStyle(
-                                        backgroundColor: WidgetStateProperty
-                                            .resolveWith<Color>(
-                                          (Set<WidgetState> states) {
-                                            if (states.contains(
-                                                WidgetState.pressed)) {
-                                              return Colors.white;
-                                            }
-                                            return const Color(0xFF02AA03);
-                                          },
-                                        ),
-                                        foregroundColor: WidgetStateProperty
-                                            .resolveWith<Color>(
-                                          (Set<WidgetState> states) {
-                                            if (states.contains(
-                                                WidgetState.pressed)) {
-                                              return const Color(0xFF02AA03);
-                                            }
-                                            return Colors.white;
-                                          },
-                                        ),
-                                        elevation:
-                                            WidgetStateProperty.all<double>(
-                                                4.0),
-                                        shape: WidgetStateProperty.all<
-                                            RoundedRectangleBorder>(
-                                          const RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(15)),
-                                          ),
-                                        ),
-                                      ),
-                                      child: const Text(
-                                        'Confirm',
-                                        style: TextStyle(
-                                          fontFamily: 'Inter',
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
+                                  // Container(
+                                  //   width: double.infinity,
+                                  //   height: (60 /
+                                  //           MediaQuery.of(context)
+                                  //               .size
+                                  //               .height) *
+                                  //       MediaQuery.of(context).size.height,
+                                  //   padding: const EdgeInsets.symmetric(
+                                  //       horizontal: 20.0),
+                                  //   child: ElevatedButton(
+                                  //     onPressed: () {
+                                  //       Navigator.push(
+                                  //         context,
+                                  //         MaterialPageRoute(
+                                  //           builder: (context) =>
+                                  //               CreateNewPassword(
+                                  //             key: UniqueKey(),
+                                  //           ),
+                                  //         ),
+                                  //       );
+                                  //     },
+                                  //     style: ButtonStyle(
+                                  //       backgroundColor: WidgetStateProperty
+                                  //           .resolveWith<Color>(
+                                  //         (Set<WidgetState> states) {
+                                  //           if (states.contains(
+                                  //               WidgetState.pressed)) {
+                                  //             return Colors.white;
+                                  //           }
+                                  //           return const Color(0xFF02AA03);
+                                  //         },
+                                  //       ),
+                                  //       foregroundColor: WidgetStateProperty
+                                  //           .resolveWith<Color>(
+                                  //         (Set<WidgetState> states) {
+                                  //           if (states.contains(
+                                  //               WidgetState.pressed)) {
+                                  //             return const Color(0xFF02AA03);
+                                  //           }
+                                  //           return Colors.white;
+                                  //         },
+                                  //       ),
+                                  //       elevation:
+                                  //           WidgetStateProperty.all<double>(
+                                  //               4.0),
+                                  //       shape: WidgetStateProperty.all<
+                                  //           RoundedRectangleBorder>(
+                                  //         const RoundedRectangleBorder(
+                                  //           borderRadius: BorderRadius.all(
+                                  //               Radius.circular(15)),
+                                  //         ),
+                                  //       ),
+                                  //     ),
+                                  //     child: const Text(
+                                  //       'Confirm',
+                                  //       style: TextStyle(
+                                  //         fontFamily: 'Inter',
+                                  //         fontWeight: FontWeight.bold,
+                                  //       ),
+                                  //     ),
+                                  //   ),
+                                  // ),
                                 ],
                               ),
                             ),

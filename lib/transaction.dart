@@ -1,5 +1,8 @@
 import 'package:bills_plug/transaction_details.dart';
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class TransactionPage extends StatefulWidget {
   const TransactionPage({super.key});
@@ -35,16 +38,103 @@ class TransactionPageState extends State<TransactionPage>
 
   TabController? _tabController;
 
+  final List<Map<String, dynamic>> _transactions = [];
+  bool _isLoading = false;
+  int _currentPage = 1;
+  int _totalPages = 1;
+  final ScrollController _scrollController = ScrollController();
+  final storage = const FlutterSecureStorage();
+
   @override
   void initState() {
     super.initState();
+    _fetchTransactions();
     _tabController = TabController(length: 10, vsync: this);
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        _fetchTransactions();
+      }
+    });
   }
 
   @override
   void dispose() {
     super.dispose();
     _tabController?.dispose();
+    _scrollController.dispose();
+  }
+
+  Future<void> _fetchTransactions() async {
+    // Check if we're already loading or if we've fetched all pages
+    if (_isLoading || _currentPage > _totalPages) return;
+
+    setState(() {
+      _isLoading = true; // Indicate loading state
+    });
+
+    try {
+      final data = await fetchTransactions(_currentPage);
+
+      // Check if the 'data' key exists and is a List
+      if (data['data'] != null && data['data'] is List) {
+        _totalPages = data['pagination']['total_pages'];
+
+        // Cast newTransactions as List<Map<String, dynamic>>
+        final List<Map<String, dynamic>> newTransactions =
+            List<Map<String, dynamic>>.from(data['data']);
+
+        // Update the transaction list with new transactions
+        _transactions.addAll(
+            newTransactions); // Combine new transactions into the existing list
+
+        // You can also log or process transactions here if needed
+        for (var item in newTransactions) {
+          String type = item['trx_type'] ?? 'Unknown'; // Handle potential null
+          String timeStamp =
+              item['created_at'] ?? 'No timestamp'; // Handle potential null
+          String amount = item['amount'] ?? '0.00'; // Handle potential null
+
+          // Print the transaction for debugging
+          print('Transaction: $type, $timeStamp, $amount');
+        }
+
+        setState(() {
+          _currentPage++; // Increment the current page for the next fetch
+          _isLoading = false; // Reset loading state
+        });
+      } else {
+        print('Invalid response structure: $data');
+        setState(() {
+          _isLoading = false; // Reset loading state on invalid response
+        });
+      }
+    } catch (error) {
+      setState(() {
+        _isLoading = false; // Reset loading state on error
+      });
+      print('Error fetching transactions: $error');
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchTransactions(int page) async {
+    // Fetch the access token from storage
+    final accessToken = await storage.read(key: 'billsplug_accessToken');
+
+    final response = await http.post(
+      Uri.parse('http://glad.payguru.com.ng/api/transactions'),
+      body: json.encode({'page': page}),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken', // Add the token to the headers
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body); // Decode the response body
+    } else {
+      throw Exception('Failed to load transactions: ${response.body}');
+    }
   }
 
   @override
@@ -149,6 +239,7 @@ class TransactionPageState extends State<TransactionPage>
                             controller: _tabController,
                             children: [
                               ListView(
+                                controller: _scrollController,
                                 children: [
                                   SizedBox(
                                       height:
@@ -224,8 +315,25 @@ class TransactionPageState extends State<TransactionPage>
                                       height:
                                           MediaQuery.of(context).size.height *
                                               0.04),
-                                  transaction('images/MTNImg.png', 'Airtime',
-                                      '08 Feb, 12:12 PM', '1500.00'),
+                                  ..._transactions.map((transaction) {
+                                    String type = transaction['trx_type'] ??
+                                        'Unknown'; // Access the raw data directly
+                                    String timeStamp = transaction[
+                                            'created_at'] ??
+                                        'No timestamp'; // Handle potential null
+                                    String amount = transaction['amount'] ??
+                                        '0.00'; // Handle potential null
+
+                                    return transactionWidget(
+                                      'images/MTNImg.png', // You can choose to update this based on transaction type
+                                      type,
+                                      timeStamp,
+                                      amount,
+                                    );
+                                  }).toList(),
+                                  if (_isLoading)
+                                    const Center(
+                                        child: CircularProgressIndicator()),
                                 ],
                               ),
                               ListView(
@@ -304,7 +412,7 @@ class TransactionPageState extends State<TransactionPage>
                                       height:
                                           MediaQuery.of(context).size.height *
                                               0.04),
-                                  transaction(
+                                  transactionWidget(
                                       'images/MTNImg.png',
                                       '10.0GB MTN Data',
                                       '08 Feb, 12:12 PM',
@@ -387,7 +495,7 @@ class TransactionPageState extends State<TransactionPage>
                                       height:
                                           MediaQuery.of(context).size.height *
                                               0.04),
-                                  transaction(
+                                  transactionWidget(
                                       'images/GoTVImg.png',
                                       'Subscription',
                                       '08 Feb, 12:12 PM',
@@ -955,7 +1063,8 @@ class TransactionPageState extends State<TransactionPage>
     );
   }
 
-  Widget transaction(String img, String type, String timeStamp, String amount) {
+  Widget transactionWidget(
+      String img, String type, String timeStamp, String amount) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
       child: InkWell(
@@ -1077,6 +1186,29 @@ class TransactionPageState extends State<TransactionPage>
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Text(name),
       ),
+    );
+  }
+}
+
+class Transaction {
+  final int id;
+  final String type;
+  final String timeStamp;
+  final String amount;
+
+  Transaction({
+    required this.id,
+    required this.type,
+    required this.timeStamp,
+    required this.amount,
+  });
+
+  factory Transaction.fromJson(Map<String, dynamic> json) {
+    return Transaction(
+      id: json['id'],
+      type: json['type'],
+      timeStamp: json['created_at'],
+      amount: json['amount'],
     );
   }
 }

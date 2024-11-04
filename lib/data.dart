@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class DataPage extends StatefulWidget {
   const DataPage({super.key});
@@ -54,10 +56,14 @@ class DataPageState extends State<DataPage>
   String currentPlanOptionText = "";
   int currentNetwork = 0;
   String currentAmount = "0.00";
+  List<Map<String, dynamic>> plans = [];
+  late Future<List<Plan>> futurePlans;
+  final storage = const FlutterSecureStorage();
 
   @override
   void initState() {
     super.initState();
+    futurePlans = fetchPlans();
     _initializePrefs();
   }
 
@@ -80,6 +86,24 @@ class DataPageState extends State<DataPage>
   // void dispose() {
   //   super.dispose();
   // }
+
+  Future<List<Plan>> fetchPlans() async {
+    final accessToken = await storage.read(key: 'billsplug_accessToken');
+    final response = await http.get(
+      Uri.parse('https://glad.payguru.com.ng/api/data/bundles/sme'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken', // Add the token to the headers
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonList = json.decode(response.body)['plans'];
+      return jsonList.map((json) => Plan.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load plans');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -286,20 +310,64 @@ class DataPageState extends State<DataPage>
                           SizedBox(
                               height:
                                   MediaQuery.of(context).size.height * 0.04),
-                          if (currentPlanText == "SME") ...[
-                            planOptions("1.GB For 03 Days", "195.00"),
-                            planOptions("2.GB For 07 Day", "290.00"),
-                            planOptions("3.5GB For 30 Days", "485.00"),
-                            planOptions("15GB For 30 Days", "1,950.00"),
-                          ] else if (currentPlanText ==
-                              "CO - OPERATE GIFTING") ...[
-                            planOptions("500MB For 07 Days", "145.00"),
-                            planOptions("1GB For 02 Days", "265.00"),
-                            planOptions("2GB For 30 Days", "530.00"),
-                            planOptions("3GB For 30 Days", "795.00"),
-                            planOptions("5GB For 30 Days", "1,325.00"),
-                            planOptions("10GB For 30 Days", "2,650.00"),
-                          ],
+                          FutureBuilder<List<Plan>>(
+                            future: futurePlans,
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Center(
+                                    child: CircularProgressIndicator(
+                                  color: Color(0xFF02AA03),
+                                ));
+                              } else if (snapshot.hasError) {
+                                return Center(
+                                    child: Text('Error: ${snapshot.error}'));
+                              } else if (!snapshot.hasData ||
+                                  snapshot.data!.isEmpty) {
+                                return const Center(
+                                    child: Text('No plans available'));
+                              } else {
+                                final plans = snapshot.data!;
+                                List<Widget> planWidgets;
+
+                                if (currentPlanText == "SME") {
+                                  if (currentNetwork == 0) {
+                                    planWidgets = plans
+                                        .where((plan) => plan.name.contains(
+                                            "MTN")) // Filtering based on your logic
+                                        .map((plan) => planOptions(
+                                            plan.name, plan.userPrice))
+                                        .toList();
+                                  } else {
+                                    planWidgets = [];
+                                  }
+                                } else {
+                                  // Add other plan conditions here (e.g., "CO - OPERATE GIFTING")
+                                  planWidgets =
+                                      []; // Example: Replace with actual plan fetching
+                                }
+
+                                return SizedBox(
+                                  height: 400.0, // Set a fixed height
+                                  child: ListView(children: planWidgets),
+                                );
+                              }
+                            },
+                          ),
+                          // if (currentPlanText == "SME") ...[
+                          //   planOptions("1.GB For 03 Days", "195.00"),
+                          //   planOptions("2.GB For 07 Day", "290.00"),
+                          //   planOptions("3.5GB For 30 Days", "485.00"),
+                          //   planOptions("15GB For 30 Days", "1,950.00"),
+                          // ] else if (currentPlanText ==
+                          //     "CO - OPERATE GIFTING") ...[
+                          //   planOptions("500MB For 07 Days", "145.00"),
+                          //   planOptions("1GB For 02 Days", "265.00"),
+                          //   planOptions("2GB For 30 Days", "530.00"),
+                          //   planOptions("3GB For 30 Days", "795.00"),
+                          //   planOptions("5GB For 30 Days", "1,325.00"),
+                          //   planOptions("10GB For 30 Days", "2,650.00"),
+                          // ],
                           SizedBox(
                               height:
                                   MediaQuery.of(context).size.height * 0.05),
@@ -1143,7 +1211,7 @@ class DataPageState extends State<DataPage>
                 ),
                 const Spacer(),
                 Expanded(
-                  flex: 10,
+                  flex: 7,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -1202,6 +1270,20 @@ class DataPageState extends State<DataPage>
           ),
         ],
       ),
+    );
+  }
+}
+
+class Plan {
+  final String name;
+  final String userPrice;
+
+  Plan({required this.name, required this.userPrice});
+
+  factory Plan.fromJson(Map<String, dynamic> json) {
+    return Plan(
+      name: json['name'],
+      userPrice: json['user_price'],
     );
   }
 }

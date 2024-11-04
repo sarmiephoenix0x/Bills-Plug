@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 
 class AirtimePage extends StatefulWidget {
   const AirtimePage({super.key});
@@ -46,10 +49,25 @@ class AirtimePageState extends State<AirtimePage>
   bool paymentSuccessful = false;
   int currentNetwork = 0;
   String currentAmount = "0.00";
+  bool inputPin = false;
+  String networkName = "MTN";
+  final storage = const FlutterSecureStorage();
+  bool isLoading = false;
+  late AnimationController _controller;
+  late Animation<double> _animation;
+  String pinCode = "";
 
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )..repeat(reverse: true);
+
+    _animation = Tween<double>(begin: 0.4, end: 0.6).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
     _initializePrefs();
   }
 
@@ -68,43 +86,77 @@ class AirtimePageState extends State<AirtimePage>
     }
   }
 
-  // @override
-  // void dispose() {
-  //   super.dispose();
-  // }
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+  }
 
-  // Future<void> _submitAirtimePurchase() async {
-  //   final url = Uri.parse("https://glad.payguru.com.ng/api/airtime/purchase");
-  //   final requestBody = {
-  //     "phone_number": phoneNumberController.text.trim(),
-  //     "network": networkController.text.trim(),
-  //     "amount": amountController.text.trim(),
-  //     "airtime_type": airtimeTypeController.text.trim(),
-  //     "da": daController.text.trim(),
-  //     "pin": pinController.text.trim(),
-  //   };
+  void handleOtpInputComplete(String code) {
+    setState(() {
+      pinCode = code;
+    });
+    _submitAirtimePurchase(pinCode);
+  }
 
-  //   try {
-  //     // Perform the POST request with the required fields
-  //     final response = await http.post(url, body: json.encode(requestBody), headers: {
-  //       'Content-Type': 'application/json',
-  //     });
+  Future<void> _submitAirtimePurchase(String pin) async {
+    setState(() {
+      isLoading = true;
+    });
+    final accessToken = await storage.read(key: 'billsplug_accessToken');
+    final url = Uri.parse("https://glad.payguru.com.ng/api/airtime/purchase");
+    final requestBody = {
+      "phone_number": phoneNumberController.text.trim(),
+      "network": networkName,
+      "amount": amountController.text.trim(),
+      "airtime_type": 'Prepaid',
+      "da": 0,
+      "pin": pin,
+    };
 
-  //     if (response.statusCode == 200) {
-  //       print("Airtime purchase successful");
-  //       // handle successful response here
-  //     } else {
-  //       final errors = json.decode(response.body)['errors'];
-  //       print("Error: $errors");
-  //       // handle error response here
-  //     }
-  //   } catch (e) {
-  //     print("An error occurred: $e");
-  //   }
-  // }
+    try {
+      // Perform the POST request with the required fields
+      final response =
+          await http.post(url, body: json.encode(requestBody), headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      });
+
+      if (response.statusCode == 200) {
+        setState(() {
+          isLoading = false;
+        });
+        inputPin = false;
+        paymentSuccessful = true;
+        print("Airtime purchase successful");
+        // handle successful response here
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+        final errors = json.decode(response.body)['errors'];
+        print("Error: $errors");
+        // handle error response here
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      print("An error occurred: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (currentNetwork == 0) {
+      networkName = "MTN";
+    } else if (currentNetwork == 1) {
+      networkName = "AIRTEL";
+    } else if (currentNetwork == 2) {
+      networkName = "GLO";
+    } else if (currentNetwork == 3) {
+      networkName = "9MOBILE";
+    }
     return OrientationBuilder(
       builder: (context, orientation) {
         return Scaffold(
@@ -795,7 +847,7 @@ class AirtimePageState extends State<AirtimePage>
                                       onPressed: () {
                                         setState(() {
                                           paymentSectionAirtimeOpen = false;
-                                          paymentSuccessful = true;
+                                          inputPin = true;
                                         });
                                       },
                                       style: ButtonStyle(
@@ -1040,6 +1092,110 @@ class AirtimePageState extends State<AirtimePage>
                           ),
                         ),
                       ],
+                    ),
+                  if (inputPin)
+                    Stack(
+                      children: [
+                        ModalBarrier(
+                          dismissible: false,
+                          color: Colors.black.withOpacity(0.5),
+                        ),
+                        PopScope(
+                          canPop: false,
+                          onPopInvokedWithResult: (didPop, dynamic result) {
+                            if (!didPop) {
+                              setState(() {
+                                inputPin = false;
+                              });
+                            }
+                          },
+                          child: Center(
+                            child: SingleChildScrollView(
+                              child: Container(
+                                margin: const EdgeInsets.symmetric(
+                                    horizontal: 20.0), // Centered padding
+                                padding: const EdgeInsets.all(
+                                    16.0), // Inner padding for content
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(25.0),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.black26,
+                                      spreadRadius: 2,
+                                      blurRadius: 10,
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize
+                                      .min, // Expands only as needed
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.03),
+                                    const Text(
+                                      'Input PIN',
+                                      style: TextStyle(
+                                        fontSize: 24,
+                                        fontFamily: 'Inter',
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.04),
+                                    OtpTextField(
+                                      numberOfFields: 4,
+                                      fieldWidth: (50 /
+                                              MediaQuery.of(context)
+                                                  .size
+                                                  .width) *
+                                          MediaQuery.of(context).size.width,
+                                      focusedBorderColor: const Color(
+                                          0xFF02AA03), // Border color when focused
+                                      enabledBorderColor: Colors.grey,
+                                      borderColor: Colors.grey,
+                                      showFieldAsBox: true,
+                                      onCodeChanged: (String code) {
+                                        // Handle real-time OTP input changes
+                                      },
+                                      onSubmit: (String code) =>
+                                          handleOtpInputComplete(code),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  if (isLoading)
+                    Positioned.fill(
+                      child: AbsorbPointer(
+                        absorbing:
+                            true, // Blocks interaction with widgets behind
+                        child: Container(
+                          color: Colors.black
+                              .withOpacity(0.5), // Semi-transparent background
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ScaleTransition(
+                                scale: _animation,
+                                child: Image.asset(
+                                  'images/Loading.png',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
                 ],
               ),
