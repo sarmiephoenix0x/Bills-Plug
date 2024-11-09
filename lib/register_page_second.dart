@@ -146,11 +146,11 @@ class RegisterPageSecondState extends State<RegisterPageSecond>
     final Map<String, dynamic> responseData = jsonDecode(response.body);
     print('Response Data: $responseData');
 
-    if (response.statusCode == 201) {
+    if (response.statusCode == 200) {
       final Map<String, dynamic> user = responseData['user'];
-      final String accessToken = responseData['access_token'];
+      // final String accessToken = responseData['access_token'];
 
-      await storage.write(key: 'billsplug_accessToken', value: accessToken);
+      // await storage.write(key: 'billsplug_accessToken', value: accessToken);
       await prefs.setString('user', jsonEncode(user));
 
       _showCustomSnackBar(

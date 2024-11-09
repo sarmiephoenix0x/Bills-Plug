@@ -1,6 +1,7 @@
 import 'package:bills_plug/add_money_old_users.dart';
 import 'package:bills_plug/add_photo.dart';
 import 'package:bills_plug/airtime_and_data_page.dart';
+import 'package:bills_plug/intro_page.dart';
 import 'package:bills_plug/notification.dart';
 import 'package:bills_plug/self_service.dart';
 import 'package:bills_plug/transaction.dart';
@@ -17,6 +18,7 @@ import 'dart:convert';
 import 'package:bills_plug/referral_page.dart';
 import 'package:bills_plug/networking.dart';
 import 'package:bills_plug/billsplug_chat.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -43,6 +45,8 @@ class _ProfilePageState extends State<ProfilePage>
   String? lastName;
   String? fullName;
   String? userBalance;
+  bool isLoading = false;
+  final storage = const FlutterSecureStorage();
 
   @override
   void initState() {
@@ -90,6 +94,130 @@ class _ProfilePageState extends State<ProfilePage>
     } else {
       return null;
     }
+  }
+
+  Future<void> _logout() async {
+    final String? accessToken =
+        await storage.read(key: 'billsplug_accessToken');
+    if (accessToken == null) {
+      _showCustomSnackBar(
+        context,
+        'You are not logged in.',
+        isError: true,
+      );
+
+      return;
+    }
+
+    await storage.delete(key: 'billsplug_accessToken');
+    await prefs.remove('user');
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const IntroPage(),
+      ),
+    );
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  void _showLogoutConfirmationDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: const Text('Confirm Logout'),
+              content: const Text('Are you sure you want to log out?'),
+              actions: <Widget>[
+                Row(
+                  children: [
+                    TextButton(
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontFamily: 'Inter'),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop(); // Dismiss the dialog
+                      },
+                    ),
+                    const Spacer(),
+                    if (isLoading)
+                      const Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.red,
+                        ),
+                      )
+                    else
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            isLoading = true;
+                          });
+
+                          _logout().then((_) {
+                            // Navigator.of(context)
+                            //     .pop(); // Dismiss dialog after logout
+                          }).catchError((error) {
+                            setState(() {
+                              isLoading = false;
+                            });
+                          });
+                        },
+                        child: Text(
+                          'Logout',
+                          style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              fontFamily: 'Inter'),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showCustomSnackBar(BuildContext context, String message,
+      {bool isError = false}) {
+    final snackBar = SnackBar(
+      content: Row(
+        children: [
+          Icon(
+            isError ? Icons.error_outline : Icons.check_circle_outline,
+            color: isError ? Colors.red : Colors.green,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+      backgroundColor: isError ? Colors.red : Colors.green,
+      behavior: SnackBarBehavior.floating,
+      margin: const EdgeInsets.all(10),
+      duration: const Duration(seconds: 3),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   @override
@@ -597,6 +725,20 @@ class _ProfilePageState extends State<ProfilePage>
                                 height: 20,
                               ),
                             ),
+                            InkWell(
+                              onTap: () {
+                                _showLogoutConfirmationDialog();
+                              },
+                              child: basicInfo("Log out", "", Icons.exit_to_app,
+                                  showArrow: true),
+                            ),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width,
+                              child: const Divider(
+                                color: Colors.grey,
+                                height: 20,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -673,8 +815,8 @@ class _ProfilePageState extends State<ProfilePage>
               Icons.navigate_next,
               color: Theme.of(context).colorScheme.onSurface,
             ),
-            onPressed: () {},
-          ),
+            onPressed: null, // Disable the button
+          )
       ],
     );
   }

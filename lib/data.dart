@@ -1377,45 +1377,43 @@ class DataPageState extends State<DataPage>
                 ? Border.all(width: 2, color: const Color(0xFF02AA03))
                 : Border.all(width: 2, color: Colors.black),
           ),
-          child: Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Expanded(
-                  flex: 10,
-                  child: Text(
-                    text,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 16.0,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Expanded(
+                flex: 10,
+                child: Text(
+                  text,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 16.0,
+                  ),
+                ),
+              ),
+              const Spacer(),
+              Expanded(
+                flex: 7,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Image.asset(
+                      'images/NairaImg.png',
+                      height: 15,
                     ),
-                  ),
-                ),
-                const Spacer(),
-                Expanded(
-                  flex: 7,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Image.asset(
-                        'images/NairaImg.png',
-                        height: 15,
+                    Text(
+                      amount,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
-                      Text(
-                        amount,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
