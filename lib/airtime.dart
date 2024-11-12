@@ -115,35 +115,71 @@ class AirtimePageState extends State<AirtimePage>
     };
 
     try {
-      // Perform the POST request with the required fields
       final response =
           await http.post(url, body: json.encode(requestBody), headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $accessToken',
       });
 
+      setState(() {
+        isLoading = false;
+      });
+
       if (response.statusCode == 200) {
-        setState(() {
-          isLoading = false;
-        });
         inputPin = false;
         paymentSuccessful = true;
         print("Airtime purchase successful");
-        // handle successful response here
+      } else if (response.statusCode == 400) {
+        final errorMessage = json.decode(response.body)['error'];
+        _showCustomSnackBar(
+          context,
+          errorMessage ?? "An error occurred",
+          isError: true,
+        );
       } else {
-        setState(() {
-          isLoading = false;
-        });
         final errors = json.decode(response.body)['errors'];
         print("Error: $errors");
-        // handle error response here
       }
     } catch (e) {
       setState(() {
         isLoading = false;
       });
-      print("An error occurred: $e");
+      _showCustomSnackBar(
+        context,
+        'An error occurred. Please try again later.',
+        isError: true,
+      );
     }
+  }
+
+  void _showCustomSnackBar(BuildContext context, String message,
+      {bool isError = false}) {
+    final snackBar = SnackBar(
+      content: Row(
+        children: [
+          Icon(
+            isError ? Icons.error_outline : Icons.check_circle_outline,
+            color: isError ? Colors.red : Colors.green,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+      backgroundColor: isError ? Colors.red : Colors.green,
+      behavior: SnackBarBehavior.floating,
+      margin: const EdgeInsets.all(10),
+      duration: const Duration(seconds: 3),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   @override
