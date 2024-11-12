@@ -76,7 +76,7 @@ class DataPageState extends State<DataPage>
       duration: const Duration(seconds: 1),
     )..repeat(reverse: true);
 
-    _animation = Tween<double>(begin: 0.4, end: 0.6).animate(
+    _animation = Tween<double>(begin: 0.25, end: 0.4).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
     futurePlans = fetchPlans();

@@ -16,7 +16,7 @@ class ChangePasswordState extends State<ChangePassword>
 
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
-  TextEditingController();
+      TextEditingController();
 
   bool _isPasswordVisible = false;
   bool _isPasswordVisible2 = false;
@@ -31,10 +31,9 @@ class ChangePasswordState extends State<ChangePassword>
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 1),
-    )
-      ..repeat(reverse: true);
+    )..repeat(reverse: true);
 
-    _animation = Tween<double>(begin: 0.4, end: 0.6).animate(
+    _animation = Tween<double>(begin: 0.25, end: 0.4).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
   }
@@ -57,19 +56,13 @@ class ChangePasswordState extends State<ChangePassword>
                 alignment: Alignment.center,
                 children: [
                   SizedBox(
-                    width: MediaQuery
-                        .of(context)
-                        .size
-                        .width,
+                    width: MediaQuery.of(context).size.width,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         SizedBox(
-                            height: MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.05),
+                            height: MediaQuery.of(context).size.height * 0.05),
                         Image.asset(
                           "images/AppLogo.png",
                           fit: BoxFit.contain,
@@ -97,20 +90,14 @@ class ChangePasswordState extends State<ChangePassword>
                         ],
                       ),
                       child: SizedBox(
-                        width: MediaQuery
-                            .of(context)
-                            .size
-                            .width,
+                        width: MediaQuery.of(context).size.width,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20.0),
                           child: Column(children: [
-                            if(isPasswordChanged == false)...[
+                            if (isPasswordChanged == false) ...[
                               SizedBox(
-                                  height:
-                                  MediaQuery
-                                      .of(context)
-                                      .size
-                                      .height * 0.03),
+                                  height: MediaQuery.of(context).size.height *
+                                      0.03),
                               const Text(
                                 'Change Password',
                                 style: TextStyle(
@@ -121,14 +108,11 @@ class ChangePasswordState extends State<ChangePassword>
                                 ),
                               ),
                               SizedBox(
-                                  height:
-                                  MediaQuery
-                                      .of(context)
-                                      .size
-                                      .height * 0.04),
+                                  height: MediaQuery.of(context).size.height *
+                                      0.04),
                               Padding(
-                                padding:
-                                const EdgeInsets.symmetric(horizontal: 20.0),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20.0),
                                 child: TextFormField(
                                   controller: passwordController,
                                   focusNode: _passwordFocusNode,
@@ -144,7 +128,7 @@ class ChangePasswordState extends State<ChangePassword>
                                         decoration: TextDecoration.none,
                                       ),
                                       floatingLabelBehavior:
-                                      FloatingLabelBehavior.never,
+                                          FloatingLabelBehavior.never,
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(15),
                                       ),
@@ -169,7 +153,7 @@ class ChangePasswordState extends State<ChangePassword>
                                         onPressed: () {
                                           setState(() {
                                             _isPasswordVisible =
-                                            !_isPasswordVisible;
+                                                !_isPasswordVisible;
                                           });
                                         },
                                       )),
@@ -179,14 +163,11 @@ class ChangePasswordState extends State<ChangePassword>
                                 ),
                               ),
                               SizedBox(
-                                  height:
-                                  MediaQuery
-                                      .of(context)
-                                      .size
-                                      .height * 0.02),
+                                  height: MediaQuery.of(context).size.height *
+                                      0.02),
                               Padding(
-                                padding:
-                                const EdgeInsets.symmetric(horizontal: 20.0),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20.0),
                                 child: TextFormField(
                                   controller: confirmPasswordController,
                                   focusNode: _confirmPasswordFocusNode,
@@ -202,7 +183,7 @@ class ChangePasswordState extends State<ChangePassword>
                                         decoration: TextDecoration.none,
                                       ),
                                       floatingLabelBehavior:
-                                      FloatingLabelBehavior.never,
+                                          FloatingLabelBehavior.never,
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(15),
                                       ),
@@ -227,7 +208,7 @@ class ChangePasswordState extends State<ChangePassword>
                                         onPressed: () {
                                           setState(() {
                                             _isPasswordVisible2 =
-                                            !_isPasswordVisible2;
+                                                !_isPasswordVisible2;
                                           });
                                         },
                                       )),
@@ -237,24 +218,15 @@ class ChangePasswordState extends State<ChangePassword>
                                 ),
                               ),
                               SizedBox(
-                                  height:
-                                  MediaQuery
-                                      .of(context)
-                                      .size
-                                      .height * 0.05),
+                                  height: MediaQuery.of(context).size.height *
+                                      0.05),
                               Container(
                                 width: double.infinity,
                                 height:
-                                (60 / MediaQuery
-                                    .of(context)
-                                    .size
-                                    .height) *
-                                    MediaQuery
-                                        .of(context)
-                                        .size
-                                        .height,
-                                padding:
-                                const EdgeInsets.symmetric(horizontal: 20.0),
+                                    (60 / MediaQuery.of(context).size.height) *
+                                        MediaQuery.of(context).size.height,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20.0),
                                 child: ElevatedButton(
                                   onPressed: () {
                                     setState(() {
@@ -270,8 +242,8 @@ class ChangePasswordState extends State<ChangePassword>
                                   },
                                   style: ButtonStyle(
                                     backgroundColor:
-                                    WidgetStateProperty.resolveWith<Color>(
-                                          (Set<WidgetState> states) {
+                                        WidgetStateProperty.resolveWith<Color>(
+                                      (Set<WidgetState> states) {
                                         if (states
                                             .contains(WidgetState.pressed)) {
                                           return Colors.white;
@@ -280,8 +252,8 @@ class ChangePasswordState extends State<ChangePassword>
                                       },
                                     ),
                                     foregroundColor:
-                                    WidgetStateProperty.resolveWith<Color>(
-                                          (Set<WidgetState> states) {
+                                        WidgetStateProperty.resolveWith<Color>(
+                                      (Set<WidgetState> states) {
                                         if (states
                                             .contains(WidgetState.pressed)) {
                                           return const Color(0xFF02AA03);
@@ -290,14 +262,14 @@ class ChangePasswordState extends State<ChangePassword>
                                       },
                                     ),
                                     elevation:
-                                    WidgetStateProperty.all<double>(4.0),
+                                        WidgetStateProperty.all<double>(4.0),
                                     shape: WidgetStateProperty.all<
                                         RoundedRectangleBorder>(
                                       const RoundedRectangleBorder(
                                         side: BorderSide(
                                             width: 3, color: Color(0xFF02AA03)),
-                                        borderRadius:
-                                        BorderRadius.all(Radius.circular(15)),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(15)),
                                       ),
                                     ),
                                   ),
@@ -310,101 +282,87 @@ class ChangePasswordState extends State<ChangePassword>
                                   ),
                                 ),
                               ),
-                            ] else
-                              ...[
-                                SizedBox(
-                                    height:
-                                    MediaQuery
-                                        .of(context)
-                                        .size
-                                        .height * 0.03),
-                                const Text(
-                                  'Successful!',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontFamily: 'Inter',
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF02AA03),
-                                  ),
+                            ] else ...[
+                              SizedBox(
+                                  height: MediaQuery.of(context).size.height *
+                                      0.03),
+                              const Text(
+                                'Successful!',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontFamily: 'Inter',
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF02AA03),
                                 ),
-                                SizedBox(
-                                    height:
-                                    MediaQuery
-                                        .of(context)
-                                        .size
-                                        .height * 0.04),
-                                Container(
-                                  width: double.infinity,
-                                  height: (60 / MediaQuery
-                                      .of(context)
-                                      .size
-                                      .height) *
-                                      MediaQuery
-                                          .of(context)
-                                          .size
-                                          .height,
-                                  padding:
-                                  const EdgeInsets.symmetric(horizontal: 20.0),
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              LoginPage(key: UniqueKey()),
-                                        ),
-                                      );
-                                    },
-                                    style: ButtonStyle(
-                                      backgroundColor:
-                                      WidgetStateProperty.resolveWith<Color>(
-                                            (Set<WidgetState> states) {
-                                          if (states.contains(
-                                              WidgetState.pressed)) {
-                                            return const Color(0xFFE9FFEF);
-                                          }
-                                          return const Color(0xFF02AA03);
-                                        },
+                              ),
+                              SizedBox(
+                                  height: MediaQuery.of(context).size.height *
+                                      0.04),
+                              Container(
+                                width: double.infinity,
+                                height:
+                                    (60 / MediaQuery.of(context).size.height) *
+                                        MediaQuery.of(context).size.height,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20.0),
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            LoginPage(key: UniqueKey()),
                                       ),
-                                      foregroundColor:
-                                      WidgetStateProperty.resolveWith<Color>(
-                                            (Set<WidgetState> states) {
-                                          if (states.contains(
-                                              WidgetState.pressed)) {
-                                            return const Color(0xFF02AA03);
-                                          }
+                                    );
+                                  },
+                                  style: ButtonStyle(
+                                    backgroundColor:
+                                        WidgetStateProperty.resolveWith<Color>(
+                                      (Set<WidgetState> states) {
+                                        if (states
+                                            .contains(WidgetState.pressed)) {
                                           return const Color(0xFFE9FFEF);
-                                        },
-                                      ),
-                                      elevation: WidgetStateProperty.all<
-                                          double>(4.0),
-                                      shape: WidgetStateProperty.all<
-                                          RoundedRectangleBorder>(
-                                        const RoundedRectangleBorder(
-                                          side: BorderSide(
-                                              width: 3,
-                                              color: Color(0xFF02AA03)),
-                                          borderRadius:
-                                          BorderRadius.all(Radius.circular(15)),
-                                        ),
-                                      ),
+                                        }
+                                        return const Color(0xFF02AA03);
+                                      },
                                     ),
-                                    child: const Text(
-                                      'Return',
-                                      style: TextStyle(
-                                        fontFamily: 'Inter',
-                                        fontWeight: FontWeight.bold,
+                                    foregroundColor:
+                                        WidgetStateProperty.resolveWith<Color>(
+                                      (Set<WidgetState> states) {
+                                        if (states
+                                            .contains(WidgetState.pressed)) {
+                                          return const Color(0xFF02AA03);
+                                        }
+                                        return const Color(0xFFE9FFEF);
+                                      },
+                                    ),
+                                    elevation:
+                                        WidgetStateProperty.all<double>(4.0),
+                                    shape: WidgetStateProperty.all<
+                                        RoundedRectangleBorder>(
+                                      const RoundedRectangleBorder(
+                                        side: BorderSide(
+                                            width: 3, color: Color(0xFF02AA03)),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(15)),
                                       ),
                                     ),
                                   ),
+                                  child: const Text(
+                                    'Return',
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
-                              ],
+                              ),
+                            ],
                           ]),
                         ),
                       ),
                     ),
                   ),
-
                   if (isLoading)
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
