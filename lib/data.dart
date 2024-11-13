@@ -67,6 +67,7 @@ class DataPageState extends State<DataPage>
   String networkName = "MTN";
   bool inputPin = false;
   String planID = "0";
+  Plan? selectedPlan;
 
   @override
   void initState() {
@@ -430,16 +431,24 @@ class DataPageState extends State<DataPage>
                               if (snapshot.connectionState ==
                                   ConnectionState.waiting) {
                                 return const Center(
-                                    child: CircularProgressIndicator(
-                                  color: Color(0xFF02AA03),
-                                ));
+                                  child: CircularProgressIndicator(
+                                    color: Color(0xFF02AA03),
+                                  ),
+                                );
                               } else if (snapshot.hasError) {
                                 return Center(
-                                    child: Text('Error: ${snapshot.error}'));
+                                  child: Text(
+                                    'An error occurred while fetching plans. Please try again later.\nError: ${snapshot.error}',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                );
                               } else if (!snapshot.hasData ||
                                   snapshot.data!.isEmpty) {
                                 return const Center(
-                                    child: Text('No plans available'));
+                                  child:
+                                      Text('No plans available at the moment.'),
+                                );
                               } else {
                                 final plans = snapshot.data!;
                                 List<Widget> planWidgets;
@@ -449,8 +458,18 @@ class DataPageState extends State<DataPage>
                                     planWidgets = plans
                                         .where((plan) => plan.name.contains(
                                             "MTN")) // Filtering based on your logic
-                                        .map((plan) => planOptions(plan.name,
-                                            plan.userPrice, plan.planId))
+                                        .map((plan) => GestureDetector(
+                                              onTap: () {
+                                                setState(() {
+                                                  selectedPlan =
+                                                      plan; // Set the selected plan
+                                                });
+                                              },
+                                              child: planOptions(plan.name,
+                                                  plan.userPrice, plan.planId,
+                                                  isSelected:
+                                                      selectedPlan == plan),
+                                            ))
                                         .toList();
                                   } else {
                                     planWidgets = [];
@@ -459,6 +478,23 @@ class DataPageState extends State<DataPage>
                                   // Add other plan conditions here (e.g., "CO - OPERATE GIFTING")
                                   planWidgets =
                                       []; // Example: Replace with actual plan fetching
+                                }
+
+                                // If a plan is selected, show only that plan
+                                if (selectedPlan != null) {
+                                  planWidgets = [
+                                    planOptions(
+                                        selectedPlan!.name,
+                                        selectedPlan!.userPrice,
+                                        selectedPlan!.planId,
+                                        isSelected: true),
+                                  ];
+                                } else {
+                                  planWidgets = plans.map((plan) {
+                                    return planOptions(
+                                        plan.name, plan.userPrice, plan.planId,
+                                        isSelected: selectedPlan == plan);
+                                  }).toList();
                                 }
 
                                 return SizedBox(
@@ -1394,7 +1430,8 @@ class DataPageState extends State<DataPage>
     );
   }
 
-  Widget planOptions(String text, String amount, String planId) {
+  Widget planOptions(String text, String amount, String planId,
+      {bool isSelected = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
       child: InkWell(
@@ -1402,16 +1439,20 @@ class DataPageState extends State<DataPage>
           setState(() {
             currentPlanOptionText = text;
             currentAmount = amount;
-            planId = planID;
+            planId = planId; // Use the parameter passed to the function
           });
         },
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 7.0),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
-            border: currentPlanOptionText == text
+            border: isSelected
                 ? Border.all(width: 2, color: const Color(0xFF02AA03))
                 : Border.all(width: 2, color: Colors.black),
+            color: isSelected
+                ? const Color(0xFFE8F5E9)
+                : Colors
+                    .white, // Optional: Change background color when selected
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
