@@ -41,11 +41,51 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   String? lastName;
   String? fullName;
   String? userBalance;
+  bool welcomeAd = false;
+  late AnimationController _animController;
+  late Animation<double> _opacityAnimation;
+  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
     super.initState();
+    _checkFirstLaunch();
+    _animController = AnimationController(
+      duration: const Duration(milliseconds: 3000),
+      vsync: this,
+    );
+
+    _opacityAnimation =
+        Tween<double>(begin: 0.0, end: 1.0).animate(_animController);
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, -1), end: const Offset(0, 0))
+            .animate(CurvedAnimation(
+      parent: _animController,
+      curve: Curves.easeIn,
+    ));
+
+    // Start the animation
+    _animController.forward();
     _initializePrefs();
+  }
+
+  Future<void> _checkFirstLaunch() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool isFirstLaunch = prefs.getBool('isFirstLaunch') ?? true;
+
+    if (isFirstLaunch) {
+      // If it's the first launch, show the welcome ad
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) {
+          setState(() {
+            welcomeAd = true;
+          });
+        }
+      });
+
+      // Set the flag to false so it won't show again
+      await prefs.setBool('isFirstLaunch', false);
+    }
   }
 
   Future<void> _initializePrefs() async {
@@ -652,7 +692,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ],
                 ),
                 Positioned(
-                  top: 200,
+                  top: MediaQuery.of(context).padding.top + 200,
                   left: 0,
                   right: 0,
                   child: Padding(
@@ -816,6 +856,207 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     ),
                   ),
                 ),
+                if (welcomeAd)
+                  Stack(
+                    children: [
+                      // Your main content goes here
+                      // For example, a Scaffold with a FloatingActionButton:
+                      SizedBox(
+                        height: MediaQuery.of(context)
+                            .size
+                            .height, // Specify a fixed height
+                        child: ModalBarrier(
+                          dismissible: true,
+                          color: Colors.black.withOpacity(0.5),
+                        ),
+                      ),
+                      // The modal overlay
+                      Positioned(
+                        top: MediaQuery.of(context).padding.top + 50,
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: SlideTransition(
+                            position: _slideAnimation,
+                            child: FadeTransition(
+                              opacity: _opacityAnimation,
+                              child: Container(
+                                padding: const EdgeInsets.only(
+                                    bottom: 10.0, top: 10),
+                                constraints: BoxConstraints(
+                                  maxHeight: MediaQuery.of(context)
+                                      .size
+                                      .height, // Set a max height for the content
+                                  maxWidth: MediaQuery.of(context).size.width *
+                                      0.9, // Set a width for the content
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors
+                                      .white, // White background for the content
+                                  borderRadius: BorderRadius.circular(
+                                      20.0), // Curved edges
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.black26,
+                                      spreadRadius: 2,
+                                      blurRadius: 10,
+                                    ),
+                                  ],
+                                ),
+                                child: PopScope(
+                                  canPop: false,
+                                  onPopInvokedWithResult:
+                                      (didPop, dynamic result) {
+                                    if (!didPop) {
+                                      setState(() {
+                                        welcomeAd = false;
+                                      });
+                                    }
+                                  },
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 20.0,
+                                            right: 20.0,
+                                            top: 12.0,
+                                            bottom: 14),
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Image.asset(
+                                              "images/icons/AppIcon.png",
+                                              fit: BoxFit.contain,
+                                              width: 40,
+                                            ),
+                                            SizedBox(
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  0.02,
+                                            ),
+                                            const Expanded(
+                                              child: Text(
+                                                "Get Started With Us",
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontSize: 16.0,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Image.asset(
+                                        'images/AdImg2.png',
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                      ),
+                                      SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.03,
+                                      ),
+                                      const Padding(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 20.0),
+                                        child: Text(
+                                          'Enjoy our service that brings you fast and reliable deals for Airtime, Data, Cable TV, and more. Take a first try and give us feedback.',
+                                          textAlign: TextAlign.start,
+                                          style: TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontSize: 16.0,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.03,
+                                      ),
+                                      const Padding(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 10.0),
+                                        child: Text(
+                                          'www.Billsplug.ng/Referredandearn583',
+                                          textAlign: TextAlign.start,
+                                          style: TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontSize: 16.0,
+                                            color: Color(0xFF1469CC),
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.04,
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 20.0),
+                                        child: Container(
+                                          padding:
+                                              const EdgeInsets.only(left: 10.0),
+                                          decoration: BoxDecoration(
+                                            color: const Color.fromARGB(
+                                                28, 2, 170, 2),
+                                            borderRadius:
+                                                BorderRadius.circular(15.0),
+                                          ),
+                                          child: Row(children: [
+                                            const Text(
+                                              'Ignore',
+                                              textAlign: TextAlign.start,
+                                              style: TextStyle(
+                                                fontFamily: 'Inter',
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16.0,
+                                                color: Color(0xFF5B5B5B),
+                                              ),
+                                            ),
+                                            const Spacer(),
+                                            Row(
+                                              children: [
+                                                const Text(
+                                                  'View',
+                                                  textAlign: TextAlign.start,
+                                                  style: TextStyle(
+                                                    fontFamily: 'Inter',
+                                                    fontSize: 16.0,
+                                                    color: Color(0xFF02AA03),
+                                                  ),
+                                                ),
+                                                IconButton(
+                                                  icon: const Icon(
+                                                    Icons.navigate_next,
+                                                    color: Color(0xFF02AA03),
+                                                  ),
+                                                  onPressed: () {},
+                                                ),
+                                              ],
+                                            ),
+                                          ]),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
               ],
             ),
           ],
@@ -824,31 +1065,33 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          FloatingActionButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => HelpServicePage(
-                    key: UniqueKey(),
+          if (welcomeAd == false) ...[
+            FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => HelpServicePage(
+                      key: UniqueKey(),
+                    ),
                   ),
-                ),
-              );
-            },
-            backgroundColor: const Color(0xFF02AA03),
-            child: const Icon(Icons.question_mark),
-          ),
-          SizedBox(height: MediaQuery.of(context).size.height * 0.005),
-          const Text(
-            'Need Help With \nOur Service',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontWeight: FontWeight.bold,
-              fontSize: 12.0,
-              color: Colors.black,
+                );
+              },
+              backgroundColor: const Color(0xFF02AA03),
+              child: const Icon(Icons.question_mark),
             ),
-          ),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.005),
+            const Text(
+              'Need Help With \nOur Service',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'Inter',
+                fontWeight: FontWeight.bold,
+                fontSize: 12.0,
+                color: Colors.black,
+              ),
+            ),
+          ],
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,

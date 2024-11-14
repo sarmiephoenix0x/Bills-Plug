@@ -425,6 +425,7 @@ class DataPageState extends State<DataPage>
                           SizedBox(
                               height:
                                   MediaQuery.of(context).size.height * 0.04),
+
                           FutureBuilder<List<Plan>>(
                             future: futurePlans,
                             builder: (context, snapshot) {
@@ -437,10 +438,34 @@ class DataPageState extends State<DataPage>
                                 );
                               } else if (snapshot.hasError) {
                                 return Center(
-                                  child: Text(
-                                    'An error occurred while fetching plans. Please try again later.\nError: ${snapshot.error}',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(color: Colors.red),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Text(
+                                        'Oops! Something went wrong while fetching the plans.',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            color: Colors.red, fontSize: 16),
+                                      ),
+                                      const SizedBox(height: 10),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            futurePlans =
+                                                fetchPlans(); // Retry fetching plans
+                                          });
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                            backgroundColor:
+                                                const Color(0xFF02AA03)),
+                                        child: const Text(
+                                          'Retry',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 );
                               } else if (!snapshot.hasData ||
@@ -451,56 +476,63 @@ class DataPageState extends State<DataPage>
                                 );
                               } else {
                                 final plans = snapshot.data!;
-                                List<Widget> planWidgets;
+                                List<Widget> planWidgets = [];
 
                                 if (currentPlanText == "SME") {
                                   if (currentNetwork == 0) {
                                     planWidgets = plans
                                         .where((plan) => plan.name.contains(
                                             "MTN")) // Filtering based on your logic
-                                        .map((plan) => GestureDetector(
-                                              onTap: () {
-                                                setState(() {
-                                                  selectedPlan =
-                                                      plan; // Set the selected plan
-                                                });
-                                              },
-                                              child: planOptions(plan.name,
-                                                  plan.userPrice, plan.planId,
-                                                  isSelected:
-                                                      selectedPlan == plan),
-                                            ))
+                                        .map(
+                                          (plan) => planOptions(plan.name,
+                                              plan.userPrice, plan.planId,
+                                              isSelected: selectedPlan == plan),
+                                        )
                                         .toList();
                                   } else {
-                                    planWidgets = [];
+                                    // Add other plan conditions here (e.g., "CO - OPERATE GIFTING")
+                                    selectedPlan = null;
                                   }
                                 } else {
                                   // Add other plan conditions here (e.g., "CO - OPERATE GIFTING")
-                                  planWidgets =
-                                      []; // Example: Replace with actual plan fetching
+                                  selectedPlan = null;
                                 }
 
                                 // If a plan is selected, show only that plan
                                 if (selectedPlan != null) {
-                                  planWidgets = [
-                                    planOptions(
-                                        selectedPlan!.name,
-                                        selectedPlan!.userPrice,
-                                        selectedPlan!.planId,
-                                        isSelected: true),
-                                  ];
+                                  return Container(
+                                    constraints: const BoxConstraints(
+                                      maxHeight: 400.0, // Set a maximum height
+                                    ),
+                                    child: ListView(
+                                      shrinkWrap:
+                                          true, // Make the ListView shrink to fit its contents
+                                      physics:
+                                          const AlwaysScrollableScrollPhysics(), // Ensure it can still scroll if needed
+                                      children: [
+                                        planOptions(
+                                          selectedPlan!.name,
+                                          selectedPlan!.userPrice,
+                                          selectedPlan!.planId,
+                                          isSelected: true,
+                                        ),
+                                      ],
+                                    ),
+                                  );
                                 } else {
-                                  planWidgets = plans.map((plan) {
-                                    return planOptions(
-                                        plan.name, plan.userPrice, plan.planId,
-                                        isSelected: selectedPlan == plan);
-                                  }).toList();
+                                  return Container(
+                                    constraints: const BoxConstraints(
+                                      maxHeight: 400.0, // Set a maximum height
+                                    ),
+                                    child: ListView(
+                                      shrinkWrap:
+                                          true, // Make the ListView shrink to fit its contents
+                                      physics:
+                                          const AlwaysScrollableScrollPhysics(), // Ensure it can still scroll if needed
+                                      children: planWidgets,
+                                    ),
+                                  );
                                 }
-
-                                return SizedBox(
-                                  height: 400.0, // Set a fixed height
-                                  child: ListView(children: planWidgets),
-                                );
                               }
                             },
                           ),
@@ -1437,9 +1469,20 @@ class DataPageState extends State<DataPage>
       child: InkWell(
         onTap: () {
           setState(() {
-            currentPlanOptionText = text;
-            currentAmount = amount;
-            planId = planId; // Use the parameter passed to the function
+            if (isSelected) {
+              // Deselect the current plan
+              currentPlanOptionText = "";
+              selectedPlan = null; // Deselect the plan
+            } else {
+              // Select a new plan
+              currentPlanOptionText = text;
+              currentAmount = amount;
+              selectedPlan = Plan(
+                name: text,
+                userPrice: amount,
+                planId: planId,
+              ); // Update selectedPlan
+            }
           });
         },
         child: Container(
@@ -1449,10 +1492,7 @@ class DataPageState extends State<DataPage>
             border: isSelected
                 ? Border.all(width: 2, color: const Color(0xFF02AA03))
                 : Border.all(width: 2, color: Colors.black),
-            color: isSelected
-                ? const Color(0xFFE8F5E9)
-                : Colors
-                    .white, // Optional: Change background color when selected
+            color: isSelected ? const Color(0xFFE8F5E9) : Colors.white,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
