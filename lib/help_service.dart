@@ -385,7 +385,7 @@ class _HelpServicePageState extends State<HelpServicePage>
             Icons.navigate_next,
             color: Theme.of(context).colorScheme.onSurface,
           ),
-          onPressed: () {},
+          onPressed: null,
         ),
       ],
     );
