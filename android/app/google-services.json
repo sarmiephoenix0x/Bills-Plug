@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "222445823239",
+    "project_id": "billsplug-6a6a1",
+    "storage_bucket": "billsplug-6a6a1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:222445823239:android:c1ae89364a20c787c611a2",
+        "android_client_info": {
+          "package_name": "com.bills_plug.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAf4XxGjpE3kTaRG9TD1ommP_NkV9izvZM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
