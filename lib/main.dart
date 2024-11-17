@@ -114,7 +114,7 @@ Future<void> sendTokenToServer(String? token) async {
   if (token == null) return;
 
   final response = await http.post(
-    Uri.parse('https://your_api_url_here'),
+    Uri.parse('https://86t6buc6j0.execute-api.eu-north-1.amazonaws.com/test/'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
