@@ -566,30 +566,38 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         ],
                       ),
                     ),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.06),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                      child: CarouselSlider(
-                        options: CarouselOptions(
-                          enlargeCenterPage: false,
-                          viewportFraction: 1.0,
-                          enableInfiniteScroll: false,
-                          initialPage: 0,
-                          onPageChanged: (index, reason) {
-                            setState(() {
-                              _current = index;
-                            });
-                          },
-                        ),
-                        carouselController: _controller,
-                        items: imagePaths.map((item) {
-                          return Image.asset(
-                            item,
-                            width: double.infinity,
-                            fit: BoxFit.contain,
-                          );
-                        }).toList(),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.09),
+                    CarouselSlider(
+                      options: CarouselOptions(
+                        enlargeCenterPage: false,
+                        viewportFraction: 1.0,
+                        height: 150,
+                        enableInfiniteScroll: false,
+                        initialPage: 0,
+                        onPageChanged: (index, reason) {
+                          setState(() {
+                            _current = index;
+                          });
+                        },
                       ),
+                      carouselController: _controller,
+                      items: imagePaths.map((item) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal:
+                                  20.0), // Adjust horizontal padding as needed
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(25),
+                            child: Image.asset(
+                              item,
+                              width: double
+                                  .infinity, // Make the width fill the screen
+                              fit: BoxFit
+                                  .cover, // Ensure the image covers the available space
+                            ),
+                          ),
+                        );
+                      }).toList(),
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,

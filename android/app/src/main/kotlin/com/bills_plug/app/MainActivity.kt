@@ -1,4 +1,4 @@
-package com.bills_plug.bills_plug
+package com.bills_plug.app
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 
