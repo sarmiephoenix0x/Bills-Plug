@@ -15,6 +15,13 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
   int _selectedIndex = 1;
   final List<bool> _hasNotification = [false, false, false, false, false];
   DateTime? currentBackPressTime;
+  bool _welcomeAdActive = false;
+
+  void _onWelcomeAdActive() {
+    setState(() {
+      _welcomeAdActive = !_welcomeAdActive; // Update loading state
+    });
+  }
 
   void _showCustomSnackBar(BuildContext context, String message,
       {bool isError = false}) {
@@ -154,10 +161,12 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
           selectedItemColor: const Color(0xFF02AA03),
           // Customize the selected item color
           onTap: (index) {
-            if (index != _selectedIndex) {
-              setState(() {
-                _selectedIndex = index;
-              });
+            if (_welcomeAdActive == false) {
+              if (index != _selectedIndex) {
+                setState(() {
+                  _selectedIndex = index;
+                });
+              }
             }
           },
         ),
@@ -170,7 +179,9 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
       case 0:
         return const ServicePage();
       case 1:
-        return const HomePage();
+        return HomePage(
+          welcomeAdActive: _onWelcomeAdActive,
+        );
       case 2:
         return const ProfilePage();
       default:

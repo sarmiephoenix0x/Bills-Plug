@@ -17,7 +17,8 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final Function welcomeAdActive;
+  const HomePage({super.key, required this.welcomeAdActive});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -79,6 +80,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         if (mounted) {
           setState(() {
             welcomeAd = true;
+            widget.welcomeAdActive();
           });
         }
       });
@@ -918,6 +920,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                     if (!didPop) {
                                       setState(() {
                                         welcomeAd = false;
+                                        widget.welcomeAdActive();
                                       });
                                     }
                                   },

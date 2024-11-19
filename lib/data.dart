@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
@@ -49,6 +50,36 @@ class DataPageState extends State<DataPage>
     "CO - OPERATE GIFTING",
   ];
 
+  List<String> mtnPrefixes = [
+    "0703",
+    "0706",
+    "0803",
+    "0806",
+    "0810",
+    "0813",
+    "0814",
+    "0816",
+    "0903",
+    "0906",
+    "0913"
+  ];
+
+  List<String> airtelPrefixes = [
+    "0701",
+    "0708",
+    "0802",
+    "0808",
+    "0812",
+    "0815",
+    "0817",
+    "0901",
+    "0902"
+  ];
+
+  List<String> gloPrefixes = ["0705", "0805", "0811", "0818", "0905"];
+
+  List<String> nineMobilePrefixes = ["0709", "0809", "0819", "0904"];
+
   bool paymentSectionDataOpen = false;
   String? userBalance;
   late SharedPreferences prefs;
@@ -68,6 +99,7 @@ class DataPageState extends State<DataPage>
   bool inputPin = false;
   String planID = "0";
   Plan? selectedPlan;
+  String phoneNumber = '';
 
   @override
   void initState() {
@@ -330,82 +362,89 @@ class DataPageState extends State<DataPage>
                                       );
                                     },
                                   ))),
-                          SizedBox(
-                              height:
-                                  MediaQuery.of(context).size.height * 0.04),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 20.0),
-                            child: Text(
-                              'Recent Number',
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18.0,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                              height:
-                                  MediaQuery.of(context).size.height * 0.04),
-                          SizedBox(
-                            height: (50 / MediaQuery.of(context).size.height) *
-                                MediaQuery.of(context).size.height,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: networkImg.length,
-                              itemBuilder: (context, index) {
-                                return number(index, networkImg[index],
-                                    networkNumber[index]);
-                              },
-                            ),
-                          ),
+                          // SizedBox(
+                          //     height:
+                          //         MediaQuery.of(context).size.height * 0.04),
+                          // const Padding(
+                          //   padding: EdgeInsets.symmetric(horizontal: 20.0),
+                          //   child: Text(
+                          //     'Recent Number',
+                          //     style: TextStyle(
+                          //       fontFamily: 'Inter',
+                          //       fontWeight: FontWeight.bold,
+                          //       fontSize: 18.0,
+                          //       color: Colors.black,
+                          //     ),
+                          //   ),
+                          // ),
+                          // SizedBox(
+                          //     height:
+                          //         MediaQuery.of(context).size.height * 0.04),
+                          // SizedBox(
+                          //   height: (50 / MediaQuery.of(context).size.height) *
+                          //       MediaQuery.of(context).size.height,
+                          //   child: ListView.builder(
+                          //     scrollDirection: Axis.horizontal,
+                          //     itemCount: networkImg.length,
+                          //     itemBuilder: (context, index) {
+                          //       return number(index, networkImg[index],
+                          //           networkNumber[index]);
+                          //     },
+                          //   ),
+                          // ),
                           SizedBox(
                               height:
                                   MediaQuery.of(context).size.height * 0.04),
                           Padding(
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 20.0),
-                            child: TextFormField(
-                              controller: phoneNumberController,
-                              focusNode: _phoneNumberFocusNode,
-                              style: const TextStyle(
-                                fontSize: 16.0,
-                              ),
+                            child: IntlPhoneField(
                               decoration: InputDecoration(
-                                  labelText: 'Mobile Number',
-                                  labelStyle: const TextStyle(
+                                labelText: 'Mobile Number',
+                                labelStyle: const TextStyle(
+                                  color: Colors.grey,
+                                  fontFamily: 'Inter',
+                                  fontSize: 16.0,
+                                  decoration: TextDecoration.none,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                  borderSide: const BorderSide(),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                  borderSide: const BorderSide(
+                                    width: 3,
+                                    color: Color(0xFF02AA03),
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                  borderSide: const BorderSide(
+                                    width: 2,
                                     color: Colors.grey,
-                                    fontFamily: 'Inter',
-                                    fontSize: 16.0,
-                                    decoration: TextDecoration.none,
                                   ),
-                                  floatingLabelBehavior:
-                                      FloatingLabelBehavior.never,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(15),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(15),
-                                    borderSide: const BorderSide(
-                                        width: 3, color: Color(0xFF02AA03)),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(15),
-                                    borderSide: const BorderSide(
-                                        width: 2, color: Colors.grey),
-                                  ),
-                                  filled: true,
-                                  fillColor: Colors.white,
-                                  suffixIcon: IconButton(
-                                    icon: const Icon(
-                                      Icons.contact_phone,
-                                      color: Colors.grey,
-                                    ),
-                                    onPressed: () {},
-                                  )),
-                              cursorColor: const Color(0xFF02AA03),
+                                ),
+                                filled: true,
+                                fillColor: Colors.white,
+                                counterText: '',
+                              ),
+                              initialCountryCode:
+                                  'NG', // Set the initial country code to Nigeria
+                              showCountryFlag: false, // Hide the country flag
+                              onChanged: (phone) {
+                                setState(() {
+                                  phoneNumber = phone.completeNumber;
+                                });
+                              },
+                              validator: (value) {
+                                // Validate the phone number length for Nigeria
+                                if (value == null ||
+                                    value.number.length != 11) {
+                                  return 'Please enter a valid 10-digit mobile number';
+                                }
+                                return null;
+                              },
                             ),
                           ),
                           SizedBox(
@@ -479,16 +518,32 @@ class DataPageState extends State<DataPage>
                                 List<Widget> planWidgets = [];
 
                                 if (currentPlanText == "SME") {
+                                  if (phoneNumber.length != 11) {
+                                    _showCustomSnackBar(
+                                      context,
+                                      'Please enter a valid 11-digit mobile number',
+                                      isError: true,
+                                    );
+                                    print(
+                                        'Please enter a valid 11-digit mobile number');
+                                    return Container();
+                                  }
                                   if (currentNetwork == 0) {
-                                    planWidgets = plans
-                                        .where((plan) => plan.name.contains(
-                                            "MTN")) // Filtering based on your logic
-                                        .map(
-                                          (plan) => planOptions(plan.name,
-                                              plan.userPrice, plan.planId,
-                                              isSelected: selectedPlan == plan),
-                                        )
-                                        .toList();
+                                    bool isMtnNumber = mtnPrefixes.any(
+                                        (prefix) =>
+                                            phoneNumber.startsWith(prefix));
+                                    if (isMtnNumber) {
+                                      planWidgets = plans
+                                          .where((plan) => plan.name.contains(
+                                              "MTN")) // Filtering based on your logic
+                                          .map(
+                                            (plan) => planOptions(plan.name,
+                                                plan.userPrice, plan.planId,
+                                                isSelected:
+                                                    selectedPlan == plan),
+                                          )
+                                          .toList();
+                                    }
                                   } else {
                                     // Add other plan conditions here (e.g., "CO - OPERATE GIFTING")
                                     selectedPlan = null;
