@@ -454,6 +454,21 @@ class AirtimePageState extends State<AirtimePage>
                                       setState(() {
                                         phoneNumber = phone.completeNumber;
 
+                                        if (phoneNumber.startsWith('+234')) {
+                                          phoneNumber = phoneNumber
+                                              .replaceFirst('+234', '');
+                                        } else if (phoneNumber
+                                            .startsWith('234')) {
+                                          phoneNumber = phoneNumber
+                                              .replaceFirst('234', '');
+                                        }
+
+                                        // Ensure the phone number is 11 digits long after removing the international code
+                                        if (phoneNumber.length > 11) {
+                                          phoneNumber = phoneNumber.substring(
+                                              phoneNumber.length - 11);
+                                        }
+
                                         // Check for MTN
                                         if (mtnPrefixes.any((prefix) =>
                                                 phoneNumber
