@@ -8,6 +8,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 // Initialize the local notification plugin
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -44,92 +45,6 @@ Future<void> _createNotificationChannel(
       ?.createNotificationChannel(androidNotificationChannel);
 }
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-
-  // Initialize local notifications plugin
-  const AndroidInitializationSettings androidInitializationSettings =
-      AndroidInitializationSettings('app_icon');
-  const InitializationSettings initializationSettings =
-      InitializationSettings(android: androidInitializationSettings);
-
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  // Handle foreground messages
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    print('Received a foreground message: ${message.notification?.title}');
-
-    // Dynamically set the channel ID and name
-    String channelId =
-        "dynamic_channel_${DateTime.now().millisecondsSinceEpoch}";
-    String channelName = "Dynamic Notification Channel ${DateTime.now()}";
-
-    // Show notification for foreground message
-    _showNotification(message, channelId, channelName);
-  });
-
-  // Request permissions for notifications
-  await _requestPermission();
-
-  // Get FCM token and send to server
-  await _getToken();
-
-  const storage = FlutterSecureStorage();
-  final accessToken = await storage.read(key: 'billsplug_accessToken');
-  final prefs = await SharedPreferences.getInstance();
-  final bool isLoggedIn = accessToken != null;
-
-  runApp(MyApp(isLoggedIn: isLoggedIn));
-}
-
-Future<void> _requestPermission() async {
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
-  NotificationSettings settings = await messaging.requestPermission(
-    alert: true,
-    badge: true,
-    provisional: false,
-    sound: true,
-  );
-
-  if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-    print('User granted permission');
-  } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
-    print('User granted provisional permission');
-  } else {
-    print('User declined permission');
-  }
-}
-
-Future<void> _getToken() async {
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
-  String? token = await messaging.getToken();
-  print("FCM Token: $token");
-  await sendTokenToServer(token);
-}
-
-Future<void> sendTokenToServer(String? token) async {
-  if (token == null) return;
-
-  final response = await http.post(
-    Uri.parse('https://86t6buc6j0.execute-api.eu-north-1.amazonaws.com/test/'),
-    headers: <String, String>{
-      'Content-Type': 'application/json; charset=UTF-8',
-    },
-    body: jsonEncode(<String, String>{
-      'token': token,
-    }),
-  );
-
-  if (response.statusCode == 200) {
-    print('Token sent to server successfully');
-  } else {
-    print('Failed to send token to server: ${response.body}');
-  }
-}
-
 Future<void> _showNotification(
     RemoteMessage message, String channelId, String channelName) async {
   const AndroidNotificationDetails androidNotificationDetails =
@@ -149,19 +64,143 @@ Future<void> _showNotification(
   );
 }
 
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+
+  // Initialize local notifications plugin
+  const AndroidInitializationSettings androidInitializationSettings =
+      AndroidInitializationSettings('app_icon');
+  const InitializationSettings initializationSettings =
+      InitializationSettings(android: androidInitializationSettings);
+
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    print('Received a foreground message: ${message.notification?.title}');
+
+    // Dynamically set the channel ID and name
+    String channelId =
+        "dynamic_channel_${DateTime.now().millisecondsSinceEpoch}";
+    String channelName = "Dynamic Notification Channel ${DateTime.now()}";
+
+    // Show notification for foreground message
+    _showNotification(message, channelId, channelName);
+  });
+
+  runApp(const MyApp());
+}
+
 class MyApp extends StatefulWidget {
-  final bool isLoggedIn;
-  const MyApp({Key? key, required this.isLoggedIn}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   _MyAppState createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
+  bool isLoggedIn = false;
+  bool isLoading = true; // Loading state
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    // Check network connectivity
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.none) {
+      // Handle no network case
+      print('No network connection');
+      setState(() {
+        isLoading = false; // Stop loading
+      });
+      // Optionally, show a message or a retry button
+      return;
+    }
+
+    // Proceed with fetching the token and checking login status
+    await _requestPermission();
+    await _getToken();
+
+    const storage = FlutterSecureStorage();
+    final accessToken = await storage.read(key: 'billsplug_accessToken');
+    isLoggedIn = accessToken != null;
+
+    setState(() {
+      isLoading = false; // Stop loading
+    });
+  }
+
+  Future<void> _requestPermission() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      badge: true,
+      provisional: false,
+      sound: true,
+    );
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      print('User granted permission');
+    } else if (settings.authorizationStatus ==
+        AuthorizationStatus.provisional) {
+      print('User granted provisional permission');
+    } else {
+      print('User declined permission');
+    }
+  }
+
+  Future<void> _getToken() async {
+    try {
+      FirebaseMessaging messaging = FirebaseMessaging.instance;
+      String? token = await messaging.getToken();
+      print("FCM Token: $token");
+      await sendTokenToServer(token);
+    } catch (e) {
+      print("Error fetching token: $e");
+      // Handle the error (e.g., show a message to the user)
+    }
+  }
+
+  Future<void> sendTokenToServer(String? token) async {
+    if (token == null) return;
+
+    final response = await http.post(
+      Uri.parse(
+          'https://86t6buc6j0.execute-api.eu-north-1.amazonaws.com/test/'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'token': token,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      print('Token sent to server successfully');
+    } else {
+      print('Failed to send token to server: ${response.body}');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const MaterialApp(
+        home: Scaffold(
+          body: Center(
+              child: CircularProgressIndicator(
+                  color: Color(0xFF02AA03))), // Loading indicator
+        ),
+      );
+    }
+
     return MaterialApp(
-      home: widget.isLoggedIn ? const MainApp() : const IntroPage(),
+      home: isLoggedIn ? const MainApp() : const IntroPage(),
     );
   }
 }

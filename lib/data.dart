@@ -53,6 +53,7 @@ class DataPageState extends State<DataPage>
 
   List<String> mtnPrefixes = [
     "0703",
+    "0704",
     "0706",
     "0803",
     "0806",
@@ -62,7 +63,8 @@ class DataPageState extends State<DataPage>
     "0816",
     "0903",
     "0906",
-    "0913"
+    "0913",
+    "0916"
   ];
 
   List<String> airtelPrefixes = [
@@ -74,12 +76,30 @@ class DataPageState extends State<DataPage>
     "0815",
     "0817",
     "0901",
-    "0902"
+    "0902",
+    "0907"
   ];
 
-  List<String> gloPrefixes = ["0705", "0805", "0811", "0818", "0905"];
+  List<String> gloPrefixes = [
+    "0705",
+    "0805",
+    "0811",
+    "0815",
+    "0818",
+    "0905",
+    "0915"
+  ];
 
-  List<String> nineMobilePrefixes = ["0709", "0809", "0819", "0904"];
+  List<String> nineMobilePrefixes = [
+    "0709",
+    "0809",
+    "0817",
+    "0818",
+    "0819",
+    "0904",
+    "09088",
+    "0909"
+  ];
 
   bool paymentSectionDataOpen = false;
   String? userBalance;
@@ -103,6 +123,7 @@ class DataPageState extends State<DataPage>
   String phoneNumber = '';
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool isButtonEnabled = false;
+  String networkErrorMessage = "";
 
   @override
   void initState() {
@@ -461,6 +482,76 @@ class DataPageState extends State<DataPage>
                                       validateForm();
                                       setState(() {
                                         phoneNumber = phone.completeNumber;
+                                        if (phoneNumber.startsWith('+234')) {
+                                          phoneNumber = phoneNumber
+                                              .replaceFirst('+234', '');
+                                        } else if (phoneNumber
+                                            .startsWith('234')) {
+                                          phoneNumber = phoneNumber
+                                              .replaceFirst('234', '');
+                                        }
+
+                                        // Ensure the phone number is 11 digits long after removing the international code
+                                        if (phoneNumber.length > 11) {
+                                          phoneNumber = phoneNumber.substring(
+                                              phoneNumber.length - 11);
+                                        }
+
+                                        // Check for MTN
+                                        if (mtnPrefixes.any((prefix) =>
+                                                phoneNumber
+                                                    .startsWith(prefix)) &&
+                                            currentNetwork == 0) {
+                                          networkErrorMessage =
+                                              ""; // Valid MTN number
+                                        } else {
+                                          if (currentNetwork == 0) {
+                                            networkErrorMessage =
+                                                'Please enter a valid MTN number.';
+                                          }
+                                        }
+
+                                        // Check for Glo
+                                        if (gloPrefixes.any((prefix) =>
+                                            phoneNumber.startsWith(prefix))) {
+                                          if (currentNetwork == 2) {
+                                            networkErrorMessage =
+                                                ""; // Valid Glo number
+                                          }
+                                        } else {
+                                          if (currentNetwork == 2) {
+                                            networkErrorMessage =
+                                                'Please enter a valid Glo number.';
+                                          }
+                                        }
+
+                                        // Check for Airtel
+                                        if (airtelPrefixes.any((prefix) =>
+                                            phoneNumber.startsWith(prefix))) {
+                                          if (currentNetwork == 1) {
+                                            networkErrorMessage =
+                                                ""; // Valid Airtel number
+                                          }
+                                        } else {
+                                          if (currentNetwork == 1) {
+                                            networkErrorMessage =
+                                                'Please enter a valid Airtel number.';
+                                          }
+                                        }
+
+                                        // Check for 9Mobile
+                                        if (nineMobilePrefixes.any((prefix) =>
+                                            phoneNumber.startsWith(prefix))) {
+                                          if (currentNetwork == 3) {
+                                            networkErrorMessage =
+                                                ""; // Valid 9Mobile number
+                                          }
+                                        } else {
+                                          if (currentNetwork == 3) {
+                                            networkErrorMessage =
+                                                'Please enter a valid 9Mobile number.';
+                                          }
+                                        }
                                       });
                                     },
                                     validator: (value) {
@@ -473,6 +564,17 @@ class DataPageState extends State<DataPage>
                                     },
                                   ),
                                 ),
+                                // Display the error message below the input field
+                                if (networkErrorMessage.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 8.0, left: 20.0),
+                                    child: Text(
+                                      networkErrorMessage,
+                                      style: const TextStyle(
+                                          color: Colors.red, fontSize: 14.0),
+                                    ),
+                                  ),
                               ],
                             ),
                           ),
@@ -548,11 +650,11 @@ class DataPageState extends State<DataPage>
 
                                 if (currentPlanText == "SME") {
                                   if (phoneNumber.length != 11) {
-                                    _showCustomSnackBar(
-                                      context,
-                                      'Please enter a valid 11-digit mobile number',
-                                      isError: true,
-                                    );
+                                    // _showCustomSnackBar(
+                                    //   context,
+                                    //   'Please enter a valid 11-digit mobile number',
+                                    //   isError: true,
+                                    // );
                                     print(
                                         'Please enter a valid 11-digit mobile number');
                                     return Container();
@@ -1490,6 +1592,7 @@ class DataPageState extends State<DataPage>
           setState(() {
             currentPlanText = text;
             currentPlanOptionText = "";
+            networkErrorMessage = "";
           });
         },
         child: Container(

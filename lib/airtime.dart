@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:flutter/services.dart';
 
 class AirtimePage extends StatefulWidget {
   const AirtimePage({super.key});
@@ -44,6 +45,56 @@ class AirtimePageState extends State<AirtimePage>
     "07066666666",
   ];
 
+  List<String> mtnPrefixes = [
+    "0703",
+    "0704",
+    "0706",
+    "0803",
+    "0806",
+    "0810",
+    "0813",
+    "0814",
+    "0816",
+    "0903",
+    "0906",
+    "0913",
+    "0916"
+  ];
+
+  List<String> airtelPrefixes = [
+    "0701",
+    "0708",
+    "0802",
+    "0808",
+    "0812",
+    "0815",
+    "0817",
+    "0901",
+    "0902",
+    "0907"
+  ];
+
+  List<String> gloPrefixes = [
+    "0705",
+    "0805",
+    "0811",
+    "0815",
+    "0818",
+    "0905",
+    "0915"
+  ];
+
+  List<String> nineMobilePrefixes = [
+    "0709",
+    "0809",
+    "0817",
+    "0818",
+    "0819",
+    "0904",
+    "09088",
+    "0909"
+  ];
+
   bool paymentSectionAirtimeOpen = false;
   String? userBalance;
   late SharedPreferences prefs;
@@ -60,6 +111,7 @@ class AirtimePageState extends State<AirtimePage>
   String phoneNumber = '';
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool isButtonEnabled = false;
+  String networkErrorMessage = "";
 
   @override
   void initState() {
@@ -401,6 +453,62 @@ class AirtimePageState extends State<AirtimePage>
                                       validateForm();
                                       setState(() {
                                         phoneNumber = phone.completeNumber;
+
+                                        // Check for MTN
+                                        if (mtnPrefixes.any((prefix) =>
+                                                phoneNumber
+                                                    .startsWith(prefix)) &&
+                                            currentNetwork == 0) {
+                                          networkErrorMessage =
+                                              ""; // Valid MTN number
+                                        } else {
+                                          if (currentNetwork == 0) {
+                                            networkErrorMessage =
+                                                'Please enter a valid MTN number.';
+                                          }
+                                        }
+
+                                        // Check for Glo
+                                        if (gloPrefixes.any((prefix) =>
+                                            phoneNumber.startsWith(prefix))) {
+                                          if (currentNetwork == 2) {
+                                            networkErrorMessage =
+                                                ""; // Valid Glo number
+                                          }
+                                        } else {
+                                          if (currentNetwork == 2) {
+                                            networkErrorMessage =
+                                                'Please enter a valid Glo number.';
+                                          }
+                                        }
+
+                                        // Check for Airtel
+                                        if (airtelPrefixes.any((prefix) =>
+                                            phoneNumber.startsWith(prefix))) {
+                                          if (currentNetwork == 1) {
+                                            networkErrorMessage =
+                                                ""; // Valid Airtel number
+                                          }
+                                        } else {
+                                          if (currentNetwork == 1) {
+                                            networkErrorMessage =
+                                                'Please enter a valid Airtel number.';
+                                          }
+                                        }
+
+                                        // Check for 9Mobile
+                                        if (nineMobilePrefixes.any((prefix) =>
+                                            phoneNumber.startsWith(prefix))) {
+                                          if (currentNetwork == 3) {
+                                            networkErrorMessage =
+                                                ""; // Valid 9Mobile number
+                                          }
+                                        } else {
+                                          if (currentNetwork == 3) {
+                                            networkErrorMessage =
+                                                'Please enter a valid 9Mobile number.';
+                                          }
+                                        }
                                       });
                                     },
                                     validator: (value) {
@@ -413,6 +521,16 @@ class AirtimePageState extends State<AirtimePage>
                                     },
                                   ),
                                 ),
+                                if (networkErrorMessage.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 8.0, left: 20.0),
+                                    child: Text(
+                                      networkErrorMessage,
+                                      style: const TextStyle(
+                                          color: Colors.red, fontSize: 14.0),
+                                    ),
+                                  ),
                               ],
                             ),
                           ),
@@ -456,6 +574,18 @@ class AirtimePageState extends State<AirtimePage>
                                 fillColor: Colors.white,
                               ),
                               cursorColor: const Color(0xFF02AA03),
+                              keyboardType: TextInputType
+                                  .number, // This allows only numeric input
+                              inputFormatters: <TextInputFormatter>[
+                                FilteringTextInputFormatter
+                                    .digitsOnly, // This will filter out non-numeric input
+                              ],
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter an amount';
+                                }
+                                return null; // Return null if the input is valid
+                              },
                             ),
                           ),
                           SizedBox(
