@@ -2285,7 +2285,7 @@ class AirtimeAndDataPageState extends State<AirtimeAndDataPage>
                                                   alignment:
                                                       Alignment.centerLeft,
                                                   child: Text(
-                                                    'Select start date',
+                                                    'Select end date',
                                                     style: TextStyle(
                                                       fontFamily: 'Inter',
                                                       fontSize: 16.0,
@@ -2311,7 +2311,7 @@ class AirtimeAndDataPageState extends State<AirtimeAndDataPage>
                                                   if (picked != null) {
                                                     setState(() {
                                                       // Format the date in dd/MM/yyyy format before updating the controller
-                                                      startDateText =
+                                                      endDateText =
                                                           _formatDate(picked);
                                                     });
                                                   }
@@ -2337,7 +2337,7 @@ class AirtimeAndDataPageState extends State<AirtimeAndDataPage>
                                                       Expanded(
                                                         flex: 5,
                                                         child: Text(
-                                                          startDateText,
+                                                          endDateText,
                                                           overflow: TextOverflow
                                                               .ellipsis,
                                                           style:
@@ -2371,7 +2371,7 @@ class AirtimeAndDataPageState extends State<AirtimeAndDataPage>
                                                           if (picked != null) {
                                                             setState(() {
                                                               // Format the date in dd/MM/yyyy format before updating the controller
-                                                              startDateText =
+                                                              endDateText =
                                                                   _formatDate(
                                                                       picked);
                                                             });

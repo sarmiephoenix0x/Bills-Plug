@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 
 class AirtimePage extends StatefulWidget {
   const AirtimePage({super.key});
@@ -56,10 +57,14 @@ class AirtimePageState extends State<AirtimePage>
   late AnimationController _controller;
   late Animation<double> _animation;
   String pinCode = "";
+  String phoneNumber = '';
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool isButtonEnabled = false;
 
   @override
   void initState() {
     super.initState();
+    amountController.addListener(validateForm);
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 1),
@@ -182,6 +187,14 @@ class AirtimePageState extends State<AirtimePage>
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
+  void validateForm() {
+    setState(() {
+      isButtonEnabled = amountController.text.trim().isNotEmpty &&
+          _formKey.currentState!
+              .validate(); // Update button state based on validation
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     if (currentNetwork == 0) {
@@ -300,82 +313,107 @@ class AirtimePageState extends State<AirtimePage>
                                       );
                                     },
                                   ))),
+                          // SizedBox(
+                          //     height:
+                          //         MediaQuery.of(context).size.height * 0.04),
+                          // const Padding(
+                          //   padding: EdgeInsets.symmetric(horizontal: 20.0),
+                          //   child: Text(
+                          //     'Recent Number',
+                          //     style: TextStyle(
+                          //       fontFamily: 'Inter',
+                          //       fontWeight: FontWeight.bold,
+                          //       fontSize: 18.0,
+                          //       color: Colors.black,
+                          //     ),
+                          //   ),
+                          // ),
+                          // SizedBox(
+                          //     height:
+                          //         MediaQuery.of(context).size.height * 0.04),
+                          // SizedBox(
+                          //   height: (50 / MediaQuery.of(context).size.height) *
+                          //       MediaQuery.of(context).size.height,
+                          //   child: ListView.builder(
+                          //     scrollDirection: Axis.horizontal,
+                          //     itemCount: networkImg.length,
+                          //     itemBuilder: (context, index) {
+                          //       return number(index, networkImg[index],
+                          //           networkNumber[index]);
+                          //     },
+                          //   ),
+                          // ),
                           SizedBox(
                               height:
                                   MediaQuery.of(context).size.height * 0.04),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 20.0),
-                            child: Text(
-                              'Recent Number',
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18.0,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                              height:
-                                  MediaQuery.of(context).size.height * 0.04),
-                          SizedBox(
-                            height: (50 / MediaQuery.of(context).size.height) *
-                                MediaQuery.of(context).size.height,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: networkImg.length,
-                              itemBuilder: (context, index) {
-                                return number(index, networkImg[index],
-                                    networkNumber[index]);
-                              },
-                            ),
-                          ),
-                          SizedBox(
-                              height:
-                                  MediaQuery.of(context).size.height * 0.04),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 20.0),
-                            child: TextFormField(
-                              controller: phoneNumberController,
-                              focusNode: _phoneNumberFocusNode,
-                              style: const TextStyle(
-                                fontSize: 16.0,
-                              ),
-                              decoration: InputDecoration(
-                                  labelText: 'Mobile Number',
-                                  labelStyle: const TextStyle(
-                                    color: Colors.grey,
-                                    fontFamily: 'Inter',
-                                    fontSize: 16.0,
-                                    decoration: TextDecoration.none,
-                                  ),
-                                  floatingLabelBehavior:
-                                      FloatingLabelBehavior.never,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(15),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(15),
-                                    borderSide: const BorderSide(
-                                        width: 3, color: Color(0xFF02AA03)),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(15),
-                                    borderSide: const BorderSide(
-                                        width: 2, color: Colors.grey),
-                                  ),
-                                  filled: true,
-                                  fillColor: Colors.white,
-                                  suffixIcon: IconButton(
-                                    icon: const Icon(
-                                      Icons.contact_phone,
-                                      color: Colors.grey,
+                          Form(
+                            key: _formKey,
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20.0),
+                                  child: IntlPhoneField(
+                                    decoration: InputDecoration(
+                                      labelText: 'Mobile Number',
+                                      labelStyle: const TextStyle(
+                                        color: Colors.grey,
+                                        fontFamily: 'Inter',
+                                        fontSize: 16.0,
+                                        decoration: TextDecoration.none,
+                                      ),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                        borderSide: const BorderSide(
+                                          width: 3,
+                                          color: Color(0xFF02AA03),
+                                        ),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                        borderSide: const BorderSide(
+                                          width: 2,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                      suffixIcon: IconButton(
+                                        icon: const Icon(
+                                          Icons.contact_phone,
+                                          color: Colors.grey,
+                                        ),
+                                        onPressed: () {
+                                          // Action when the icon is pressed
+                                        },
+                                      ),
+                                      counterText: '',
                                     ),
-                                    onPressed: () {},
-                                  )),
-                              cursorColor: const Color(0xFF02AA03),
+                                    initialCountryCode:
+                                        'NG', // Set the initial country code to Nigeria
+                                    showCountryFlag:
+                                        false, // Hide the country flag
+                                    onChanged: (phone) {
+                                      validateForm();
+                                      setState(() {
+                                        phoneNumber = phone.completeNumber;
+                                      });
+                                    },
+                                    validator: (value) {
+                                      // Validate the phone number length for Nigeria
+                                      if (value == null ||
+                                          value.number.length != 11) {
+                                        return 'Please enter a valid 11-digit mobile number';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           SizedBox(
@@ -433,70 +471,50 @@ class AirtimePageState extends State<AirtimePage>
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 20.0),
                             child: ElevatedButton(
-                              onPressed: () {
-                                if (amountController.text.trim().isNotEmpty &&
-                                    phoneNumberController.text
-                                        .trim()
-                                        .isNotEmpty) {
-                                  setState(() {
-                                    paymentSectionAirtimeOpen = true;
-                                  });
-                                }
-                              },
+                              onPressed:
+                                  isButtonEnabled // Enable or disable the button
+                                      ? () {
+                                          setState(() {
+                                            paymentSectionAirtimeOpen =
+                                                true; // Proceed if valid
+                                          });
+                                        }
+                                      : null, // Disable button if conditions are not met
                               style: ButtonStyle(
                                 backgroundColor:
                                     WidgetStateProperty.resolveWith<Color>(
                                   (Set<WidgetState> states) {
-                                    if (amountController.text
-                                            .trim()
-                                            .isNotEmpty &&
-                                        phoneNumberController.text
-                                            .trim()
-                                            .isNotEmpty) {
-                                      if (states
-                                          .contains(WidgetState.pressed)) {
-                                        return Colors.white;
-                                      }
-                                      return const Color(0xFF02AA03);
-                                    } else {
-                                      return Colors.grey;
+                                    if (states.contains(WidgetState.pressed)) {
+                                      return Colors
+                                          .white; // Change color when pressed
                                     }
+                                    return isButtonEnabled // Check if button should be enabled
+                                        ? const Color(
+                                            0xFF02AA03) // Active color
+                                        : Colors.grey; // Inactive color
                                   },
                                 ),
                                 foregroundColor:
                                     WidgetStateProperty.resolveWith<Color>(
                                   (Set<WidgetState> states) {
-                                    if (amountController.text
-                                            .trim()
-                                            .isNotEmpty &&
-                                        phoneNumberController.text
-                                            .trim()
-                                            .isNotEmpty) {
-                                      if (states
-                                          .contains(WidgetState.pressed)) {
-                                        return const Color(0xFF02AA03);
-                                      }
-                                      return Colors.white;
-                                    } else {
-                                      return Colors.white;
-                                    }
+                                    return isButtonEnabled // Check if button should be enabled
+                                        ? (states.contains(WidgetState.pressed)
+                                            ? const Color(
+                                                0xFF02AA03) // Change text color when pressed
+                                            : Colors
+                                                .white) // Default text color
+                                        : Colors
+                                            .white; // Text color when inactive
                                   },
                                 ),
                                 elevation: WidgetStateProperty.all<double>(4.0),
                                 shape: WidgetStateProperty.resolveWith<
                                     RoundedRectangleBorder>(
                                   (Set<WidgetState> states) {
-                                    final bool isFilled = amountController.text
-                                            .trim()
-                                            .isNotEmpty &&
-                                        phoneNumberController.text
-                                            .trim()
-                                            .isNotEmpty;
-
                                     return RoundedRectangleBorder(
                                       side: BorderSide(
                                         width: 3,
-                                        color: isFilled
+                                        color: isButtonEnabled
                                             ? const Color(0xFF02AA03)
                                             : Colors.grey,
                                       ),

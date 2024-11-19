@@ -15,6 +15,7 @@ import 'help_service.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatefulWidget {
   final Function welcomeAdActive;
@@ -151,6 +152,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       return userMap['image']; // Fetch the outer profile photo
     } else {
       return null;
+    }
+  }
+
+  void _launchURL() async {
+    const url = 'https://www.Billsplug.ng/Referredandearn583'; // Your URL here
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
     }
   }
 
@@ -993,16 +1003,20 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                             MediaQuery.of(context).size.height *
                                                 0.03,
                                       ),
-                                      const Padding(
-                                        padding: EdgeInsets.symmetric(
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
                                             horizontal: 10.0),
-                                        child: Text(
-                                          'www.Billsplug.ng/Referredandearn583',
-                                          textAlign: TextAlign.start,
-                                          style: TextStyle(
-                                            fontFamily: 'Inter',
-                                            fontSize: 16.0,
-                                            color: Color(0xFF1469CC),
+                                        child: GestureDetector(
+                                          onTap:
+                                              _launchURL, // Call the function when tapped
+                                          child: const Text(
+                                            'www.Billsplug.ng/Referredandearn583',
+                                            textAlign: TextAlign.start,
+                                            style: TextStyle(
+                                              fontFamily: 'Inter',
+                                              fontSize: 16.0,
+                                              color: Color(0xFF1469CC),
+                                            ),
                                           ),
                                         ),
                                       ),

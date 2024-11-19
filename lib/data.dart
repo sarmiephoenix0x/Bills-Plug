@@ -48,6 +48,7 @@ class DataPageState extends State<DataPage>
     "SME",
     "Gifting",
     "CO - OPERATE GIFTING",
+    "Special Offer"
   ];
 
   List<String> mtnPrefixes = [
@@ -100,6 +101,8 @@ class DataPageState extends State<DataPage>
   String planID = "0";
   Plan? selectedPlan;
   String phoneNumber = '';
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool isButtonEnabled = false;
 
   @override
   void initState() {
@@ -241,6 +244,14 @@ class DataPageState extends State<DataPage>
     );
 
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  void validateForm() {
+    setState(() {
+      isButtonEnabled = currentPlanOptionText != "" &&
+          _formKey.currentState!
+              .validate(); // Update button state based on validation
+    });
   }
 
   @override
@@ -395,56 +406,74 @@ class DataPageState extends State<DataPage>
                           SizedBox(
                               height:
                                   MediaQuery.of(context).size.height * 0.04),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 20.0),
-                            child: IntlPhoneField(
-                              decoration: InputDecoration(
-                                labelText: 'Mobile Number',
-                                labelStyle: const TextStyle(
-                                  color: Colors.grey,
-                                  fontFamily: 'Inter',
-                                  fontSize: 16.0,
-                                  decoration: TextDecoration.none,
-                                ),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                  borderSide: const BorderSide(),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                  borderSide: const BorderSide(
-                                    width: 3,
-                                    color: Color(0xFF02AA03),
+                          Form(
+                            key: _formKey,
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20.0),
+                                  child: IntlPhoneField(
+                                    decoration: InputDecoration(
+                                      labelText: 'Mobile Number',
+                                      labelStyle: const TextStyle(
+                                        color: Colors.grey,
+                                        fontFamily: 'Inter',
+                                        fontSize: 16.0,
+                                        decoration: TextDecoration.none,
+                                      ),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                        borderSide: const BorderSide(
+                                          width: 3,
+                                          color: Color(0xFF02AA03),
+                                        ),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                        borderSide: const BorderSide(
+                                          width: 2,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                      suffixIcon: IconButton(
+                                        icon: const Icon(
+                                          Icons.contact_phone,
+                                          color: Colors.grey,
+                                        ),
+                                        onPressed: () {
+                                          // Action when the icon is pressed
+                                        },
+                                      ),
+                                      counterText: '',
+                                    ),
+                                    initialCountryCode:
+                                        'NG', // Set the initial country code to Nigeria
+                                    showCountryFlag:
+                                        false, // Hide the country flag
+                                    onChanged: (phone) {
+                                      validateForm();
+                                      setState(() {
+                                        phoneNumber = phone.completeNumber;
+                                      });
+                                    },
+                                    validator: (value) {
+                                      // Validate the phone number length for Nigeria
+                                      if (value == null ||
+                                          value.number.length != 11) {
+                                        return 'Please enter a valid 11-digit mobile number';
+                                      }
+                                      return null;
+                                    },
                                   ),
                                 ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                  borderSide: const BorderSide(
-                                    width: 2,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                                filled: true,
-                                fillColor: Colors.white,
-                                counterText: '',
-                              ),
-                              initialCountryCode:
-                                  'NG', // Set the initial country code to Nigeria
-                              showCountryFlag: false, // Hide the country flag
-                              onChanged: (phone) {
-                                setState(() {
-                                  phoneNumber = phone.completeNumber;
-                                });
-                              },
-                              validator: (value) {
-                                // Validate the phone number length for Nigeria
-                                if (value == null ||
-                                    value.number.length != 11) {
-                                  return 'Please enter a valid 10-digit mobile number';
-                                }
-                                return null;
-                              },
+                              ],
                             ),
                           ),
                           SizedBox(
@@ -453,12 +482,12 @@ class DataPageState extends State<DataPage>
                           SizedBox(
                             height: (50 / MediaQuery.of(context).size.height) *
                                 MediaQuery.of(context).size.height,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: planText.length,
-                              itemBuilder: (context, index) {
-                                return plan(planText[index]);
-                              },
+                            width: MediaQuery.of(context).size.width,
+                            child: ListView(
+                              scrollDirection:
+                                  Axis.horizontal, // Set to horizontal
+                              children:
+                                  planText.map((text) => plan(text)).toList(),
                             ),
                           ),
                           SizedBox(
@@ -615,65 +644,50 @@ class DataPageState extends State<DataPage>
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 20.0),
                             child: ElevatedButton(
-                              onPressed: () {
-                                if (currentPlanOptionText != "" &&
-                                    phoneNumberController.text
-                                        .trim()
-                                        .isNotEmpty) {
-                                  setState(() {
-                                    paymentSectionDataOpen = true;
-                                  });
-                                }
-                              },
+                              onPressed:
+                                  isButtonEnabled // Enable or disable the button
+                                      ? () {
+                                          setState(() {
+                                            paymentSectionDataOpen =
+                                                true; // Proceed if valid
+                                          });
+                                        }
+                                      : null, // Disable button if conditions are not met
                               style: ButtonStyle(
                                 backgroundColor:
                                     WidgetStateProperty.resolveWith<Color>(
                                   (Set<WidgetState> states) {
-                                    if (currentPlanOptionText != "" &&
-                                        phoneNumberController.text
-                                            .trim()
-                                            .isNotEmpty) {
-                                      if (states
-                                          .contains(WidgetState.pressed)) {
-                                        return Colors.white;
-                                      }
-                                      return const Color(0xFF02AA03);
-                                    } else {
-                                      return Colors.grey;
+                                    if (states.contains(WidgetState.pressed)) {
+                                      return Colors
+                                          .white; // Change color when pressed
                                     }
+                                    return isButtonEnabled // Check if button should be enabled
+                                        ? const Color(
+                                            0xFF02AA03) // Active color
+                                        : Colors.grey; // Inactive color
                                   },
                                 ),
                                 foregroundColor:
                                     WidgetStateProperty.resolveWith<Color>(
                                   (Set<WidgetState> states) {
-                                    if (currentPlanOptionText != "" &&
-                                        phoneNumberController.text
-                                            .trim()
-                                            .isNotEmpty) {
-                                      if (states
-                                          .contains(WidgetState.pressed)) {
-                                        return const Color(0xFF02AA03);
-                                      }
-                                      return Colors.white;
-                                    } else {
-                                      return Colors.white;
-                                    }
+                                    return isButtonEnabled // Check if button should be enabled
+                                        ? (states.contains(WidgetState.pressed)
+                                            ? const Color(
+                                                0xFF02AA03) // Change text color when pressed
+                                            : Colors
+                                                .white) // Default text color
+                                        : Colors
+                                            .white; // Text color when inactive
                                   },
                                 ),
                                 elevation: WidgetStateProperty.all<double>(4.0),
                                 shape: WidgetStateProperty.resolveWith<
                                     RoundedRectangleBorder>(
                                   (Set<WidgetState> states) {
-                                    final bool isFilled =
-                                        currentPlanOptionText != "" &&
-                                            phoneNumberController.text
-                                                .trim()
-                                                .isNotEmpty;
-
                                     return RoundedRectangleBorder(
                                       side: BorderSide(
                                         width: 3,
-                                        color: isFilled
+                                        color: isButtonEnabled
                                             ? const Color(0xFF02AA03)
                                             : Colors.grey,
                                       ),
@@ -1523,6 +1537,7 @@ class DataPageState extends State<DataPage>
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
       child: InkWell(
         onTap: () {
+          validateForm();
           setState(() {
             if (isSelected) {
               // Deselect the current plan

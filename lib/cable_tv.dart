@@ -1521,7 +1521,7 @@ class CableTVPageState extends State<CableTVPage>
                                                   alignment:
                                                       Alignment.centerLeft,
                                                   child: Text(
-                                                    'Select start date',
+                                                    'Select end date',
                                                     style: TextStyle(
                                                       fontFamily: 'Inter',
                                                       fontSize: 16.0,
@@ -1547,7 +1547,7 @@ class CableTVPageState extends State<CableTVPage>
                                                   if (picked != null) {
                                                     setState(() {
                                                       // Format the date in dd/MM/yyyy format before updating the controller
-                                                      startDateText =
+                                                      endDateText =
                                                           _formatDate(picked);
                                                     });
                                                   }
@@ -1573,7 +1573,7 @@ class CableTVPageState extends State<CableTVPage>
                                                       Expanded(
                                                         flex: 5,
                                                         child: Text(
-                                                          startDateText,
+                                                          endDateText,
                                                           overflow: TextOverflow
                                                               .ellipsis,
                                                           style:
@@ -1607,7 +1607,7 @@ class CableTVPageState extends State<CableTVPage>
                                                           if (picked != null) {
                                                             setState(() {
                                                               // Format the date in dd/MM/yyyy format before updating the controller
-                                                              startDateText =
+                                                              endDateText =
                                                                   _formatDate(
                                                                       picked);
                                                             });
