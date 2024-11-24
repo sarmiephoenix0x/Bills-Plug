@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
+import 'package:local_auth/local_auth.dart';
 
 class DataPage extends StatefulWidget {
   const DataPage({super.key});
@@ -124,10 +123,15 @@ class DataPageState extends State<DataPage>
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool isButtonEnabled = false;
   String networkErrorMessage = "";
+  final LocalAuthentication auth = LocalAuthentication();
+  String pin = '';
+  final TextEditingController pinController = TextEditingController();
+  List<FocusNode> focusNodes = [];
 
   @override
   void initState() {
     super.initState();
+    focusNodes = List.generate(4, (_) => FocusNode());
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 1),
@@ -161,7 +165,7 @@ class DataPageState extends State<DataPage>
     super.dispose();
   }
 
-  void handleOtpInputComplete(String code) {
+  void handlePinInputComplete(String code) {
     setState(() {
       pinCode = code;
     });
@@ -193,7 +197,7 @@ class DataPageState extends State<DataPage>
     final accessToken = await storage.read(key: 'billsplug_accessToken');
     final url = Uri.parse("https://glad.payguru.com.ng/api/data/purchase");
     final requestBody = {
-      "phone_number": phoneNumberController.text.trim(),
+      "phone_number": phoneNumber,
       "network": networkName,
       "plan_id": planID,
       "pin": pin,
@@ -269,10 +273,30 @@ class DataPageState extends State<DataPage>
 
   void validateForm() {
     setState(() {
-      isButtonEnabled = currentPlanOptionText != "" &&
-          _formKey.currentState!
-              .validate(); // Update button state based on validation
+      isButtonEnabled = currentPlanOptionText != "" && phoneNumber.length == 11;
     });
+  }
+
+  Future<void> authenticateWithFingerprint() async {
+    try {
+      bool authenticated = await auth.authenticate(
+        localizedReason: 'Please authenticate to proceed',
+        options: const AuthenticationOptions(
+          useErrorDialogs: true,
+          stickyAuth: true,
+        ),
+      );
+
+      if (authenticated) {
+        // Handle successful authentication
+        print("Fingerprint authentication successful!");
+      } else {
+        // Handle failed authentication
+        print("Fingerprint authentication failed.");
+      }
+    } catch (e) {
+      print("Error during fingerprint authentication: $e");
+    }
   }
 
   @override
@@ -434,7 +458,7 @@ class DataPageState extends State<DataPage>
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 20.0),
-                                  child: IntlPhoneField(
+                                  child: TextFormField(
                                     decoration: InputDecoration(
                                       labelText: 'Mobile Number',
                                       labelStyle: const TextStyle(
@@ -474,27 +498,24 @@ class DataPageState extends State<DataPage>
                                       ),
                                       counterText: '',
                                     ),
-                                    initialCountryCode:
-                                        'NG', // Set the initial country code to Nigeria
-                                    showCountryFlag:
-                                        false, // Hide the country flag
-                                    onChanged: (phone) {
+                                    maxLength:
+                                        11, // Limit to 11 digits for Nigeria
+                                    keyboardType: TextInputType.phone,
+                                    onChanged: (value) {
                                       validateForm();
                                       setState(() {
-                                        phoneNumber = phone.completeNumber;
-                                        if (phoneNumber.startsWith('+234')) {
-                                          phoneNumber = phoneNumber
-                                              .replaceFirst('+234', '');
-                                        } else if (phoneNumber
-                                            .startsWith('234')) {
-                                          phoneNumber = phoneNumber
-                                              .replaceFirst('234', '');
-                                        }
+                                        phoneNumber = value;
 
-                                        // Ensure the phone number is 11 digits long after removing the international code
+                                        // Ensure the phone number is 11 digits long
                                         if (phoneNumber.length > 11) {
                                           phoneNumber = phoneNumber.substring(
                                               phoneNumber.length - 11);
+                                        }
+
+                                        // Dismiss the keyboard if the length is 11
+                                        if (phoneNumber.length == 11) {
+                                          FocusScope.of(context)
+                                              .unfocus(); // Dismiss the keyboard
                                         }
 
                                         // Check for MTN
@@ -556,15 +577,13 @@ class DataPageState extends State<DataPage>
                                     },
                                     validator: (value) {
                                       // Validate the phone number length for Nigeria
-                                      if (value == null ||
-                                          value.number.length != 11) {
+                                      if (value == null || value.length != 11) {
                                         return 'Please enter a valid 11-digit mobile number';
                                       }
                                       return null;
                                     },
                                   ),
                                 ),
-                                // Display the error message below the input field
                                 if (networkErrorMessage.isNotEmpty)
                                   Padding(
                                     padding: const EdgeInsets.only(
@@ -578,24 +597,31 @@ class DataPageState extends State<DataPage>
                               ],
                             ),
                           ),
-                          SizedBox(
-                              height:
-                                  MediaQuery.of(context).size.height * 0.04),
-                          SizedBox(
-                            height: (50 / MediaQuery.of(context).size.height) *
-                                MediaQuery.of(context).size.height,
-                            width: MediaQuery.of(context).size.width,
-                            child: ListView(
-                              scrollDirection:
-                                  Axis.horizontal, // Set to horizontal
-                              children:
-                                  planText.map((text) => plan(text)).toList(),
+                          if (phoneNumber.length == 11) ...[
+                            SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.04),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10.0),
+                              child: SizedBox(
+                                height:
+                                    (50 / MediaQuery.of(context).size.height) *
+                                        MediaQuery.of(context).size.height,
+                                width: MediaQuery.of(context).size.width,
+                                child: ListView(
+                                  scrollDirection:
+                                      Axis.horizontal, // Set to horizontal
+                                  children: planText
+                                      .map((text) => plan(text))
+                                      .toList(),
+                                ),
+                              ),
                             ),
-                          ),
-                          SizedBox(
-                              height:
-                                  MediaQuery.of(context).size.height * 0.04),
-
+                            SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.04),
+                          ],
                           FutureBuilder<List<Plan>>(
                             future: futurePlans,
                             builder: (context, snapshot) {
@@ -1423,68 +1449,86 @@ class DataPageState extends State<DataPage>
                             if (!didPop) {
                               setState(() {
                                 inputPin = false;
+                                pin = '';
                               });
                             }
                           },
-                          child: Center(
-                            child: SingleChildScrollView(
-                              child: Container(
-                                margin: const EdgeInsets.symmetric(
-                                    horizontal: 20.0), // Centered padding
-                                padding: const EdgeInsets.all(
-                                    16.0), // Inner padding for content
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(25.0),
-                                  boxShadow: const [
-                                    BoxShadow(
-                                      color: Colors.black26,
-                                      spreadRadius: 2,
-                                      blurRadius: 10,
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize
-                                      .min, // Expands only as needed
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    SizedBox(
-                                        height:
-                                            MediaQuery.of(context).size.height *
-                                                0.03),
-                                    const Text(
-                                      'Input PIN',
-                                      style: TextStyle(
-                                        fontSize: 24,
-                                        fontFamily: 'Inter',
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black,
+                          child: GestureDetector(
+                            onTap: () {
+                              // Dismiss the keyboard when tapping outside
+                              FocusScope.of(context).unfocus();
+                            },
+                            child: Center(
+                              child: SingleChildScrollView(
+                                child: Container(
+                                  margin: const EdgeInsets.symmetric(
+                                      horizontal: 20.0), // Centered padding
+                                  padding: const EdgeInsets.all(
+                                      16.0), // Inner padding for content
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(25.0),
+                                    boxShadow: const [
+                                      BoxShadow(
+                                        color: Colors.black26,
+                                        spreadRadius: 2,
+                                        blurRadius: 10,
                                       ),
-                                    ),
-                                    SizedBox(
-                                        height:
-                                            MediaQuery.of(context).size.height *
-                                                0.04),
-                                    OtpTextField(
-                                      numberOfFields: 4,
-                                      fieldWidth: (50 /
-                                              MediaQuery.of(context)
+                                    ],
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize
+                                        .min, // Expands only as needed
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
                                                   .size
-                                                  .width) *
-                                          MediaQuery.of(context).size.width,
-                                      focusedBorderColor: const Color(
-                                          0xFF02AA03), // Border color when focused
-                                      enabledBorderColor: Colors.grey,
-                                      borderColor: Colors.grey,
-                                      showFieldAsBox: true,
-                                      onCodeChanged: (String code) {
-                                        // Handle real-time OTP input changes
-                                      },
-                                      onSubmit: (String code) =>
-                                          handleOtpInputComplete(code),
-                                    ),
-                                  ],
+                                                  .height *
+                                              0.03),
+                                      const Text(
+                                        'Input PIN',
+                                        style: TextStyle(
+                                          fontSize: 24,
+                                          fontFamily: 'Inter',
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.04),
+                                      PinInput(pin: pin, length: 4),
+                                      const SizedBox(height: 20),
+                                      // Custom Keyboard
+                                      CustomKeyboard(
+                                        onNumberPressed: (String number) {
+                                          setState(() {
+                                            if (pin.length < 4) {
+                                              pin += number;
+                                            }
+                                            if (pin.length == 4) {
+                                              handlePinInputComplete(pin);
+                                            }
+                                          });
+                                        },
+                                        onFingerprintPressed: () async {
+                                          await authenticateWithFingerprint();
+                                        },
+                                        onBackspacePressed: () {
+                                          setState(() {
+                                            if (pin.isNotEmpty) {
+                                              pin = pin.substring(
+                                                  0, pin.length - 1);
+                                            }
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
@@ -1586,7 +1630,7 @@ class DataPageState extends State<DataPage>
 
   Widget plan(String text) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      padding: const EdgeInsets.symmetric(horizontal: 10.0),
       child: InkWell(
         onTap: () {
           setState(() {
@@ -1607,7 +1651,7 @@ class DataPageState extends State<DataPage>
                 : Border.all(width: 0, color: Colors.transparent),
           ),
           child: SizedBox(
-            width: (150 / MediaQuery.of(context).size.width) *
+            width: (100 / MediaQuery.of(context).size.width) *
                 MediaQuery.of(context).size.width,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -1640,7 +1684,6 @@ class DataPageState extends State<DataPage>
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
       child: InkWell(
         onTap: () {
-          validateForm();
           setState(() {
             if (isSelected) {
               // Deselect the current plan
@@ -1654,9 +1697,10 @@ class DataPageState extends State<DataPage>
                 name: text,
                 userPrice: amount,
                 planId: planId,
-              ); // Update selectedPlan
+              );
             }
           });
+          validateForm();
         },
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 7.0),
@@ -1741,6 +1785,142 @@ class DataPageState extends State<DataPage>
           ),
         ],
       ),
+    );
+  }
+}
+
+class PinInput extends StatelessWidget {
+  final String pin;
+  final int length;
+
+  const PinInput({
+    Key? key,
+    required this.pin,
+    required this.length,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(length, (index) {
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 4.0),
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color:
+                pin.length > index ? const Color(0xFF02AA03) : Colors.grey[300],
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            pin.length > index ? pin[index] : '',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+class CustomKeyboard extends StatefulWidget {
+  final Function(String) onNumberPressed;
+  final Function onFingerprintPressed;
+  final Function onBackspacePressed;
+
+  const CustomKeyboard({
+    super.key,
+    required this.onNumberPressed,
+    required this.onFingerprintPressed,
+    required this.onBackspacePressed,
+  });
+
+  @override
+  _CustomKeyboardState createState() => _CustomKeyboardState();
+}
+
+class _CustomKeyboardState extends State<CustomKeyboard> {
+  List<bool> _isPressed =
+      List.generate(12, (index) => false); // Track button press state
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.count(
+      crossAxisCount: 3,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      children: [
+        for (int i = 1; i <= 9; i++)
+          GestureDetector(
+            onTapDown: (_) => _setPressed(i - 1, true),
+            onTapUp: (_) {
+              _setPressed(i - 1, false);
+              widget.onNumberPressed(i.toString());
+            },
+            onTapCancel: () => _setPressed(i - 1, false),
+            child: _buildKey(i.toString(), i - 1),
+          ),
+        GestureDetector(
+          onTapDown: (_) => _setPressed(9, true),
+          onTapUp: (_) {
+            _setPressed(9, false);
+            widget.onNumberPressed('0');
+          },
+          onTapCancel: () => _setPressed(9, false),
+          child: _buildKey('0', 9),
+        ),
+        GestureDetector(
+          onTapDown: (_) => _setPressed(10, true),
+          onTapUp: (_) {
+            _setPressed(10, false);
+            widget.onBackspacePressed();
+          },
+          onTapCancel: () => _setPressed(10, false),
+          child: _buildKey('Backspace', 10, isIcon: true),
+        ),
+        GestureDetector(
+          onTapDown: (_) => _setPressed(11, true),
+          onTapUp: (_) {
+            _setPressed(11, false);
+            widget.onFingerprintPressed();
+          },
+          onTapCancel: () => _setPressed(11, false),
+          child: _buildKey('Fingerprint', 11, isIcon: true),
+        ),
+      ],
+    );
+  }
+
+  void _setPressed(int index, bool isPressed) {
+    setState(() {
+      _isPressed[index] = isPressed;
+    });
+  }
+
+  Widget _buildKey(String label, int index, {bool isIcon = false}) {
+    return Container(
+      margin: const EdgeInsets.all(8.0),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: _isPressed[index] ? Colors.green[300] : Colors.grey[200],
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: isIcon
+          ? Icon(
+              label == 'Backspace' ? Icons.backspace : Icons.fingerprint,
+              size: 45,
+              color:
+                  label == 'Backspace' ? Colors.black : const Color(0xFF02AA03),
+            )
+          : Text(
+              label,
+              style: const TextStyle(fontSize: 24),
+            ),
     );
   }
 }
