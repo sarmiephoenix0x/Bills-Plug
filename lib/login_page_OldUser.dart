@@ -83,7 +83,7 @@ class LoginPageOldUserState extends State<LoginPageOldUser> {
                         Image.asset(
                           "images/AppLogo.png",
                           fit: BoxFit.contain,
-                          width: 150,
+                          width: 120,
                         ),
                       ],
                     ),

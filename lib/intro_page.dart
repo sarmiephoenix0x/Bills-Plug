@@ -21,9 +21,9 @@ class _IntroPageState extends State<IntroPage> {
   ];
 
   List<String> imageHeaders = [
-    "Welcome to Billsplug",
-    "Welcome to Billsplug",
-    "Welcome to Billsplug",
+    "Welcome to Flexi Data",
+    "Welcome to Flexi Data",
+    "Welcome to Flexi Data",
   ];
 
   List<String> imageSubheadings = [

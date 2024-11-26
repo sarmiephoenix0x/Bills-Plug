@@ -222,7 +222,7 @@ class LoginPageState extends State<LoginPage>
                         Image.asset(
                           "images/AppLogo.png",
                           fit: BoxFit.contain,
-                          width: 150,
+                          width: 120,
                         ),
                       ],
                     ),
