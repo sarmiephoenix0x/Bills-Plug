@@ -179,6 +179,15 @@ flutter:
     - images/WAECImg.png
     - images/Sterling.png
     - images/WEMA.png
+    - images/EkoElectricity.png
+    - images/EnuguElectricity.png
+    - images/IkejaDisco.png
+    - images/KanoElectricity.png
+    - images/1XBet.png
+    - images/BetWay.png
+    - images/BetWinner.png
+    - images/Tick.png
+    - images/CopyImg.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

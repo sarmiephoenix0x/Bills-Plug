@@ -1,3 +1,4 @@
+import 'package:bills_plug/payment_successful_airtime.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -148,6 +149,7 @@ class AirtimePageState extends State<AirtimePage>
     setState(() {
       pinCode = code;
     });
+
     _submitAirtimePurchase(pinCode);
   }
 
@@ -179,7 +181,20 @@ class AirtimePageState extends State<AirtimePage>
 
       if (response.statusCode == 200) {
         inputPin = false;
-        paymentSuccessful = true;
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PaymentSuccessfulAirtime(
+              key: UniqueKey(),
+              id: 0,
+              network: networkName,
+              type: "VTU",
+              number: phoneNumberController.text.trim(),
+              amount: amountController.text.trim(),
+              timeStamp: "08 Oct, 2024 12:12PM",
+            ),
+          ),
+        );
         print("Airtime purchase successful");
       } else if (response.statusCode == 400) {
         final errorMessage = json.decode(response.body)['error'];
@@ -236,7 +251,8 @@ class AirtimePageState extends State<AirtimePage>
 
   void validateForm() {
     setState(() {
-      isButtonEnabled = amountController.text.trim().isNotEmpty &&
+      isButtonEnabled = networkErrorMessage.isEmpty &&
+          amountController.text.trim().isNotEmpty &&
           phoneNumber.length == 11; // Update button state based on validation
     });
   }
@@ -428,6 +444,8 @@ class AirtimePageState extends State<AirtimePage>
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 20.0),
                                   child: TextFormField(
+                                    controller: phoneNumberController,
+                                    focusNode: _phoneNumberFocusNode,
                                     decoration: InputDecoration(
                                       labelText: 'Mobile Number',
                                       labelStyle: const TextStyle(

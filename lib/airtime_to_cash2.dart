@@ -4,7 +4,14 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart' hide CarouselController;
 
 class AirtimeToCashOTPPage extends StatefulWidget {
-  const AirtimeToCashOTPPage({super.key});
+  final String networkImg;
+  final String networkName;
+  final String number;
+  const AirtimeToCashOTPPage(
+      {super.key,
+      required this.networkImg,
+      required this.networkName,
+      required this.number});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -214,6 +221,9 @@ class AirtimeToCashOTPPageState extends State<AirtimeToCashOTPPage>
                                         builder: (context) =>
                                             AirtimeToCashSellPage(
                                           key: UniqueKey(),
+                                          networkImg: widget.networkImg,
+                                          networkName: widget.networkName,
+                                          number: widget.number,
                                         ),
                                       ),
                                     );

@@ -174,6 +174,7 @@ class AirtimeAndDataPageState extends State<AirtimeAndDataPage>
                                       options: CarouselOptions(
                                         enlargeCenterPage: false,
                                         viewportFraction: 1.0,
+                                        height: 150,
                                         enableInfiniteScroll: false,
                                         initialPage: 0,
                                         onPageChanged: (index, reason) {
@@ -184,10 +185,21 @@ class AirtimeAndDataPageState extends State<AirtimeAndDataPage>
                                       ),
                                       carouselController: _controller,
                                       items: imagePaths.map((item) {
-                                        return Image.asset(
-                                          item,
-                                          width: double.infinity,
-                                          fit: BoxFit.contain,
+                                        return Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal:
+                                                  20.0), // Adjust horizontal padding as needed
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(25),
+                                            child: Image.asset(
+                                              item,
+                                              width: double
+                                                  .infinity, // Make the width fill the screen
+                                              fit: BoxFit
+                                                  .cover, // Ensure the image covers the available space
+                                            ),
+                                          ),
                                         );
                                       }).toList(),
                                     ),
@@ -537,6 +549,7 @@ class AirtimeAndDataPageState extends State<AirtimeAndDataPage>
                                       options: CarouselOptions(
                                         enlargeCenterPage: false,
                                         viewportFraction: 1.0,
+                                        height: 150,
                                         enableInfiniteScroll: false,
                                         initialPage: 0,
                                         onPageChanged: (index, reason) {
@@ -547,10 +560,21 @@ class AirtimeAndDataPageState extends State<AirtimeAndDataPage>
                                       ),
                                       carouselController: _controller,
                                       items: imagePaths.map((item) {
-                                        return Image.asset(
-                                          item,
-                                          width: double.infinity,
-                                          fit: BoxFit.contain,
+                                        return Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal:
+                                                  20.0), // Adjust horizontal padding as needed
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(25),
+                                            child: Image.asset(
+                                              item,
+                                              width: double
+                                                  .infinity, // Make the width fill the screen
+                                              fit: BoxFit
+                                                  .cover, // Ensure the image covers the available space
+                                            ),
+                                          ),
                                         );
                                       }).toList(),
                                     ),

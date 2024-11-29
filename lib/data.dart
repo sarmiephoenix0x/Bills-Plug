@@ -1,3 +1,4 @@
+import 'package:bills_plug/payment_successful_data.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -169,6 +170,7 @@ class DataPageState extends State<DataPage>
     setState(() {
       pinCode = code;
     });
+
     _submitDataPurchase(pinCode);
   }
 
@@ -216,7 +218,21 @@ class DataPageState extends State<DataPage>
 
       if (response.statusCode == 200) {
         inputPin = false;
-        paymentSuccessful = true;
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PaymentSuccessfulData(
+              key: UniqueKey(),
+              id: 0,
+              network: networkName,
+              type: currentPlanText,
+              size: currentPlanOptionText,
+              number: phoneNumberController.text.trim(),
+              amount: currentAmount,
+              timeStamp: "08 Oct, 2024 12:12PM",
+            ),
+          ),
+        );
         print("Data purchase successful");
       } else if (response.statusCode == 400) {
         final errorMessage = json.decode(response.body)['error'];
@@ -459,6 +475,8 @@ class DataPageState extends State<DataPage>
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 20.0),
                                   child: TextFormField(
+                                    controller: phoneNumberController,
+                                    focusNode: _phoneNumberFocusNode,
                                     decoration: InputDecoration(
                                       labelText: 'Mobile Number',
                                       labelStyle: const TextStyle(

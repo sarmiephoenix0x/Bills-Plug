@@ -1,8 +1,11 @@
+import 'package:bills_plug/payment_successful_cableTV.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart' hide CarouselController;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'package:flutter/services.dart';
+import 'package:local_auth/local_auth.dart';
 
 class CableTVPage extends StatefulWidget {
   const CableTVPage({super.key});
@@ -47,10 +50,32 @@ class CableTVPageState extends State<CableTVPage>
   String endDateText = "dd/mm/yyyy";
   String currentSubscriptionType = "";
   String currentAmount = "";
+  List<String> tvImagePaths = [
+    "images/GoTVImg.png",
+    "images/DStv.png",
+    "images/Startimes.png",
+  ];
+
+  int currentTV = 0;
+  final LocalAuthentication auth = LocalAuthentication();
+  String pin = '';
+  String pinCode = "";
+  bool inputPin = false;
+  bool isLoading = false;
+  late AnimationController _scaleController;
+  late Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
+    _scaleController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )..repeat(reverse: true);
+
+    _animation = Tween<double>(begin: 0.25, end: 0.4).animate(
+      CurvedAnimation(parent: _scaleController, curve: Curves.easeInOut),
+    );
     _initializePrefs();
   }
 
@@ -71,11 +96,55 @@ class CableTVPageState extends State<CableTVPage>
 
   @override
   void dispose() {
+    _scaleController.dispose();
     super.dispose();
   }
 
   String _formatDate(DateTime date) {
     return DateFormat('dd/MM/yyyy').format(date);
+  }
+
+  void handlePinInputComplete(String code) {
+    setState(() {
+      pinCode = code;
+    });
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PaymentSuccessfulCabletv(
+          key: UniqueKey(),
+          id: 0,
+          iucNumber: int.parse(iucNumberController.text.trim()),
+          plan: currentSubscriptionType,
+          decoder: "GoTv",
+          type: optionText,
+          amount: currentAmount,
+          timeStamp: "08 Oct, 2024 12:12PM",
+        ),
+      ),
+    );
+  }
+
+  Future<void> authenticateWithFingerprint() async {
+    try {
+      bool authenticated = await auth.authenticate(
+        localizedReason: 'Please authenticate to proceed',
+        options: const AuthenticationOptions(
+          useErrorDialogs: true,
+          stickyAuth: true,
+        ),
+      );
+
+      if (authenticated) {
+        // Handle successful authentication
+        print("Fingerprint authentication successful!");
+      } else {
+        // Handle failed authentication
+        print("Fingerprint authentication failed.");
+      }
+    } catch (e) {
+      print("Error during fingerprint authentication: $e");
+    }
   }
 
   @override
@@ -143,6 +212,7 @@ class CableTVPageState extends State<CableTVPage>
                                   options: CarouselOptions(
                                     enlargeCenterPage: false,
                                     viewportFraction: 1.0,
+                                    height: 150,
                                     enableInfiniteScroll: false,
                                     initialPage: 0,
                                     onPageChanged: (index, reason) {
@@ -153,10 +223,20 @@ class CableTVPageState extends State<CableTVPage>
                                   ),
                                   carouselController: _controller,
                                   items: imagePaths.map((item) {
-                                    return Image.asset(
-                                      item,
-                                      width: double.infinity,
-                                      fit: BoxFit.contain,
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal:
+                                              20.0), // Adjust horizontal padding as needed
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(25),
+                                        child: Image.asset(
+                                          item,
+                                          width: double
+                                              .infinity, // Make the width fill the screen
+                                          fit: BoxFit
+                                              .cover, // Ensure the image covers the available space
+                                        ),
+                                      ),
                                     );
                                   }).toList(),
                                 ),
@@ -203,111 +283,130 @@ class CableTVPageState extends State<CableTVPage>
                               ),
                               SizedBox(
                                   height: MediaQuery.of(context).size.height *
+                                      0.05),
+                              Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20.0),
+                                  child: SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.1,
+                                      child: ListView.builder(
+                                        scrollDirection: Axis.horizontal,
+                                        itemCount: tvImagePaths.length,
+                                        itemBuilder: (context, index) {
+                                          return Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 8.0),
+                                            child: InkWell(
+                                              onTap: () {
+                                                setState(() {
+                                                  currentTV = index;
+                                                });
+                                              },
+                                              child: Container(
+                                                width: (90 /
+                                                        MediaQuery.of(context)
+                                                            .size
+                                                            .width) *
+                                                    MediaQuery.of(context)
+                                                        .size
+                                                        .width,
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        vertical: 7.0,
+                                                        horizontal: 7.0),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius:
+                                                      const BorderRadius.all(
+                                                    Radius.circular(5.0),
+                                                  ),
+                                                  border: currentTV == index
+                                                      ? Border.all(
+                                                          width: 2,
+                                                          color: const Color(
+                                                              0xFF02AA03))
+                                                      : Border.all(
+                                                          width: 0,
+                                                          color: Colors
+                                                              .transparent),
+                                                ),
+                                                child: Image.asset(
+                                                  tvImagePaths[index],
+                                                  fit: BoxFit.contain,
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ))),
+                              SizedBox(
+                                  height: MediaQuery.of(context).size.height *
                                       0.04),
                               Padding(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 20.0),
-                                child: Row(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    InkWell(
-                                      onTap: () {
-                                        Navigator.pop(context);
-                                      },
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(55),
-                                        child: SizedBox(
-                                          width: (60 /
-                                                  MediaQuery.of(context)
-                                                      .size
-                                                      .width) *
-                                              MediaQuery.of(context).size.width,
-                                          height: (60 /
-                                                  MediaQuery.of(context)
-                                                      .size
-                                                      .height) *
-                                              MediaQuery.of(context)
-                                                  .size
-                                                  .height,
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(
-                                                vertical: 7.0, horizontal: 7.0),
-                                            decoration: const BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius: BorderRadius.all(
-                                                Radius.circular(5.0),
-                                              ),
-                                            ),
-                                            child: Image.asset(
-                                              'images/GoTVImg.png',
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ),
-                                        ),
+                                    const Text(
+                                      'IUC Number',
+                                      textAlign: TextAlign.start,
+                                      style: TextStyle(
+                                        fontFamily: 'Inter',
+                                        fontSize: 16.0,
+                                        color: Colors.grey,
                                       ),
                                     ),
                                     SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width *
+                                        height:
+                                            MediaQuery.of(context).size.height *
                                                 0.02),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          const Padding(
-                                            padding: EdgeInsets.symmetric(
-                                                horizontal: 10.0),
-                                            child: Text(
-                                              'IUC Number',
-                                              textAlign: TextAlign.start,
-                                              style: TextStyle(
-                                                fontFamily: 'Inter',
-                                                fontSize: 16.0,
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(
-                                              height: MediaQuery.of(context)
-                                                      .size
-                                                      .height *
-                                                  0.02),
-                                          TextFormField(
-                                            controller: iucNumberController,
-                                            focusNode: _iucNumberFocusNode,
-                                            style: const TextStyle(
-                                              fontSize: 16.0,
-                                            ),
-                                            decoration: InputDecoration(
-                                              labelText: '',
-                                              labelStyle: const TextStyle(
-                                                color: Colors.grey,
-                                                fontFamily: 'Inter',
-                                                fontSize: 12.0,
-                                                decoration: TextDecoration.none,
-                                              ),
-                                              floatingLabelBehavior:
-                                                  FloatingLabelBehavior.never,
-                                              border: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(15),
-                                                borderSide: BorderSide.none,
-                                              ),
-                                              focusedBorder: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(15),
-                                                borderSide: const BorderSide(
-                                                    width: 3,
-                                                    color: Color(0xFF02AA03)),
-                                              ),
-                                              filled: true,
-                                              fillColor: Colors.white,
-                                            ),
-                                            cursorColor:
-                                                const Color(0xFF02AA03),
-                                          ),
-                                        ],
+                                    TextFormField(
+                                      controller: iucNumberController,
+                                      focusNode: _iucNumberFocusNode,
+                                      style: const TextStyle(
+                                        fontSize: 16.0,
                                       ),
+                                      decoration: InputDecoration(
+                                        labelText: '',
+                                        labelStyle: const TextStyle(
+                                          color: Colors.grey,
+                                          fontFamily: 'Inter',
+                                          fontSize: 16.0,
+                                          decoration: TextDecoration.none,
+                                        ),
+                                        floatingLabelBehavior:
+                                            FloatingLabelBehavior.never,
+                                        border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(15),
+                                          borderSide: BorderSide.none,
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(15),
+                                          borderSide: const BorderSide(
+                                              width: 3,
+                                              color: Color(0xFF02AA03)),
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(15),
+                                          borderSide: const BorderSide(
+                                              width: 2, color: Colors.grey),
+                                        ),
+                                        filled: true,
+                                        fillColor: Colors.white,
+                                      ),
+                                      cursorColor: const Color(0xFF02AA03),
+                                      keyboardType: TextInputType
+                                          .number, // This allows only numeric input
+                                      inputFormatters: <TextInputFormatter>[
+                                        FilteringTextInputFormatter
+                                            .digitsOnly, // This will filter out non-numeric input
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -903,7 +1002,7 @@ class CableTVPageState extends State<CableTVPage>
                                       onPressed: () {
                                         setState(() {
                                           paymentSectionCableTVOpen = false;
-                                          paymentSuccessful = true;
+                                          inputPin = true;
                                         });
                                       },
                                       style: ButtonStyle(
@@ -1764,6 +1863,128 @@ class CableTVPageState extends State<CableTVPage>
                         ),
                       ],
                     ),
+                  if (inputPin)
+                    Stack(
+                      children: [
+                        ModalBarrier(
+                          dismissible: false,
+                          color: Colors.black.withOpacity(0.5),
+                        ),
+                        PopScope(
+                          canPop: false,
+                          onPopInvokedWithResult: (didPop, dynamic result) {
+                            if (!didPop) {
+                              setState(() {
+                                inputPin = false;
+                                pin = '';
+                              });
+                            }
+                          },
+                          child: GestureDetector(
+                            onTap: () {
+                              // Dismiss the keyboard when tapping outside
+                              FocusScope.of(context).unfocus();
+                            },
+                            child: Center(
+                              child: SingleChildScrollView(
+                                child: Container(
+                                  margin: const EdgeInsets.symmetric(
+                                      horizontal: 20.0), // Centered padding
+                                  padding: const EdgeInsets.all(
+                                      16.0), // Inner padding for content
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(25.0),
+                                    boxShadow: const [
+                                      BoxShadow(
+                                        color: Colors.black26,
+                                        spreadRadius: 2,
+                                        blurRadius: 10,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize
+                                        .min, // Expands only as needed
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.03),
+                                      const Text(
+                                        'Input PIN',
+                                        style: TextStyle(
+                                          fontSize: 24,
+                                          fontFamily: 'Inter',
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.04),
+                                      PinInput(pin: pin, length: 4),
+                                      const SizedBox(height: 20),
+                                      // Custom Keyboard
+                                      CustomKeyboard(
+                                        onNumberPressed: (String number) {
+                                          setState(() {
+                                            if (pin.length < 4) {
+                                              pin += number;
+                                            }
+                                            if (pin.length == 4) {
+                                              handlePinInputComplete(pin);
+                                            }
+                                          });
+                                        },
+                                        onFingerprintPressed: () async {
+                                          await authenticateWithFingerprint();
+                                        },
+                                        onBackspacePressed: () {
+                                          setState(() {
+                                            if (pin.isNotEmpty) {
+                                              pin = pin.substring(
+                                                  0, pin.length - 1);
+                                            }
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  if (isLoading)
+                    Positioned.fill(
+                      child: AbsorbPointer(
+                        absorbing:
+                            true, // Blocks interaction with widgets behind
+                        child: Container(
+                          color: Colors.black
+                              .withOpacity(0.5), // Semi-transparent background
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ScaleTransition(
+                                scale: _animation,
+                                child: Image.asset(
+                                  'images/Loading.png',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -1848,6 +2069,142 @@ class CableTVPageState extends State<CableTVPage>
         ),
       ),
       controlAffinity: ListTileControlAffinity.trailing,
+    );
+  }
+}
+
+class PinInput extends StatelessWidget {
+  final String pin;
+  final int length;
+
+  const PinInput({
+    Key? key,
+    required this.pin,
+    required this.length,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(length, (index) {
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 4.0),
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color:
+                pin.length > index ? const Color(0xFF02AA03) : Colors.grey[300],
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            pin.length > index ? pin[index] : '',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+class CustomKeyboard extends StatefulWidget {
+  final Function(String) onNumberPressed;
+  final Function onFingerprintPressed;
+  final Function onBackspacePressed;
+
+  const CustomKeyboard({
+    super.key,
+    required this.onNumberPressed,
+    required this.onFingerprintPressed,
+    required this.onBackspacePressed,
+  });
+
+  @override
+  _CustomKeyboardState createState() => _CustomKeyboardState();
+}
+
+class _CustomKeyboardState extends State<CustomKeyboard> {
+  List<bool> _isPressed =
+      List.generate(12, (index) => false); // Track button press state
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.count(
+      crossAxisCount: 3,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      children: [
+        for (int i = 1; i <= 9; i++)
+          GestureDetector(
+            onTapDown: (_) => _setPressed(i - 1, true),
+            onTapUp: (_) {
+              _setPressed(i - 1, false);
+              widget.onNumberPressed(i.toString());
+            },
+            onTapCancel: () => _setPressed(i - 1, false),
+            child: _buildKey(i.toString(), i - 1),
+          ),
+        GestureDetector(
+          onTapDown: (_) => _setPressed(9, true),
+          onTapUp: (_) {
+            _setPressed(9, false);
+            widget.onNumberPressed('0');
+          },
+          onTapCancel: () => _setPressed(9, false),
+          child: _buildKey('0', 9),
+        ),
+        GestureDetector(
+          onTapDown: (_) => _setPressed(10, true),
+          onTapUp: (_) {
+            _setPressed(10, false);
+            widget.onBackspacePressed();
+          },
+          onTapCancel: () => _setPressed(10, false),
+          child: _buildKey('Backspace', 10, isIcon: true),
+        ),
+        GestureDetector(
+          onTapDown: (_) => _setPressed(11, true),
+          onTapUp: (_) {
+            _setPressed(11, false);
+            widget.onFingerprintPressed();
+          },
+          onTapCancel: () => _setPressed(11, false),
+          child: _buildKey('Fingerprint', 11, isIcon: true),
+        ),
+      ],
+    );
+  }
+
+  void _setPressed(int index, bool isPressed) {
+    setState(() {
+      _isPressed[index] = isPressed;
+    });
+  }
+
+  Widget _buildKey(String label, int index, {bool isIcon = false}) {
+    return Container(
+      margin: const EdgeInsets.all(8.0),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: _isPressed[index] ? Colors.green[300] : Colors.grey[200],
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: isIcon
+          ? Icon(
+              label == 'Backspace' ? Icons.backspace : Icons.fingerprint,
+              size: 45,
+              color:
+                  label == 'Backspace' ? Colors.black : const Color(0xFF02AA03),
+            )
+          : Text(
+              label,
+              style: const TextStyle(fontSize: 24),
+            ),
     );
   }
 }

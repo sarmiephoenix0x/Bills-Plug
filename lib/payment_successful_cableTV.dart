@@ -1,22 +1,29 @@
 import 'package:flutter/material.dart';
 
-class TransactionDetails extends StatefulWidget {
+class PaymentSuccessfulCabletv extends StatefulWidget {
   final int id;
+  final int iucNumber;
   final String type;
+  final String plan;
+  final String decoder;
   final String amount;
   final String timeStamp;
-  const TransactionDetails(
+  const PaymentSuccessfulCabletv(
       {super.key,
       required this.id,
-      required this.type,
       required this.amount,
-      required this.timeStamp});
+      required this.timeStamp,
+      required this.iucNumber,
+      required this.type,
+      required this.plan,
+      required this.decoder});
 
   @override
-  State<TransactionDetails> createState() => _TransactionDetailsState();
+  State<PaymentSuccessfulCabletv> createState() =>
+      _PaymentSuccessfulCabletvState();
 }
 
-class _TransactionDetailsState extends State<TransactionDetails>
+class _PaymentSuccessfulCabletvState extends State<PaymentSuccessfulCabletv>
     with TickerProviderStateMixin {
   String? profileImg;
   bool network = true;
@@ -62,9 +69,6 @@ class _TransactionDetailsState extends State<TransactionDetails>
                                   right: 20.0,
                                   top: 20.0,
                                   bottom: 20.0),
-                              decoration: const BoxDecoration(
-                                color: Color(0xFF02AA03),
-                              ),
                               child: Column(
                                 children: [
                                   Row(
@@ -78,60 +82,21 @@ class _TransactionDetailsState extends State<TransactionDetails>
                                         child: Image.asset(
                                           'images/BackButton_White.png',
                                           height: 40,
-                                        ),
-                                      ),
-                                      SizedBox(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.05),
-                                      const Expanded(
-                                        flex: 10,
-                                        child: Text(
-                                          'Transaction Details',
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontFamily: 'Inter',
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 20.0,
-                                            color: Colors.white,
-                                          ),
+                                          color: Colors.black,
                                         ),
                                       ),
                                       const Spacer(),
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.headset_mic,
-                                          color: Colors.white,
-                                        ),
-                                        onPressed: () {},
-                                      ),
                                     ],
                                   ),
                                 ],
                               ),
                             ),
-                            SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.05),
                             Padding(
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 20.0),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 20.0),
-                                    child: Align(
-                                      alignment: Alignment.topLeft,
-                                      child: Image.asset(
-                                        "images/AppLogo.png",
-                                        fit: BoxFit.contain,
-                                        width: 50,
-                                      ),
-                                    ),
-                                  ),
                                   Padding(
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 20.0),
@@ -154,7 +119,7 @@ class _TransactionDetailsState extends State<TransactionDetails>
                                     child: Align(
                                       alignment: Alignment.center,
                                       child: Text(
-                                        'Transaction Successful!',
+                                        'Payment Successful!',
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           fontFamily: 'Inter',
@@ -162,17 +127,6 @@ class _TransactionDetailsState extends State<TransactionDetails>
                                           fontSize: 18.0,
                                           color: Color(0xFF02AA03),
                                         ),
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 20.0),
-                                    child: SizedBox(
-                                      width: MediaQuery.of(context).size.width,
-                                      child: const Divider(
-                                        color: Colors.grey,
-                                        height: 20,
                                       ),
                                     ),
                                   ),
@@ -196,7 +150,8 @@ class _TransactionDetailsState extends State<TransactionDetails>
                                           padding: const EdgeInsets.symmetric(
                                               horizontal: 20.0, vertical: 12.0),
                                           child: basicInfo3("Transaction ID",
-                                              widget.id.toString(), false),
+                                              widget.id.toString(), false,
+                                              img: "images/CopyImg.png"),
                                         ),
                                         Padding(
                                           padding: const EdgeInsets.symmetric(
@@ -227,59 +182,29 @@ class _TransactionDetailsState extends State<TransactionDetails>
                                           padding: const EdgeInsets.symmetric(
                                               horizontal: 20.0, vertical: 12.0),
                                           child: basicInfo(
-                                              "Number", "+234905479938", false),
+                                              "IUC Number",
+                                              widget.iucNumber.toString(),
+                                              false),
                                         ),
-                                        if (network) ...[
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 20.0,
-                                                vertical: 12.0),
-                                            child: basicInfo(
-                                                "Network", "", false,
-                                                img: "images/MTNImg.png"),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 20.0,
-                                                vertical: 12.0),
-                                            child: basicInfo("Data Type",
-                                                widget.type, false),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 20.0,
-                                                vertical: 12.0),
-                                            child: basicInfo(
-                                                "Data Plan", "10.0GB", false),
-                                          ),
-                                        ] else if (network == false) ...[
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 20.0,
-                                                vertical: 12.0),
-                                            child: basicInfo(
-                                                "Subscription Type",
-                                                "Renew",
-                                                false),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 20.0,
-                                                vertical: 12.0),
-                                            child: basicInfo(
-                                                "Subscription Plan",
-                                                "GOTV Supa Plus",
-                                                false),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 20.0,
-                                                vertical: 12.0),
-                                            child: basicInfo(
-                                                "Decoder", "", false,
-                                                img: "images/GoTVImg.png"),
-                                          ),
-                                        ],
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 20.0, vertical: 12.0),
+                                          child: basicInfo("Subscription Type",
+                                              widget.type, false),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 20.0, vertical: 12.0),
+                                          child: basicInfo("Subscription Plan",
+                                              widget.plan, false),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 20.0, vertical: 12.0),
+                                          child: basicInfo(
+                                              "Decoder", widget.decoder, false,
+                                              img: "images/GoTVImg.png"),
+                                        ),
                                         Padding(
                                           padding: const EdgeInsets.symmetric(
                                               horizontal: 20.0, vertical: 12.0),
@@ -307,7 +232,9 @@ class _TransactionDetailsState extends State<TransactionDetails>
                                                 .height) *
                                         MediaQuery.of(context).size.height,
                                     child: ElevatedButton(
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
                                       style: ButtonStyle(
                                         backgroundColor: WidgetStateProperty
                                             .resolveWith<Color>(
@@ -346,7 +273,7 @@ class _TransactionDetailsState extends State<TransactionDetails>
                                       child: const Row(
                                         children: [
                                           Text(
-                                            'Report an issue',
+                                            'Complete',
                                             style: TextStyle(
                                               fontFamily: 'Inter',
                                               fontWeight: FontWeight.bold,
@@ -404,7 +331,7 @@ class _TransactionDetailsState extends State<TransactionDetails>
                                       child: const Row(
                                         children: [
                                           Text(
-                                            'Share Receipt',
+                                            'TopUP Again',
                                             style: TextStyle(
                                               fontFamily: 'Inter',
                                               fontWeight: FontWeight.bold,
@@ -456,7 +383,7 @@ class _TransactionDetailsState extends State<TransactionDetails>
               children: [
                 if (img != "") ...[
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(15),
+                    borderRadius: BorderRadius.circular(55),
                     child: SizedBox(
                       width: (35 / MediaQuery.of(context).size.width) *
                           MediaQuery.of(context).size.width,

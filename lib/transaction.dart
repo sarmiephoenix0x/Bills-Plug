@@ -111,9 +111,11 @@ class TransactionPageState extends State<TransactionPage>
         });
       }
     } catch (error) {
-      setState(() {
-        _isLoading = false; // Reset loading state on error
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false; // Reset loading state on error
+        });
+      }
       print('Error fetching transactions: $error');
     }
   }

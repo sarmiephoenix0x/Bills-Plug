@@ -47,10 +47,23 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late AnimationController _animController;
   late Animation<double> _opacityAnimation;
   late Animation<Offset> _slideAnimation;
+  late AnimationController _bounceController;
+  late Animation<double> _bounceAnimation;
+  bool _isTextVisible = false;
 
   @override
   void initState() {
     super.initState();
+    _bounceController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _bounceAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
+      CurvedAnimation(
+        parent: _bounceController,
+        curve: Curves.elasticOut,
+      ),
+    );
     _checkFirstLaunch();
     _animController = AnimationController(
       duration: const Duration(milliseconds: 3000),
@@ -162,6 +175,34 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     } else {
       throw 'Could not launch $url';
     }
+  }
+
+  @override
+  void dispose() {
+    _bounceController.dispose();
+    super.dispose();
+  }
+
+  void _onTap() {
+    _bounceController.forward().then((_) {
+      setState(() {
+        _isTextVisible = true; // Show text on tap
+      });
+      Future.delayed(Duration(milliseconds: 500), () {
+        _bounceController.reverse().then((_) {
+          setState(() {
+            _isTextVisible = false; // Hide text after delay
+          });
+          // Navigate to the new screen
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddMoneyNewUsers(key: UniqueKey()),
+            ),
+          );
+        });
+      });
+    });
   }
 
   @override
@@ -403,20 +444,26 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                 ),
                               ),
                               const Spacer(),
-                              InkWell(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => AddMoneyNewUsers(
-                                        key: UniqueKey(),
-                                      ),
-                                    ),
-                                  );
-                                },
-                                child: Image.asset(
-                                  'images/AddMoneyImg2.png',
-                                  height: 40,
+                              ScaleTransition(
+                                scale: _bounceAnimation,
+                                child: InkWell(
+                                  onTap: _onTap,
+                                  child: Image.asset(
+                                    'images/AddMoneyImg2.png',
+                                    height: 40,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(
+                                  height: 8), // Space between image and text
+                              AnimatedOpacity(
+                                opacity: _isTextVisible ? 1.0 : 0.0,
+                                duration: const Duration(milliseconds: 300),
+                                child: const Text(
+                                  "Add Money",
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ],
