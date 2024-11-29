@@ -363,7 +363,7 @@ class RechargeCardPrintingState extends State<RechargeCardPrinting>
                                   MediaQuery.of(context).size.height * 0.02),
                           Padding(
                             padding:
-                                const EdgeInsets.symmetric(horizontal: 20.0),
+                                const EdgeInsets.symmetric(horizontal: 0.0),
                             child: CarouselSlider(
                               options: CarouselOptions(
                                 enlargeCenterPage: false,
@@ -382,7 +382,7 @@ class RechargeCardPrintingState extends State<RechargeCardPrinting>
                                 return Padding(
                                   padding: const EdgeInsets.symmetric(
                                       horizontal:
-                                          20.0), // Adjust horizontal padding as needed
+                                          0.0), // Adjust horizontal padding as needed
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(25),
                                     child: Image.asset(

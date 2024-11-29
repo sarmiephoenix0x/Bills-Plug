@@ -444,6 +444,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                 ),
                               ),
                               const Spacer(),
+                              Column(
+                                children:[
                               ScaleTransition(
                                 scale: _bounceAnimation,
                                 child: InkWell(
@@ -463,8 +465,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                   "Add Money",
                                   style: TextStyle(
                                       fontSize: 16,
-                                      fontWeight: FontWeight.bold),
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,),
                                 ),
+                              ),
+                                ],
                               ),
                             ],
                           ),

@@ -443,7 +443,7 @@ class ElectricityBillState extends State<ElectricityBill>
                                 return Padding(
                                   padding: const EdgeInsets.symmetric(
                                       horizontal:
-                                          20.0), // Adjust horizontal padding as needed
+                                          0.0), // Adjust horizontal padding as needed
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(25),
                                     child: Image.asset(
