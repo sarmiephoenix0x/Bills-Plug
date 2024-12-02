@@ -76,6 +76,7 @@ class RechargeCardPrintingState extends State<RechargeCardPrinting>
   final LocalAuthentication auth = LocalAuthentication();
   String pin = '';
   String currentPlan = "";
+  String? _errorText;
 
   @override
   void initState() {
@@ -191,6 +192,130 @@ class RechargeCardPrintingState extends State<RechargeCardPrinting>
     }
   }
 
+  void _showPinInputBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isDismissible: false, // Prevents dismissing by tapping outside
+      isScrollControlled: true, // Allows the bottom sheet to take full height
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return GestureDetector(
+              onTap: () {
+                // Dismiss the keyboard when tapping outside
+                FocusScope.of(context).unfocus();
+              },
+              child: Container(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min, // Expands only as needed
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+                    const Text(
+                      'Enter Payment PIN',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.04),
+                    PinInput(pin: pin, length: 4),
+                    const SizedBox(height: 20),
+                    // Custom Keyboard
+                    CustomKeyboard(
+                      onNumberPressed: (String number) {
+                        setState(() {
+                          if (pin.length < 4) {
+                            pin += number;
+                          }
+                          if (pin.length == 4) {
+                            handlePinInputComplete(pin);
+                            Navigator.of(context)
+                                .pop(); // Close the bottom sheet after input
+                          }
+                        });
+                      },
+                      onFingerprintPressed: () async {
+                        await authenticateWithFingerprint();
+                        Navigator.of(context)
+                            .pop(); // Close the bottom sheet after fingerprint authentication
+                      },
+                      onBackspacePressed: () {
+                        setState(() {
+                          if (pin.isNotEmpty) {
+                            pin = pin.substring(0, pin.length - 1);
+                          }
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showSelectPlanBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allows the bottom sheet to be scrollable
+      backgroundColor: Colors.transparent, // Makes the background transparent
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+          return Container(
+            margin:
+                const EdgeInsets.symmetric(horizontal: 0.0), // Centered padding
+            padding: const EdgeInsets.all(16.0), // Inner padding for content
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(25.0), // Set the top-left radius
+                topRight: Radius.circular(25.0), // Set the top-right radius
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  spreadRadius: 2,
+                  blurRadius: 10,
+                ),
+              ],
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min, // Expands only as needed
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Text(
+                    'Select a plan',
+                    style: TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                  radioButton("Airtime Pin (NGN100.00)", 0, setState),
+                  radioButton("Airtime Pin (NGN200.00)", 1, setState),
+                  radioButton("Airtime Pin (NGN300.00)", 2, setState),
+                  radioButton("Airtime Pin (NGN500.00)", 3, setState),
+                  radioButton("Airtime Pin (NGN1000.00)", 4, setState),
+                  radioButton("Airtime Pin (NGN1500.00)", 5, setState),
+                ],
+              ),
+            ),
+          );
+        });
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return OrientationBuilder(
@@ -198,7 +323,7 @@ class RechargeCardPrintingState extends State<RechargeCardPrinting>
         return Scaffold(
           body: SafeArea(
             child: Align(
-              alignment: Alignment.bottomCenter,
+              alignment: Alignment.topCenter,
               child: Stack(
                 alignment: Alignment.center,
                 children: [
@@ -363,7 +488,7 @@ class RechargeCardPrintingState extends State<RechargeCardPrinting>
                                   MediaQuery.of(context).size.height * 0.02),
                           Padding(
                             padding:
-                                const EdgeInsets.symmetric(horizontal: 0.0),
+                                const EdgeInsets.symmetric(horizontal: 20.0),
                             child: CarouselSlider(
                               options: CarouselOptions(
                                 enlargeCenterPage: false,
@@ -522,9 +647,10 @@ class RechargeCardPrintingState extends State<RechargeCardPrinting>
                                 const EdgeInsets.symmetric(horizontal: 20.0),
                             child: InkWell(
                               onTap: () {
-                                setState(() {
-                                  selectPlan = true;
-                                });
+                                _showSelectPlanBottomSheet(context);
+                                // setState(() {
+                                //   selectPlan = true;
+                                // });
                               },
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
@@ -559,122 +685,148 @@ class RechargeCardPrintingState extends State<RechargeCardPrinting>
                               ),
                             ),
                           ),
-                          SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.02),
-                          SizedBox(
-                              height:
-                                  MediaQuery.of(context).size.height * 0.04),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 20.0),
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                'Quality',
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontSize: 14.0,
-                                  color: Colors.grey,
+                          if (currentPlan != "") ...[
+                            SizedBox(
+                                width:
+                                    MediaQuery.of(context).size.width * 0.02),
+                            SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.04),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 20.0),
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  'Quality',
+                                  style: TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontSize: 14.0,
+                                    color: Colors.grey,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          SizedBox(
-                              height:
-                                  MediaQuery.of(context).size.height * 0.02),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 20.0),
-                            child: TextFormField(
-                              controller: qualityController,
-                              focusNode: _qualityFocusNode,
-                              style: const TextStyle(
-                                fontSize: 16.0,
-                              ),
-                              decoration: InputDecoration(
-                                labelText: 'Min - 3   Max - 7',
-                                labelStyle: const TextStyle(
-                                  color: Colors.grey,
-                                  fontFamily: 'Inter',
+                            SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.02),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20.0),
+                              child: TextFormField(
+                                controller: qualityController,
+                                focusNode: _qualityFocusNode,
+                                style: const TextStyle(
                                   fontSize: 16.0,
-                                  decoration: TextDecoration.none,
                                 ),
-                                floatingLabelBehavior:
-                                    FloatingLabelBehavior.never,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                  borderSide: BorderSide.none,
+                                decoration: InputDecoration(
+                                  labelText: 'Min - 1   Max - 20',
+                                  labelStyle: const TextStyle(
+                                    color: Colors.grey,
+                                    fontFamily: 'Inter',
+                                    fontSize: 16.0,
+                                    decoration: TextDecoration.none,
+                                  ),
+                                  floatingLabelBehavior:
+                                      FloatingLabelBehavior.never,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                    borderSide: const BorderSide(
+                                        width: 3, color: Colors.grey),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                    borderSide: const BorderSide(
+                                        width: 3, color: Color(0xFF02AA03)),
+                                  ),
+                                  errorText:
+                                      _errorText, // Display error text if validation fails
                                 ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                  borderSide: const BorderSide(
-                                      width: 3, color: Color(0xFF02AA03)),
-                                ),
-                                filled: true,
-                                fillColor: Colors.white,
+                                cursorColor: const Color(0xFF02AA03),
+                                keyboardType: TextInputType
+                                    .number, // This allows only numeric input
+                                inputFormatters: <TextInputFormatter>[
+                                  FilteringTextInputFormatter
+                                      .digitsOnly, // This will filter out non-numeric input
+                                ],
+                                onChanged: (value) {
+                                  // Validate the input
+                                  final int? number = int.tryParse(value);
+                                  if (number != null) {
+                                    if (number < 1 || number > 20) {
+                                      setState(() {
+                                        _errorText =
+                                            'Please enter a number between 1 and 20';
+                                      });
+                                    } else {
+                                      setState(() {
+                                        _errorText =
+                                            null; // Clear the error if valid
+                                      });
+                                    }
+                                  } else {
+                                    setState(() {
+                                      _errorText =
+                                          null; // Clear the error if input is invalid
+                                    });
+                                  }
+                                },
                               ),
-                              cursorColor: const Color(0xFF02AA03),
-                              keyboardType: TextInputType
-                                  .number, // This allows only numeric input
-                              inputFormatters: <TextInputFormatter>[
-                                FilteringTextInputFormatter
-                                    .digitsOnly, // This will filter out non-numeric input
-                              ],
                             ),
-                          ),
-                          SizedBox(
-                              height:
-                                  MediaQuery.of(context).size.height * 0.04),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 20.0),
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                'Card Name',
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontSize: 14.0,
-                                  color: Colors.grey,
+                            SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.04),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 20.0),
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  'Card Name',
+                                  style: TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontSize: 14.0,
+                                    color: Colors.grey,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          SizedBox(
-                              height:
-                                  MediaQuery.of(context).size.height * 0.02),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 20.0),
-                            child: TextFormField(
-                              controller: nameController,
-                              focusNode: _nameFocusNode,
-                              style: const TextStyle(
-                                fontSize: 16.0,
-                              ),
-                              decoration: InputDecoration(
-                                labelText: 'Card Name',
-                                labelStyle: const TextStyle(
-                                  color: Colors.grey,
-                                  fontFamily: 'Inter',
+                            SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.02),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20.0),
+                              child: TextFormField(
+                                controller: nameController,
+                                focusNode: _nameFocusNode,
+                                style: const TextStyle(
                                   fontSize: 16.0,
-                                  decoration: TextDecoration.none,
                                 ),
-                                floatingLabelBehavior:
-                                    FloatingLabelBehavior.never,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                  borderSide: BorderSide.none,
+                                decoration: InputDecoration(
+                                  labelText: 'Card Name',
+                                  labelStyle: const TextStyle(
+                                    color: Colors.grey,
+                                    fontFamily: 'Inter',
+                                    fontSize: 16.0,
+                                    decoration: TextDecoration.none,
+                                  ),
+                                  floatingLabelBehavior:
+                                      FloatingLabelBehavior.never,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                    borderSide: const BorderSide(
+                                        width: 3, color: Color(0xFF02AA03)),
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.white,
                                 ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                  borderSide: const BorderSide(
-                                      width: 3, color: Color(0xFF02AA03)),
-                                ),
-                                filled: true,
-                                fillColor: Colors.white,
+                                cursorColor: const Color(0xFF02AA03),
                               ),
-                              cursorColor: const Color(0xFF02AA03),
                             ),
-                          ),
+                          ],
                           SizedBox(
                               height:
                                   MediaQuery.of(context).size.height * 0.05),
@@ -1066,7 +1218,8 @@ class RechargeCardPrintingState extends State<RechargeCardPrinting>
                                   onPressed: () {
                                     setState(() {
                                       paymentSectionDataOpen = false;
-                                      inputPin = true;
+                                      // inputPin = true;
+                                      _showPinInputBottomSheet(context);
                                     });
                                   },
                                   style: ButtonStyle(
@@ -1303,6 +1456,7 @@ class RechargeCardPrintingState extends State<RechargeCardPrinting>
                         ),
                       ],
                     ),
+                  /*
                   if (selectPlan)
                     Stack(
                       children: [
@@ -1368,6 +1522,7 @@ class RechargeCardPrintingState extends State<RechargeCardPrinting>
                         ),
                       ],
                     ),
+                    */
                   if (inputPin)
                     Stack(
                       children: [
@@ -1499,7 +1654,7 @@ class RechargeCardPrintingState extends State<RechargeCardPrinting>
     );
   }
 
-  Widget radioButton(String text, int value) {
+  Widget radioButton(String text, int value, StateSetter setState2) {
     RegExp exp = RegExp(r"(.+)\s\(NGN([0-9,]+)\.00\)");
     Match? match = exp.firstMatch(text);
     return RadioListTile<int>(
@@ -1507,8 +1662,10 @@ class RechargeCardPrintingState extends State<RechargeCardPrinting>
       activeColor: const Color(0xFF02AA03),
       groupValue: _selectedPlanRadioValue,
       onChanged: (int? value) {
-        setState(() {
+        setState2(() {
           _selectedPlanRadioValue = value!;
+        });
+        setState(() {
           planText = text;
           currentPlan = text;
           if (match != null) {
@@ -1635,9 +1792,15 @@ class PinInput extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color:
-                pin.length > index ? const Color(0xFF02AA03) : Colors.grey[300],
+            shape: BoxShape.rectangle,
+            color: pin.length > index
+                ? const Color(0xFF02AA03)
+                : Colors.transparent,
+            border: Border.all(
+              color: Colors.black, // Set the border color
+              width: 2, // Set the border width
+            ),
+            borderRadius: BorderRadius.circular(8),
           ),
           alignment: Alignment.center,
           child: Text(
@@ -1677,6 +1840,7 @@ class _CustomKeyboardState extends State<CustomKeyboard> {
   @override
   Widget build(BuildContext context) {
     return GridView.count(
+      childAspectRatio: 1.6,
       crossAxisCount: 3,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -1730,22 +1894,25 @@ class _CustomKeyboardState extends State<CustomKeyboard> {
 
   Widget _buildKey(String label, int index, {bool isIcon = false}) {
     return Container(
-      margin: const EdgeInsets.all(8.0),
+      margin: const EdgeInsets.all(4.0), // Reduced margin
       alignment: Alignment.center,
+      width: 60, // Set a smaller width for keys
+      height: 60, // Set a smaller height for keys
       decoration: BoxDecoration(
         color: _isPressed[index] ? Colors.green[300] : Colors.grey[200],
-        borderRadius: BorderRadius.circular(10),
+        borderRadius:
+            BorderRadius.circular(8), // Slightly smaller border radius
       ),
       child: isIcon
           ? Icon(
               label == 'Backspace' ? Icons.backspace : Icons.fingerprint,
-              size: 45,
+              size: 30, // Reduced icon size
               color:
                   label == 'Backspace' ? Colors.black : const Color(0xFF02AA03),
             )
           : Text(
               label,
-              style: const TextStyle(fontSize: 24),
+              style: const TextStyle(fontSize: 18), // Reduced font size
             ),
     );
   }

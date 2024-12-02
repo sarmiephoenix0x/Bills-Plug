@@ -78,98 +78,101 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
         body: SafeArea(
           child: _buildPageContent(_selectedIndex),
         ),
-        bottomNavigationBar: BottomNavigationBar(
-          items: <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: const ImageIcon(
-                AssetImage('images/mdi_account-service.png'),
-                color: Colors.grey,
-              ),
-              label: 'Service',
-              // Add notification dot
-              activeIcon: Stack(
-                alignment: Alignment.center,
-                children: [
-                  const ImageIcon(AssetImage('images/mdi_account-service.png')),
-                  if (_hasNotification[0])
-                    Positioned(
-                      bottom: 0,
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.red,
-                        ),
-                        width: 8,
-                        height: 8,
-                      ),
+        bottomNavigationBar: _welcomeAdActive == false
+            ? BottomNavigationBar(
+                items: <BottomNavigationBarItem>[
+                  BottomNavigationBarItem(
+                    icon: const ImageIcon(
+                      AssetImage('images/mdi_account-service.png'),
+                      color: Colors.grey,
                     ),
-                ],
-              ),
-            ),
-            BottomNavigationBarItem(
-              icon: const ImageIcon(
-                AssetImage('images/ion_home.png'),
-                color: Colors.grey,
-              ),
-              label: 'Home',
-              activeIcon: Stack(
-                alignment: Alignment.center,
-                children: [
-                  const ImageIcon(AssetImage('images/ion_home.png')),
-                  if (_hasNotification[1])
-                    Positioned(
-                      bottom: 0,
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.red,
-                        ),
-                        width: 8,
-                        height: 8,
-                      ),
+                    label: 'Service',
+                    // Add notification dot
+                    activeIcon: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        const ImageIcon(
+                            AssetImage('images/mdi_account-service.png')),
+                        if (_hasNotification[0])
+                          Positioned(
+                            bottom: 0,
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.red,
+                              ),
+                              width: 8,
+                              height: 8,
+                            ),
+                          ),
+                      ],
                     ),
-                ],
-              ),
-            ),
-            BottomNavigationBarItem(
-              icon: const ImageIcon(
-                AssetImage('images/Profile.png'),
-                color: Colors.grey,
-              ),
-              label: 'Profile',
-              activeIcon: Stack(
-                alignment: Alignment.center,
-                children: [
-                  const ImageIcon(AssetImage('images/Profile.png')),
-                  if (_hasNotification[2])
-                    Positioned(
-                      bottom: 0,
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.red,
-                        ),
-                        width: 8,
-                        height: 8,
-                      ),
+                  ),
+                  BottomNavigationBarItem(
+                    icon: const ImageIcon(
+                      AssetImage('images/ion_home.png'),
+                      color: Colors.grey,
                     ),
+                    label: 'Home',
+                    activeIcon: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        const ImageIcon(AssetImage('images/ion_home.png')),
+                        if (_hasNotification[1])
+                          Positioned(
+                            bottom: 0,
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.red,
+                              ),
+                              width: 8,
+                              height: 8,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  BottomNavigationBarItem(
+                    icon: const ImageIcon(
+                      AssetImage('images/Profile.png'),
+                      color: Colors.grey,
+                    ),
+                    label: 'Profile',
+                    activeIcon: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        const ImageIcon(AssetImage('images/Profile.png')),
+                        if (_hasNotification[2])
+                          Positioned(
+                            bottom: 0,
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.red,
+                              ),
+                              width: 8,
+                              height: 8,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
                 ],
-              ),
-            ),
-          ],
-          currentIndex: _selectedIndex,
-          selectedItemColor: const Color(0xFF02AA03),
-          // Customize the selected item color
-          onTap: (index) {
-            if (_welcomeAdActive == false) {
-              if (index != _selectedIndex) {
-                setState(() {
-                  _selectedIndex = index;
-                });
-              }
-            }
-          },
-        ),
+                currentIndex: _selectedIndex,
+                selectedItemColor: const Color(0xFF02AA03),
+                // Customize the selected item color
+                onTap: (index) {
+                  if (_welcomeAdActive == false) {
+                    if (index != _selectedIndex) {
+                      setState(() {
+                        _selectedIndex = index;
+                      });
+                    }
+                  }
+                },
+              )
+            : null,
       ),
     );
   }

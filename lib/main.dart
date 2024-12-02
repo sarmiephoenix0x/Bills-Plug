@@ -159,11 +159,20 @@ class _MyAppState extends State<MyApp> {
       FirebaseMessaging messaging = FirebaseMessaging.instance;
       String? token = await messaging.getToken();
       print("FCM Token: $token");
-      await sendTokenToServer(token);
+
+      if (token != null) {
+        // Save the token locally for later use
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('fcmToken', token);
+      }
     } catch (e) {
       print("Error fetching token: $e");
-      // Handle the error (e.g., show a message to the user)
     }
+  }
+
+  Future<String?> getStoredFCMToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('fcmToken');
   }
 
   Future<void> sendTokenToServer(String? token) async {

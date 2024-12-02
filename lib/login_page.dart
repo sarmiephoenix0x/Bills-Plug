@@ -48,6 +48,17 @@ class LoginPageState extends State<LoginPage>
 
   Future<void> _initializePrefs() async {
     prefs = await SharedPreferences.getInstance();
+
+    // Retrieve saved email and password
+    String? savedEmail = await storage.read(key: 'email');
+    String? savedPassword = await storage.read(key: 'password');
+
+    if (savedEmail != null) {
+      emailController.text = savedEmail;
+    }
+    if (savedPassword != null) {
+      passwordController.text = savedPassword;
+    }
   }
 
   Future<void> _submitForm() async {
@@ -108,6 +119,9 @@ class LoginPageState extends State<LoginPage>
 
       await storage.write(key: 'billsplug_accessToken', value: accessToken);
       await prefs.setString('user', jsonEncode(user));
+
+      await storage.write(key: 'email', value: email);
+      await storage.write(key: 'password', value: password);
 
       _showCustomSnackBar(
         context,

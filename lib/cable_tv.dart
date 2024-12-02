@@ -64,6 +64,35 @@ class CableTVPageState extends State<CableTVPage>
   bool isLoading = false;
   late AnimationController _scaleController;
   late Animation<double> _animation;
+  final List<String> providersImg = [
+    "images/GoTV_JolliImg.png",
+    "images/GoTV_JinjaImg.png",
+    "images/GoTV_SmallieImg.png",
+    "images/GoTV_MaxImg.png",
+  ];
+
+  final List<String> providers = [
+    "GOTV Jinja Bouquet (NGN2,700.00)",
+    "GOTV Jinja Bouquet (NGN3,950.00)",
+    "GOTV Smallie - quarterly (NGN1,300.00)",
+    "GOTV Max (NGN5,700.00)"
+  ];
+
+  String searchQuery = '';
+
+  List<String> get filteredProviders {
+    if (searchQuery.isEmpty) {
+      return providers;
+    } else {
+      return providers
+          .where((provider) =>
+              provider.toLowerCase().contains(searchQuery.toLowerCase()))
+          .toList();
+    }
+  }
+
+  bool iucValid = false;
+  String currentTVImg = "images/GoTVImg.png";
 
   @override
   void initState() {
@@ -147,6 +176,203 @@ class CableTVPageState extends State<CableTVPage>
     }
   }
 
+  void _showPinInputBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isDismissible: false, // Prevents dismissing by tapping outside
+      isScrollControlled: true, // Allows the bottom sheet to take full height
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return GestureDetector(
+              onTap: () {
+                // Dismiss the keyboard when tapping outside
+                FocusScope.of(context).unfocus();
+              },
+              child: Container(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min, // Expands only as needed
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+                    const Text(
+                      'Enter Payment PIN',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.04),
+                    PinInput(pin: pin, length: 4),
+                    const SizedBox(height: 20),
+                    // Custom Keyboard
+                    CustomKeyboard(
+                      onNumberPressed: (String number) {
+                        setState(() {
+                          if (pin.length < 4) {
+                            pin += number;
+                          }
+                          if (pin.length == 4) {
+                            handlePinInputComplete(pin);
+                            Navigator.of(context)
+                                .pop(); // Close the bottom sheet after input
+                          }
+                        });
+                      },
+                      onFingerprintPressed: () async {
+                        await authenticateWithFingerprint();
+                        Navigator.of(context)
+                            .pop(); // Close the bottom sheet after fingerprint authentication
+                      },
+                      onBackspacePressed: () {
+                        setState(() {
+                          if (pin.isNotEmpty) {
+                            pin = pin.substring(0, pin.length - 1);
+                          }
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showMergedBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isDismissible: true,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Container(
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black26,
+                    spreadRadius: 2,
+                    blurRadius: 10,
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Select a Plan',
+                    style: TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    onChanged: (value) {
+                      setState(() {
+                        searchQuery = value; // Update the search query
+                      });
+                    },
+                    decoration: const InputDecoration(
+                      hintText: 'Search...',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.search),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: filteredProviders.length,
+                      itemBuilder: (context, index) {
+                        return radioButton(
+                          providersImg[index],
+                          filteredProviders[index],
+                          index,
+                          setState,
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showPlanOptionBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isDismissible: true,
+      backgroundColor: Colors.transparent, // Make the background transparent
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+          return Container(
+            margin:
+                const EdgeInsets.symmetric(horizontal: 0.0), // Centered padding
+            padding: const EdgeInsets.all(16.0), // Inner padding for content
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(25.0), // Set the top-left radius
+                topRight: Radius.circular(25.0), // Set the top-right radius
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  spreadRadius: 2,
+                  blurRadius: 10,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min, // Expands only as needed
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Text(
+                  'Select an option',
+                  style: TextStyle(
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Inter',
+                  ),
+                ),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.02,
+                ),
+                radioButton2("Renew Plan", 0, setState),
+                radioButton2(
+                  "Change Plan",
+                  1,
+                  setState,
+                ),
+                SizedBox(height: 20), // Add some spacing at the bottom
+              ],
+            ),
+          );
+        });
+      },
+    ).whenComplete(() {
+      // This will be called when the bottom sheet is dismissed
+      setState(() {
+        selectOption = false; // Update your state variable here
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return OrientationBuilder(
@@ -226,7 +452,7 @@ class CableTVPageState extends State<CableTVPage>
                                     return Padding(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal:
-                                              20.0), // Adjust horizontal padding as needed
+                                              0.0), // Adjust horizontal padding as needed
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.circular(25),
                                         child: Image.asset(
@@ -302,6 +528,16 @@ class CableTVPageState extends State<CableTVPage>
                                               onTap: () {
                                                 setState(() {
                                                   currentTV = index;
+                                                  if (index == 0) {
+                                                    currentTVImg =
+                                                        "images/GoTVImg.png";
+                                                  } else if (index == 1) {
+                                                    currentTVImg =
+                                                        "images/DStv.png";
+                                                  } else if (index == 2) {
+                                                    currentTVImg =
+                                                        "images/Startimes.png";
+                                                  }
                                                 });
                                               },
                                               child: Container(
@@ -388,14 +624,17 @@ class CableTVPageState extends State<CableTVPage>
                                           borderRadius:
                                               BorderRadius.circular(15),
                                           borderSide: const BorderSide(
-                                              width: 3,
-                                              color: Color(0xFF02AA03)),
+                                            width: 3,
+                                            color: Color(0xFF02AA03),
+                                          ),
                                         ),
                                         enabledBorder: OutlineInputBorder(
                                           borderRadius:
                                               BorderRadius.circular(15),
                                           borderSide: const BorderSide(
-                                              width: 2, color: Colors.grey),
+                                            width: 2,
+                                            color: Colors.grey,
+                                          ),
                                         ),
                                         filled: true,
                                         fillColor: Colors.white,
@@ -407,171 +646,191 @@ class CableTVPageState extends State<CableTVPage>
                                         FilteringTextInputFormatter
                                             .digitsOnly, // This will filter out non-numeric input
                                       ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      0.04),
-                              const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 20.0),
-                                child: Text(
-                                  'Select a Plan',
-                                  textAlign: TextAlign.start,
-                                  style: TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontSize: 16.0,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      0.02),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20.0),
-                                child: InkWell(
-                                  onTap: () {
-                                    setState(() {
-                                      selectPlan = true;
-                                    });
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 10.0, horizontal: 10.0),
-                                    decoration: const BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(5.0),
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Expanded(
-                                          flex: 5,
-                                          child: Text(
-                                            planText,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              fontFamily: 'Inter',
-                                              fontSize: 16.0,
-                                            ),
-                                          ),
-                                        ),
-                                        const Spacer(),
-                                        Image.asset(
-                                          'images/mdi_arrow-dropdown.png',
-                                          height: 15,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      0.04),
-                              const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 20.0),
-                                child: Text(
-                                  'Select Option',
-                                  textAlign: TextAlign.start,
-                                  style: TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontSize: 16.0,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      0.02),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20.0),
-                                child: InkWell(
-                                  onTap: () {
-                                    setState(() {
-                                      selectOption = true;
-                                    });
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 10.0, horizontal: 10.0),
-                                    decoration: const BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(5.0),
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Expanded(
-                                          flex: 5,
-                                          child: Text(
-                                            optionText,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              fontFamily: 'Inter',
-                                              fontSize: 16.0,
-                                            ),
-                                          ),
-                                        ),
-                                        const Spacer(),
-                                        Image.asset(
-                                          'images/mdi_arrow-dropdown.png',
-                                          height: 15,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      0.04),
-                              const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 20.0),
-                                child: Text(
-                                  'Auto-renewal',
-                                  textAlign: TextAlign.start,
-                                  style: TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontSize: 16.0,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      0.02),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20.0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Switch(
-                                      value: autoRenewalActive,
-                                      onChanged: (bool value) {
-                                        setState(() {
-                                          autoRenewalActive = value;
-                                          if (value == true) {
-                                            autoRenewal = value;
-                                          }
-                                        });
+                                      onChanged: (value) {
+                                        if (value.length == 10) {
+                                          // Unfocus the TextFormField to dismiss the keyboard
+                                          _iucNumberFocusNode.unfocus();
+                                          setState(() {
+                                            iucValid = true;
+                                          });
+                                        } else {
+                                          setState(() {
+                                            iucValid = false;
+                                          });
+                                        }
                                       },
                                     ),
-                                    const Spacer(),
                                   ],
                                 ),
                               ),
+                              if (iucValid == true) ...[
+                                SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.04),
+                                const Padding(
+                                  padding:
+                                      EdgeInsets.symmetric(horizontal: 20.0),
+                                  child: Text(
+                                    'Select a Plan',
+                                    textAlign: TextAlign.start,
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 16.0,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.02),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20.0),
+                                  child: InkWell(
+                                    onTap: () {
+                                      // setState(() {
+                                      //   selectPlan = true;
+                                      // });
+                                      _showMergedBottomSheet(context);
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 10.0, horizontal: 10.0),
+                                      decoration: const BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(5.0),
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Expanded(
+                                            flex: 5,
+                                            child: Text(
+                                              planText,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                fontFamily: 'Inter',
+                                                fontSize: 16.0,
+                                              ),
+                                            ),
+                                          ),
+                                          const Spacer(),
+                                          Image.asset(
+                                            'images/mdi_arrow-dropdown.png',
+                                            height: 15,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.04),
+                                const Padding(
+                                  padding:
+                                      EdgeInsets.symmetric(horizontal: 20.0),
+                                  child: Text(
+                                    'Select Option',
+                                    textAlign: TextAlign.start,
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 16.0,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.02),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20.0),
+                                  child: InkWell(
+                                    onTap: () {
+                                      _showPlanOptionBottomSheet(context);
+                                      // setState(() {
+                                      //   selectOption = true;
+                                      // });
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 10.0, horizontal: 10.0),
+                                      decoration: const BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(5.0),
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Expanded(
+                                            flex: 5,
+                                            child: Text(
+                                              optionText,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                fontFamily: 'Inter',
+                                                fontSize: 16.0,
+                                              ),
+                                            ),
+                                          ),
+                                          const Spacer(),
+                                          Image.asset(
+                                            'images/mdi_arrow-dropdown.png',
+                                            height: 15,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.04),
+                                const Padding(
+                                  padding:
+                                      EdgeInsets.symmetric(horizontal: 20.0),
+                                  child: Text(
+                                    'Auto-renewal',
+                                    textAlign: TextAlign.start,
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 16.0,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.02),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Switch(
+                                        value: autoRenewalActive,
+                                        onChanged: (bool value) {
+                                          setState(() {
+                                            autoRenewalActive = value;
+                                            if (value == true) {
+                                              autoRenewal = value;
+                                            }
+                                          });
+                                        },
+                                      ),
+                                      const Spacer(),
+                                    ],
+                                  ),
+                                ),
+                              ],
                               SizedBox(
                                   height: MediaQuery.of(context).size.height *
                                       0.05),
@@ -800,7 +1059,7 @@ class CableTVPageState extends State<CableTVPage>
                                               ),
                                             ),
                                             child: Image.asset(
-                                              'images/GoTVImg.png',
+                                              currentTVImg,
                                               fit: BoxFit.cover,
                                             ),
                                           ),
@@ -1002,7 +1261,8 @@ class CableTVPageState extends State<CableTVPage>
                                       onPressed: () {
                                         setState(() {
                                           paymentSectionCableTVOpen = false;
-                                          inputPin = true;
+                                          // inputPin = true;
+                                          _showPinInputBottomSheet(context);
                                         });
                                       },
                                       style: ButtonStyle(
@@ -1060,7 +1320,7 @@ class CableTVPageState extends State<CableTVPage>
                         ),
                     ],
                   ),
-                  if (selectPlan)
+                  /*if (selectPlan)
                     Stack(
                       children: [
                         ModalBarrier(
@@ -1129,8 +1389,8 @@ class CableTVPageState extends State<CableTVPage>
                           ),
                         ),
                       ],
-                    ),
-                  if (selectOption)
+                    ),*/
+                  /*if (selectOption)
                     Stack(
                       children: [
                         ModalBarrier(
@@ -1191,6 +1451,7 @@ class CableTVPageState extends State<CableTVPage>
                         ),
                       ],
                     ),
+                    */
                   if (paymentSuccessful)
                     Stack(
                       children: [
@@ -1994,7 +2255,8 @@ class CableTVPageState extends State<CableTVPage>
     );
   }
 
-  Widget radioButton(String text, int value) {
+  Widget radioButton(
+      String img, String text, int value, StateSetter setState2) {
     RegExp exp = RegExp(r"(.+)\s\(NGN([0-9,]+)\.00\)");
     Match? match = exp.firstMatch(text);
     return RadioListTile<int>(
@@ -2002,36 +2264,106 @@ class CableTVPageState extends State<CableTVPage>
       activeColor: const Color(0xFF02AA03),
       groupValue: _selectedPlanRadioValue,
       onChanged: (int? value) {
-        setState(() {
+        setState2(() {
           _selectedPlanRadioValue = value!;
+        });
+        setState(() {
           planText = text;
+
           if (match != null) {
             currentSubscriptionType = match.group(1) ?? '';
             currentAmount = match.group(2) ?? '';
           }
         });
       },
-      title: Text(
-        text,
-        softWrap: true,
-        style: const TextStyle(
-          fontFamily: 'Inter',
-          fontWeight: FontWeight.bold,
-          fontSize: 16.0,
-        ),
+      title: Column(
+        children: [
+          Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(15),
+                child: Container(
+                  width: (40 / MediaQuery.of(context).size.width) *
+                      MediaQuery.of(context).size.width,
+                  height: (40 / MediaQuery.of(context).size.height) *
+                      MediaQuery.of(context).size.height,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(15.0),
+                    ),
+                  ),
+                  child: Image.asset(
+                    img,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+              SizedBox(width: MediaQuery.of(context).size.width * 0.02),
+              Expanded(
+                child: Text(
+                  text,
+                  softWrap: true,
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16.0,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          // Wrap Divider with a Container to ensure it occupies the full width
+          const SizedBox(
+            width: double.infinity, // Makes the divider occupy the full width
+            child: Divider(),
+          ),
+        ],
       ),
       controlAffinity: ListTileControlAffinity.trailing,
     );
   }
 
-  Widget radioButton2(String text, int value) {
+  // Widget radioButton(String text, int value) {
+  //   RegExp exp = RegExp(r"(.+)\s\(NGN([0-9,]+)\.00\)");
+  //   Match? match = exp.firstMatch(text);
+  //   return RadioListTile<int>(
+  //     value: value,
+  //     activeColor: const Color(0xFF02AA03),
+  //     groupValue: _selectedPlanRadioValue,
+  //     onChanged: (int? value) {
+  //       setState(() {
+  //         _selectedPlanRadioValue = value!;
+  //         planText = text;
+  //         if (match != null) {
+  //           currentSubscriptionType = match.group(1) ?? '';
+  //           currentAmount = match.group(2) ?? '';
+  //         }
+  //       });
+  //     },
+  //     title: Text(
+  //       text,
+  //       softWrap: true,
+  //       style: const TextStyle(
+  //         fontFamily: 'Inter',
+  //         fontWeight: FontWeight.bold,
+  //         fontSize: 16.0,
+  //       ),
+  //     ),
+  //     controlAffinity: ListTileControlAffinity.trailing,
+  //   );
+  // }
+
+  Widget radioButton2(String text, int value, StateSetter setState2) {
     return RadioListTile<int>(
       value: value,
       activeColor: const Color(0xFF02AA03),
       groupValue: _selectedOptionRadioValue,
       onChanged: (int? value) {
-        setState(() {
+        setState2(() {
           _selectedOptionRadioValue = value!;
+        });
+        setState(() {
           optionText = text;
         });
       },
@@ -2093,9 +2425,15 @@ class PinInput extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color:
-                pin.length > index ? const Color(0xFF02AA03) : Colors.grey[300],
+            shape: BoxShape.rectangle,
+            color: pin.length > index
+                ? const Color(0xFF02AA03)
+                : Colors.transparent,
+            border: Border.all(
+              color: Colors.black, // Set the border color
+              width: 2, // Set the border width
+            ),
+            borderRadius: BorderRadius.circular(8),
           ),
           alignment: Alignment.center,
           child: Text(
@@ -2135,6 +2473,7 @@ class _CustomKeyboardState extends State<CustomKeyboard> {
   @override
   Widget build(BuildContext context) {
     return GridView.count(
+      childAspectRatio: 1.6,
       crossAxisCount: 3,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -2188,22 +2527,25 @@ class _CustomKeyboardState extends State<CustomKeyboard> {
 
   Widget _buildKey(String label, int index, {bool isIcon = false}) {
     return Container(
-      margin: const EdgeInsets.all(8.0),
+      margin: const EdgeInsets.all(4.0), // Reduced margin
       alignment: Alignment.center,
+      width: 60, // Set a smaller width for keys
+      height: 60, // Set a smaller height for keys
       decoration: BoxDecoration(
         color: _isPressed[index] ? Colors.green[300] : Colors.grey[200],
-        borderRadius: BorderRadius.circular(10),
+        borderRadius:
+            BorderRadius.circular(8), // Slightly smaller border radius
       ),
       child: isIcon
           ? Icon(
               label == 'Backspace' ? Icons.backspace : Icons.fingerprint,
-              size: 45,
+              size: 30, // Reduced icon size
               color:
                   label == 'Backspace' ? Colors.black : const Color(0xFF02AA03),
             )
           : Text(
               label,
-              style: const TextStyle(fontSize: 24),
+              style: const TextStyle(fontSize: 18), // Reduced font size
             ),
     );
   }

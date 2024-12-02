@@ -189,6 +189,7 @@ class _JambEPinState extends State<JambEPin> with TickerProviderStateMixin {
                 const SizedBox(height: 10),
                 Flexible(
                   child: ListView.builder(
+                    shrinkWrap: true,
                     itemCount: types.length,
                     itemBuilder: (context, index) {
                       return radioButton(types[index], index, setState);
@@ -199,6 +200,75 @@ class _JambEPinState extends State<JambEPin> with TickerProviderStateMixin {
             ),
           );
         });
+      },
+    );
+  }
+
+  void _showPinInputBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isDismissible: false, // Prevents dismissing by tapping outside
+      isScrollControlled: true, // Allows the bottom sheet to take full height
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return GestureDetector(
+              onTap: () {
+                // Dismiss the keyboard when tapping outside
+                FocusScope.of(context).unfocus();
+              },
+              child: Container(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min, // Expands only as needed
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+                    const Text(
+                      'Enter Payment PIN',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.04),
+                    PinInput(pin: pin, length: 4),
+                    const SizedBox(height: 20),
+                    // Custom Keyboard
+                    CustomKeyboard(
+                      onNumberPressed: (String number) {
+                        setState(() {
+                          if (pin.length < 4) {
+                            pin += number;
+                          }
+                          if (pin.length == 4) {
+                            handlePinInputComplete(pin);
+                            Navigator.of(context)
+                                .pop(); // Close the bottom sheet after input
+                          }
+                        });
+                      },
+                      onFingerprintPressed: () async {
+                        await authenticateWithFingerprint();
+                        Navigator.of(context)
+                            .pop(); // Close the bottom sheet after fingerprint authentication
+                      },
+                      onBackspacePressed: () {
+                        setState(() {
+                          if (pin.isNotEmpty) {
+                            pin = pin.substring(0, pin.length - 1);
+                          }
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
       },
     );
   }
@@ -1489,7 +1559,8 @@ class _JambEPinState extends State<JambEPin> with TickerProviderStateMixin {
                                   onPressed: () {
                                     setState(() {
                                       paymentSectionExamPins = false;
-                                      inputPin = true;
+                                      // inputPin = true;
+                                      _showPinInputBottomSheet(context);
                                     });
                                   },
                                   style: ButtonStyle(

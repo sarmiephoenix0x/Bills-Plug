@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _bounceController = AnimationController(
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     );
     _bounceAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
@@ -64,6 +64,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         curve: Curves.elasticOut,
       ),
     );
+    _startAnimationCycle();
     _checkFirstLaunch();
     _animController = AnimationController(
       duration: const Duration(milliseconds: 3000),
@@ -82,6 +83,26 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     // Start the animation
     _animController.forward();
     _initializePrefs();
+  }
+
+  void _startAnimationCycle() {
+    Future.delayed(const Duration(seconds: 10), () {
+      setState(() {
+        _isTextVisible = true; // Show text
+      });
+
+      _bounceController.forward().then((_) {
+        Future.delayed(const Duration(seconds: 2), () {
+          setState(() {
+            _isTextVisible = false; // Hide text
+          });
+
+          _bounceController.reverse().then((_) {
+            _startAnimationCycle(); // Restart the cycle
+          });
+        });
+      });
+    });
   }
 
   Future<void> _checkFirstLaunch() async {
@@ -445,30 +466,34 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               ),
                               const Spacer(),
                               Column(
-                                children:[
-                              ScaleTransition(
-                                scale: _bounceAnimation,
-                                child: InkWell(
-                                  onTap: _onTap,
-                                  child: Image.asset(
-                                    'images/AddMoneyImg2.png',
-                                    height: 40,
+                                children: [
+                                  ScaleTransition(
+                                    scale: _bounceAnimation,
+                                    child: InkWell(
+                                      onTap: _onTap,
+                                      child: Image.asset(
+                                        'images/AddMoneyImg2.png',
+                                        height: 40,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
-                              const SizedBox(
-                                  height: 8), // Space between image and text
-                              AnimatedOpacity(
-                                opacity: _isTextVisible ? 1.0 : 0.0,
-                                duration: const Duration(milliseconds: 300),
-                                child: const Text(
-                                  "Add Money",
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,),
-                                ),
-                              ),
+                                  AnimatedOpacity(
+                                    opacity: _isTextVisible ? 1.0 : 0.0,
+                                    duration: const Duration(milliseconds: 300),
+                                    child: Container(
+                                      margin: const EdgeInsets.only(
+                                          top:
+                                              8), // Space between image and text
+                                      child: const Text(
+                                        "Add Money",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                                 ],
                               ),
                             ],
@@ -934,9 +959,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       // Your main content goes here
                       // For example, a Scaffold with a FloatingActionButton:
                       SizedBox(
-                        height: MediaQuery.of(context)
-                            .size
-                            .height, // Specify a fixed height
+                        height: MediaQuery.of(context).size.height,
                         child: ModalBarrier(
                           dismissible: true,
                           color: Colors.black.withOpacity(0.5),
@@ -944,9 +967,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       ),
                       // The modal overlay
                       Positioned(
-                        top: MediaQuery.of(context).padding.top + 50,
+                        top: 0, // Start from the top
                         left: 0,
                         right: 0,
+                        bottom: 0, // Cover the entire height
                         child: Center(
                           child: SlideTransition(
                             position: _slideAnimation,
@@ -1133,7 +1157,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         ),
                       ),
                     ],
-                  ),
+                  )
               ],
             ),
           ],

@@ -51,6 +51,8 @@ class _ExamPinState extends State<ExamPin> with TickerProviderStateMixin {
   String currentType = "WAEC";
   bool paymentSectionExamPins = false;
   bool inputPin = false;
+  String? _errorText;
+  bool qualityValid = false;
 
   @override
   void initState() {
@@ -158,6 +160,75 @@ class _ExamPinState extends State<ExamPin> with TickerProviderStateMixin {
     } catch (e) {
       print("Error during fingerprint authentication: $e");
     }
+  }
+
+  void _showPinInputBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isDismissible: false, // Prevents dismissing by tapping outside
+      isScrollControlled: true, // Allows the bottom sheet to take full height
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return GestureDetector(
+              onTap: () {
+                // Dismiss the keyboard when tapping outside
+                FocusScope.of(context).unfocus();
+              },
+              child: Container(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min, // Expands only as needed
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+                    const Text(
+                      'Enter Payment PIN',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.04),
+                    PinInput(pin: pin, length: 4),
+                    const SizedBox(height: 20),
+                    // Custom Keyboard
+                    CustomKeyboard(
+                      onNumberPressed: (String number) {
+                        setState(() {
+                          if (pin.length < 4) {
+                            pin += number;
+                          }
+                          if (pin.length == 4) {
+                            handlePinInputComplete(pin);
+                            Navigator.of(context)
+                                .pop(); // Close the bottom sheet after input
+                          }
+                        });
+                      },
+                      onFingerprintPressed: () async {
+                        await authenticateWithFingerprint();
+                        Navigator.of(context)
+                            .pop(); // Close the bottom sheet after fingerprint authentication
+                      },
+                      onBackspacePressed: () {
+                        setState(() {
+                          if (pin.isNotEmpty) {
+                            pin = pin.substring(0, pin.length - 1);
+                          }
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -567,6 +638,8 @@ class _ExamPinState extends State<ExamPin> with TickerProviderStateMixin {
                                               width: 3,
                                               color: Color(0xFF02AA03)),
                                         ),
+                                        errorText:
+                                            _errorText, // Display error text if validation fails
                                       ),
                                       cursorColor: const Color(0xFF02AA03),
                                       keyboardType: TextInputType
@@ -575,62 +648,91 @@ class _ExamPinState extends State<ExamPin> with TickerProviderStateMixin {
                                         FilteringTextInputFormatter
                                             .digitsOnly, // This will filter out non-numeric input
                                       ],
+                                      onChanged: (value) {
+                                        // Validate the input
+                                        final int? number = int.tryParse(value);
+                                        if (number != null) {
+                                          if (number < 3 || number > 7) {
+                                            setState(() {
+                                              qualityValid = false;
+                                              _errorText =
+                                                  'Please enter a number between 3 and 7';
+                                            });
+                                          } else {
+                                            qualityValid = true;
+                                            setState(() {
+                                              _errorText =
+                                                  null; // Clear the error if valid
+                                            });
+                                          }
+                                        } else {
+                                          setState(() {
+                                            qualityValid = false;
+                                            _errorText =
+                                                null; // Clear the error if input is invalid
+                                          });
+                                        }
+                                      },
                                     ),
-                                    SizedBox(
-                                        height:
-                                            MediaQuery.of(context).size.height *
-                                                0.04),
-                                    const Text(
-                                      'Amount To Pay',
-                                      textAlign: TextAlign.start,
-                                      style: TextStyle(
-                                        fontFamily: 'Inter',
-                                        fontSize: 14.0,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                    SizedBox(
-                                        height:
-                                            MediaQuery.of(context).size.height *
-                                                0.02),
-                                    TextFormField(
-                                      controller: amountController,
-                                      focusNode: _amountFocusNode,
-                                      style: const TextStyle(
-                                        fontSize: 16.0,
-                                      ),
-                                      decoration: InputDecoration(
-                                        labelText: '',
-                                        labelStyle: const TextStyle(
-                                          color: Colors.grey,
+                                    if (qualityValid == true) ...[
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.04),
+                                      const Text(
+                                        'Amount To Pay',
+                                        textAlign: TextAlign.start,
+                                        style: TextStyle(
                                           fontFamily: 'Inter',
-                                          fontSize: 12.0,
-                                          decoration: TextDecoration.none,
-                                        ),
-                                        floatingLabelBehavior:
-                                            FloatingLabelBehavior.never,
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(15),
-                                          borderSide: const BorderSide(
-                                              width: 3, color: Colors.grey),
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(15),
-                                          borderSide: const BorderSide(
-                                              width: 3,
-                                              color: Color(0xFF02AA03)),
+                                          fontSize: 14.0,
+                                          color: Colors.grey,
                                         ),
                                       ),
-                                      cursorColor: const Color(0xFF02AA03),
-                                      keyboardType: TextInputType
-                                          .number, // This allows only numeric input
-                                      inputFormatters: <TextInputFormatter>[
-                                        FilteringTextInputFormatter
-                                            .digitsOnly, // This will filter out non-numeric input
-                                      ],
-                                    ),
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.02),
+                                      TextFormField(
+                                        controller: amountController,
+                                        focusNode: _amountFocusNode,
+                                        style: const TextStyle(
+                                          fontSize: 16.0,
+                                        ),
+                                        decoration: InputDecoration(
+                                          labelText: '',
+                                          labelStyle: const TextStyle(
+                                            color: Colors.grey,
+                                            fontFamily: 'Inter',
+                                            fontSize: 12.0,
+                                            decoration: TextDecoration.none,
+                                          ),
+                                          floatingLabelBehavior:
+                                              FloatingLabelBehavior.never,
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                            borderSide: const BorderSide(
+                                                width: 3, color: Colors.grey),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                            borderSide: const BorderSide(
+                                                width: 3,
+                                                color: Color(0xFF02AA03)),
+                                          ),
+                                        ),
+                                        cursorColor: const Color(0xFF02AA03),
+                                        keyboardType: TextInputType
+                                            .number, // This allows only numeric input
+                                        inputFormatters: <TextInputFormatter>[
+                                          FilteringTextInputFormatter
+                                              .digitsOnly, // This will filter out non-numeric input
+                                        ],
+                                      ),
+                                    ],
                                     SizedBox(
                                         height:
                                             MediaQuery.of(context).size.height *
@@ -1491,7 +1593,8 @@ class _ExamPinState extends State<ExamPin> with TickerProviderStateMixin {
                                   onPressed: () {
                                     setState(() {
                                       paymentSectionExamPins = false;
-                                      inputPin = true;
+                                      // inputPin = true;
+                                      _showPinInputBottomSheet(context);
                                     });
                                   },
                                   style: ButtonStyle(

@@ -285,6 +285,75 @@ class AirtimePageState extends State<AirtimePage>
     }
   }
 
+  void _showPinInputBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isDismissible: false, // Prevents dismissing by tapping outside
+      isScrollControlled: true, // Allows the bottom sheet to take full height
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return GestureDetector(
+              onTap: () {
+                // Dismiss the keyboard when tapping outside
+                FocusScope.of(context).unfocus();
+              },
+              child: Container(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min, // Expands only as needed
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+                    const Text(
+                      'Enter Payment PIN',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.04),
+                    PinInput(pin: pin, length: 4),
+                    const SizedBox(height: 20),
+                    // Custom Keyboard
+                    CustomKeyboard(
+                      onNumberPressed: (String number) {
+                        setState(() {
+                          if (pin.length < 4) {
+                            pin += number;
+                          }
+                          if (pin.length == 4) {
+                            handlePinInputComplete(pin);
+                            Navigator.of(context)
+                                .pop(); // Close the bottom sheet after input
+                          }
+                        });
+                      },
+                      onFingerprintPressed: () async {
+                        await authenticateWithFingerprint();
+                        Navigator.of(context)
+                            .pop(); // Close the bottom sheet after fingerprint authentication
+                      },
+                      onBackspacePressed: () {
+                        setState(() {
+                          if (pin.isNotEmpty) {
+                            pin = pin.substring(0, pin.length - 1);
+                          }
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (currentNetwork == 0) {
@@ -1075,7 +1144,8 @@ class AirtimePageState extends State<AirtimePage>
                                       onPressed: () {
                                         setState(() {
                                           paymentSectionAirtimeOpen = false;
-                                          inputPin = true;
+                                          // inputPin = true;
+                                          _showPinInputBottomSheet(context);
                                         });
                                       },
                                       style: ButtonStyle(
@@ -1567,9 +1637,15 @@ class PinInput extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color:
-                pin.length > index ? const Color(0xFF02AA03) : Colors.grey[300],
+            shape: BoxShape.rectangle,
+            color: pin.length > index
+                ? const Color(0xFF02AA03)
+                : Colors.transparent,
+            border: Border.all(
+              color: Colors.black, // Set the border color
+              width: 2, // Set the border width
+            ),
+            borderRadius: BorderRadius.circular(8),
           ),
           alignment: Alignment.center,
           child: Text(
@@ -1609,6 +1685,7 @@ class _CustomKeyboardState extends State<CustomKeyboard> {
   @override
   Widget build(BuildContext context) {
     return GridView.count(
+      childAspectRatio: 1.6,
       crossAxisCount: 3,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -1662,22 +1739,25 @@ class _CustomKeyboardState extends State<CustomKeyboard> {
 
   Widget _buildKey(String label, int index, {bool isIcon = false}) {
     return Container(
-      margin: const EdgeInsets.all(8.0),
+      margin: const EdgeInsets.all(4.0), // Reduced margin
       alignment: Alignment.center,
+      width: 60, // Set a smaller width for keys
+      height: 60, // Set a smaller height for keys
       decoration: BoxDecoration(
         color: _isPressed[index] ? Colors.green[300] : Colors.grey[200],
-        borderRadius: BorderRadius.circular(10),
+        borderRadius:
+            BorderRadius.circular(8), // Slightly smaller border radius
       ),
       child: isIcon
           ? Icon(
               label == 'Backspace' ? Icons.backspace : Icons.fingerprint,
-              size: 45,
+              size: 30, // Reduced icon size
               color:
                   label == 'Backspace' ? Colors.black : const Color(0xFF02AA03),
             )
           : Text(
               label,
-              style: const TextStyle(fontSize: 24),
+              style: const TextStyle(fontSize: 18), // Reduced font size
             ),
     );
   }
