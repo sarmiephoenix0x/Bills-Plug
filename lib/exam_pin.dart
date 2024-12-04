@@ -244,7 +244,7 @@ class _ExamPinState extends State<ExamPin> with TickerProviderStateMixin {
         return Scaffold(
           body: SafeArea(
             child: Align(
-              alignment: Alignment.topCenter,
+              alignment: Alignment.bottomCenter,
               child: Stack(
                 alignment: Alignment.center,
                 children: [

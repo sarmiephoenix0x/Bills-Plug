@@ -8,6 +8,8 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:intl/intl.dart';
+import 'package:contacts_service/contacts_service.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class DataPin extends StatefulWidget {
   const DataPin({super.key});
@@ -315,6 +317,117 @@ class DataPinState extends State<DataPin> with SingleTickerProviderStateMixin {
     );
   }
 
+  void _showContacts() async {
+    // Request permission to access contacts
+    var status = await Permission.contacts.request();
+    if (status.isGranted) {
+      // Show loading indicator while fetching contacts
+      showDialog(
+        context: context,
+        barrierDismissible:
+            false, // Prevent dismissing the dialog while loading
+        builder: (context) {
+          return const AlertDialog(
+            title: Text('Loading Contacts...'),
+            content: SizedBox(
+              height: 100,
+              child: Center(
+                  child: CircularProgressIndicator(color: Color(0xFF02AA03))),
+            ),
+          );
+        },
+      );
+
+      // Fetch contacts
+      Iterable<Contact> contacts = await ContactsService.getContacts();
+      Navigator.of(context).pop(); // Close the loading dialog
+
+      // Create a stateful widget to manage the search functionality
+      showDialog(
+        context: context,
+        builder: (context) {
+          String searchQuery = '';
+          return StatefulBuilder(
+            builder: (context, setState) {
+              // Filter contacts based on the search query
+              List<Contact> filteredContacts = contacts
+                  .where((contact) =>
+                      contact.displayName
+                          ?.toLowerCase()
+                          .contains(searchQuery.toLowerCase()) ??
+                      false)
+                  .toList();
+
+              return AlertDialog(
+                title: const Text('Select a Contact'),
+                content: SizedBox(
+                  width: double.maxFinite,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextField(
+                        decoration: const InputDecoration(
+                          labelText: 'Search',
+                          hintText: 'Type to search...',
+                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            searchQuery = value;
+                          });
+                        },
+                      ),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: filteredContacts.length,
+                          itemBuilder: (context, index) {
+                            Contact contact = filteredContacts[index];
+                            return ListTile(
+                              title: Text(contact.displayName ?? ''),
+                              subtitle: Text(contact.phones!.isNotEmpty
+                                  ? contact.phones!.first.value ?? ''
+                                  : 'No phone number'),
+                              onTap: () {
+                                // Populate the TextFormField with the selected contact's phone number
+                                if (contact.phones!.isNotEmpty) {
+                                  String phoneNumber =
+                                      contact.phones!.first.value!;
+
+                                  // Replace the country code "+234" with "0"
+                                  if (phoneNumber.startsWith('+234')) {
+                                    phoneNumber =
+                                        '0${phoneNumber.substring(4)}'; // Remove "+234" and prepend "0"
+                                  }
+
+                                  phoneNumberController.text = phoneNumber;
+                                }
+                                Navigator.of(context).pop(); // Close the dialog
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Close'),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      );
+    } else {
+      // Handle the case when permission is denied
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Permission to access contacts denied')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return OrientationBuilder(
@@ -322,7 +435,7 @@ class DataPinState extends State<DataPin> with SingleTickerProviderStateMixin {
         return Scaffold(
           body: SafeArea(
             child: Align(
-              alignment: Alignment.topCenter,
+              alignment: Alignment.bottomCenter,
               child: Stack(
                 alignment: Alignment.center,
                 children: [

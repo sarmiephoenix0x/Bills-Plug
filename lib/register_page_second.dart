@@ -51,6 +51,7 @@ class RegisterPageSecondState extends State<RegisterPageSecond>
   @override
   void initState() {
     super.initState();
+    countryController.text = "Nigeria";
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 1),
@@ -480,40 +481,42 @@ class RegisterPageSecondState extends State<RegisterPageSecond>
                             Padding(
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 20.0),
-                              child: TextFormField(
-                                controller: countryController,
-                                focusNode: _countryFocusNode,
-                                style: const TextStyle(
-                                  fontSize: 16.0,
-                                ),
-                                decoration: InputDecoration(
-                                    labelText: 'Country',
-                                    labelStyle: const TextStyle(
-                                      color: Colors.grey,
-                                      fontFamily: 'Inter',
-                                      fontSize: 12.0,
-                                      decoration: TextDecoration.none,
-                                    ),
-                                    floatingLabelBehavior:
-                                        FloatingLabelBehavior.never,
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(15),
-                                      borderSide: const BorderSide(
-                                          width: 3, color: Colors.grey),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(15),
-                                      borderSide: const BorderSide(
-                                          width: 3, color: Color(0xFF02AA03)),
-                                    ),
-                                    prefixIcon: IconButton(
-                                      icon: const Icon(
-                                        Icons.map,
+                              child: AbsorbPointer(
+                                child: TextFormField(
+                                  controller: countryController,
+                                  focusNode: _countryFocusNode,
+                                  style: const TextStyle(
+                                    fontSize: 16.0,
+                                  ),
+                                  decoration: InputDecoration(
+                                      labelText: 'Country',
+                                      labelStyle: const TextStyle(
                                         color: Colors.grey,
+                                        fontFamily: 'Inter',
+                                        fontSize: 12.0,
+                                        decoration: TextDecoration.none,
                                       ),
-                                      onPressed: () {},
-                                    )),
-                                cursorColor: const Color(0xFF02AA03),
+                                      floatingLabelBehavior:
+                                          FloatingLabelBehavior.never,
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                        borderSide: const BorderSide(
+                                            width: 3, color: Colors.grey),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                        borderSide: const BorderSide(
+                                            width: 3, color: Color(0xFF02AA03)),
+                                      ),
+                                      prefixIcon: IconButton(
+                                        icon: const Icon(
+                                          Icons.map,
+                                          color: Colors.grey,
+                                        ),
+                                        onPressed: () {},
+                                      )),
+                                  cursorColor: const Color(0xFF02AA03),
+                                ),
                               ),
                             ),
                             SizedBox(

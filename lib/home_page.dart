@@ -16,6 +16,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class HomePage extends StatefulWidget {
   final Function welcomeAdActive;
@@ -50,6 +51,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late AnimationController _bounceController;
   late Animation<double> _bounceAnimation;
   bool _isTextVisible = false;
+  bool _isRefreshing = false;
 
   @override
   void initState() {
@@ -87,9 +89,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   void _startAnimationCycle() {
     Future.delayed(const Duration(seconds: 10), () {
-      setState(() {
-        _isTextVisible = true; // Show text
-      });
+      if (mounted) {
+        setState(() {
+          _isTextVisible = true; // Show text
+        });
+      }
 
       _bounceController.forward().then((_) {
         Future.delayed(const Duration(seconds: 2), () {
@@ -201,6 +205,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   void dispose() {
     _bounceController.dispose();
+    _animController.dispose();
     super.dispose();
   }
 
@@ -226,125 +231,229 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     });
   }
 
+  Future<void> _refreshData() async {
+    setState(() {
+      _isRefreshing = true;
+    });
+
+    try {
+      var connectivityResult = await (Connectivity().checkConnectivity());
+      if (connectivityResult == ConnectivityResult.none) {
+        _showNoInternetDialog(context);
+        setState(() {
+          _isRefreshing = false;
+        });
+        return;
+      }
+
+      await Future.any([
+        Future.delayed(const Duration(seconds: 15), () {
+          throw TimeoutException('The operation took too long.');
+        }),
+        Future(() {
+          // This will complete successfully
+          setState(() {
+            _isRefreshing = false;
+          });
+        }),
+      ]);
+    } catch (e) {
+      if (e is TimeoutException) {
+        _showTimeoutDialog(context);
+      } else {
+        _showErrorDialog(context, e.toString());
+      }
+    } finally {
+      setState(() {
+        _isRefreshing = false;
+      });
+    }
+  }
+
+  void _showNoInternetDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('No Internet Connection'),
+          content: const Text(
+            'It looks like you are not connected to the internet. Please check your connection and try again.',
+            style: TextStyle(fontSize: 16),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Retry', style: TextStyle(color: Colors.blue)),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _refreshData();
+              },
+            ),
+            TextButton(
+              child: const Text('Cancel', style: TextStyle(color: Colors.red)),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showTimeoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Request Timed Out'),
+          content: const Text(
+            'The operation took too long to complete. Please try again later.',
+            style: TextStyle(fontSize: 16),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Retry', style: TextStyle(color: Colors.blue)),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _refreshData();
+              },
+            ),
+            TextButton(
+              child: const Text('Cancel', style: TextStyle(color: Colors.red)),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showErrorDialog(BuildContext context, String error) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Error'),
+          content: Text(
+            'An error occurred: $error',
+            style: const TextStyle(fontSize: 16),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Close', style: TextStyle(color: Colors.red)),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: ListView(
-          children: [
-            Stack(
-              children: [
-                Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.only(
-                          left: 20.0, right: 20.0, top: 20.0, bottom: 70),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF02AA03),
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              if (profileImg == null)
-                                InkWell(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => AddPhoto(
-                                          key: UniqueKey(),
+        child: RefreshIndicator(
+          onRefresh: _refreshData,
+          color: const Color(0xFF02AA03),
+          child: ListView(
+            children: [
+              Stack(
+                children: [
+                  Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.only(
+                            left: 20.0, right: 20.0, top: 20.0, bottom: 70),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF02AA03),
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                if (profileImg == null)
+                                  InkWell(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => AddPhoto(
+                                            key: UniqueKey(),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(55),
+                                      child: Container(
+                                        width: (60 /
+                                                MediaQuery.of(context)
+                                                    .size
+                                                    .width) *
+                                            MediaQuery.of(context).size.width,
+                                        height: (60 /
+                                                MediaQuery.of(context)
+                                                    .size
+                                                    .height) *
+                                            MediaQuery.of(context).size.height,
+                                        color: Colors.grey,
+                                        child: Image.asset(
+                                          'images/ProfilePic.png',
+                                          fit: BoxFit.cover,
                                         ),
                                       ),
-                                    );
-                                  },
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(55),
-                                    child: Container(
-                                      width: (60 /
-                                              MediaQuery.of(context)
-                                                  .size
-                                                  .width) *
-                                          MediaQuery.of(context).size.width,
-                                      height: (60 /
-                                              MediaQuery.of(context)
-                                                  .size
-                                                  .height) *
-                                          MediaQuery.of(context).size.height,
-                                      color: Colors.grey,
-                                      child: Image.asset(
-                                        'images/ProfilePic.png',
-                                        fit: BoxFit.cover,
+                                    ),
+                                  )
+                                else if (profileImg != null)
+                                  InkWell(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => AddPhoto(
+                                            key: UniqueKey(),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(55),
+                                      child: Container(
+                                        width: (60 /
+                                                MediaQuery.of(context)
+                                                    .size
+                                                    .width) *
+                                            MediaQuery.of(context).size.width,
+                                        height: (60 /
+                                                MediaQuery.of(context)
+                                                    .size
+                                                    .height) *
+                                            MediaQuery.of(context).size.height,
+                                        color: Colors.grey,
+                                        child: Image.network(
+                                          profileImg!,
+                                          fit: BoxFit.cover,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                )
-                              else if (profileImg != null)
-                                InkWell(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => AddPhoto(
-                                          key: UniqueKey(),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(55),
-                                    child: Container(
-                                      width: (60 /
-                                              MediaQuery.of(context)
-                                                  .size
-                                                  .width) *
-                                          MediaQuery.of(context).size.width,
-                                      height: (60 /
-                                              MediaQuery.of(context)
-                                                  .size
-                                                  .height) *
-                                          MediaQuery.of(context).size.height,
-                                      color: Colors.grey,
-                                      child: Image.network(
-                                        profileImg!,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.02),
-                              Expanded(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      "Hello",
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontFamily: 'Inter',
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16.0,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    if (fullName != null)
-                                      Text(
-                                        fullName!,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          fontFamily: 'Inter',
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16.0,
-                                          color: Colors.white,
-                                        ),
-                                      )
-                                    else
+                                SizedBox(
+                                    width: MediaQuery.of(context).size.width *
+                                        0.02),
+                                Expanded(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
                                       const Text(
-                                        "Unknown User",
+                                        "Hello",
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           fontFamily: 'Inter',
@@ -353,814 +462,863 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                           color: Colors.white,
                                         ),
                                       ),
-                                  ],
-                                ),
-                              ),
-                              const Spacer(),
-                              InkWell(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => NotificationPage(
-                                        key: UniqueKey(),
-                                      ),
-                                    ),
-                                  );
-                                },
-                                child: Image.asset(
-                                  'images/Notification.png',
-                                  height: 40,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                              height:
-                                  MediaQuery.of(context).size.height * 0.02),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                flex: 10,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
+                                      if (fullName != null)
+                                        Text(
+                                          fullName!,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16.0,
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                      else
                                         const Text(
-                                          "Total Balance",
+                                          "Unknown User",
                                           overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
                                             fontFamily: 'Inter',
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 14.0,
+                                            fontSize: 16.0,
                                             color: Colors.white,
                                           ),
                                         ),
-                                        IconButton(
-                                          icon: Icon(
-                                              _isBalanceVisible
-                                                  ? Icons.visibility
-                                                  : Icons.visibility_off,
-                                              color: Colors.white),
-                                          onPressed: () {
-                                            setState(() {
-                                              _isBalanceVisible =
-                                                  !_isBalanceVisible;
-                                            });
-                                          },
+                                    ],
+                                  ),
+                                ),
+                                const Spacer(),
+                                InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => NotificationPage(
+                                          key: UniqueKey(),
                                         ),
-                                      ],
-                                    ),
-                                    if (_isBalanceVisible != false)
+                                      ),
+                                    );
+                                  },
+                                  child: Image.asset(
+                                    'images/Notification.png',
+                                    height: 40,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.02),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Expanded(
+                                  flex: 10,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
                                       Row(
                                         children: [
-                                          Image.asset(
-                                            'images/NairaImg.png',
-                                            height: 20,
+                                          const Text(
+                                            "Total Balance",
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontFamily: 'Inter',
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14.0,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          IconButton(
+                                            icon: Icon(
+                                                _isBalanceVisible
+                                                    ? Icons.visibility
+                                                    : Icons.visibility_off,
+                                                color: Colors.white),
+                                            onPressed: () {
+                                              setState(() {
+                                                _isBalanceVisible =
+                                                    !_isBalanceVisible;
+                                              });
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                      if (_isBalanceVisible != false)
+                                        Row(
+                                          children: [
+                                            Image.asset(
+                                              'images/NairaImg.png',
+                                              height: 20,
+                                              color: Colors.white,
+                                            ),
+                                            if (userBalance != null)
+                                              Text(
+                                                double.tryParse(userBalance!) !=
+                                                        null
+                                                    ? double.parse(userBalance!)
+                                                        .toStringAsFixed(2)
+                                                    : "0.00",
+                                                overflow: TextOverflow.ellipsis,
+                                                style: const TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 27.0,
+                                                  color: Colors.white,
+                                                ),
+                                              )
+                                            else
+                                              const Text(
+                                                "0.00",
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 27.0,
+                                                  color: Colors.white,
+                                                ),
+                                              )
+                                          ],
+                                        )
+                                      else
+                                        const Text(
+                                          "****",
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 27.0,
                                             color: Colors.white,
                                           ),
-                                          if (userBalance != null)
-                                            Text(
-                                              double.tryParse(userBalance!) !=
-                                                      null
-                                                  ? double.parse(userBalance!)
-                                                      .toStringAsFixed(2)
-                                                  : "0.00",
-                                              overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                fontFamily: 'Inter',
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 27.0,
-                                                color: Colors.white,
-                                              ),
-                                            )
-                                          else
-                                            const Text(
-                                              "0.00",
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                fontFamily: 'Inter',
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 27.0,
-                                                color: Colors.white,
-                                              ),
-                                            )
-                                        ],
-                                      )
-                                    else
-                                      const Text(
-                                        "****",
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontFamily: 'Inter',
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 27.0,
-                                          color: Colors.white,
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                                const Spacer(),
+                                Column(
+                                  children: [
+                                    ScaleTransition(
+                                      scale: _bounceAnimation,
+                                      child: InkWell(
+                                        onTap: _onTap,
+                                        child: Image.asset(
+                                          'images/AddMoneyImg2.png',
+                                          height: 40,
                                         ),
                                       ),
+                                    ),
+                                    AnimatedOpacity(
+                                      opacity: _isTextVisible ? 1.0 : 0.0,
+                                      duration:
+                                          const Duration(milliseconds: 300),
+                                      child: Container(
+                                        margin: const EdgeInsets.only(
+                                            top:
+                                                8), // Space between image and text
+                                        child: const Text(
+                                          "Add Money",
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                   ],
                                 ),
-                              ),
-                              const Spacer(),
-                              Column(
-                                children: [
-                                  ScaleTransition(
-                                    scale: _bounceAnimation,
-                                    child: InkWell(
-                                      onTap: _onTap,
-                                      child: Image.asset(
-                                        'images/AddMoneyImg2.png',
-                                        height: 40,
-                                      ),
-                                    ),
-                                  ),
-                                  AnimatedOpacity(
-                                    opacity: _isTextVisible ? 1.0 : 0.0,
-                                    duration: const Duration(milliseconds: 300),
-                                    child: Container(
-                                      margin: const EdgeInsets.only(
-                                          top:
-                                              8), // Space between image and text
-                                      child: const Text(
-                                        "Add Money",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          // SizedBox(
-                          //     height:
-                          //         MediaQuery.of(context).size.height * 0.02),
-                          // Row(
-                          //   mainAxisAlignment: MainAxisAlignment.start,
-                          //   children: [
-                          //     SizedBox(
-                          //       height:
-                          //           (50 / MediaQuery.of(context).size.height) *
-                          //               MediaQuery.of(context).size.height,
-                          //       child: ElevatedButton(
-                          //         onPressed: () {
-                          //           // Navigator.push(
-                          //           //   context,
-                          //           //   MaterialPageRoute(
-                          //           //     builder: (context) =>
-                          //           //         AddMoneyOldUsers(key: UniqueKey()),
-                          //           //   ),
-                          //           // );
-                          //           Navigator.push(
-                          //             context,
-                          //             MaterialPageRoute(
-                          //               builder: (context) =>
-                          //                   AddMoneyNewUsers(key: UniqueKey()),
-                          //             ),
-                          //           );
-                          //         },
-                          //         style: ButtonStyle(
-                          //           backgroundColor:
-                          //               WidgetStateProperty.resolveWith<Color>(
-                          //             (Set<WidgetState> states) {
-                          //               if (states
-                          //                   .contains(WidgetState.pressed)) {
-                          //                 return const Color(0xFF02AA03);
-                          //               }
-                          //               return const Color(0xFFEEF1F4);
-                          //             },
-                          //           ),
-                          //           foregroundColor:
-                          //               WidgetStateProperty.resolveWith<Color>(
-                          //             (Set<WidgetState> states) {
-                          //               if (states
-                          //                   .contains(WidgetState.pressed)) {
-                          //                 return Colors.white;
-                          //               }
-                          //               return const Color(0xFF02AA03);
-                          //             },
-                          //           ),
-                          //           elevation:
-                          //               WidgetStateProperty.all<double>(0),
-                          //           shape: WidgetStateProperty.all<
-                          //               RoundedRectangleBorder>(
-                          //             const RoundedRectangleBorder(
-                          //               borderRadius: BorderRadius.all(
-                          //                   Radius.circular(35)),
-                          //             ),
-                          //           ),
-                          //         ),
-                          //         child: Row(
-                          //           children: [
-                          //             Image.asset(
-                          //               'images/AddMoneyImg.png',
-                          //               height: 20,
-                          //             ),
-                          //             SizedBox(
-                          //                 width: MediaQuery.of(context)
-                          //                         .size
-                          //                         .width *
-                          //                     0.03),
-                          //             const Text(
-                          //               'Add Money',
-                          //               style: TextStyle(
-                          //                 fontFamily: 'Inter',
-                          //                 fontWeight: FontWeight.bold,
-                          //                 fontSize: 14.0,
-                          //               ),
-                          //             ),
-                          //           ],
-                          //         ),
-                          //       ),
-                          //     ),
-                          //     SizedBox(
-                          //         width:
-                          //             MediaQuery.of(context).size.width * 0.02),
-                          //     SizedBox(
-                          //       height:
-                          //           (50 / MediaQuery.of(context).size.height) *
-                          //               MediaQuery.of(context).size.height,
-                          //       child: ElevatedButton(
-                          //         onPressed: () {
-                          //           Navigator.push(
-                          //             context,
-                          //             MaterialPageRoute(
-                          //               builder: (context) =>
-                          //                   WithdrawMoneyPage(key: UniqueKey()),
-                          //             ),
-                          //           );
-                          //         },
-                          //         style: ButtonStyle(
-                          //           backgroundColor:
-                          //               WidgetStateProperty.resolveWith<Color>(
-                          //             (Set<WidgetState> states) {
-                          //               if (states
-                          //                   .contains(WidgetState.pressed)) {
-                          //                 return const Color(0xFF02AA03);
-                          //               }
-                          //               return const Color(0xFFEEF1F4);
-                          //             },
-                          //           ),
-                          //           foregroundColor:
-                          //               WidgetStateProperty.resolveWith<Color>(
-                          //             (Set<WidgetState> states) {
-                          //               if (states
-                          //                   .contains(WidgetState.pressed)) {
-                          //                 return Colors.white;
-                          //               }
-                          //               return const Color(0xFF02AA03);
-                          //             },
-                          //           ),
-                          //           elevation:
-                          //               WidgetStateProperty.all<double>(0),
-                          //           shape: WidgetStateProperty.all<
-                          //               RoundedRectangleBorder>(
-                          //             const RoundedRectangleBorder(
-                          //               borderRadius: BorderRadius.all(
-                          //                   Radius.circular(35)),
-                          //             ),
-                          //           ),
-                          //         ),
-                          //         child: Row(
-                          //           children: [
-                          //             Image.asset(
-                          //               'images/WithdrawImg.png',
-                          //               height: 20,
-                          //             ),
-                          //             SizedBox(
-                          //                 width: MediaQuery.of(context)
-                          //                         .size
-                          //                         .width *
-                          //                     0.03),
-                          //             const Text(
-                          //               'Withdraw',
-                          //               style: TextStyle(
-                          //                 fontFamily: 'Inter',
-                          //                 fontWeight: FontWeight.bold,
-                          //                 fontSize: 14.0,
-                          //               ),
-                          //             ),
-                          //           ],
-                          //         ),
-                          //       ),
-                          //     ),
-                          //   ],
-                          // ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.09),
-                    CarouselSlider(
-                      options: CarouselOptions(
-                        enlargeCenterPage: false,
-                        viewportFraction: 1.0,
-                        height: 150,
-                        enableInfiniteScroll: false,
-                        initialPage: 0,
-                        onPageChanged: (index, reason) {
-                          setState(() {
-                            _current = index;
-                          });
-                        },
-                      ),
-                      carouselController: _controller,
-                      items: imagePaths.map((item) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal:
-                                  20.0), // Adjust horizontal padding as needed
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(25),
-                            child: Image.asset(
-                              item,
-                              width: double
-                                  .infinity, // Make the width fill the screen
-                              fit: BoxFit
-                                  .cover, // Ensure the image covers the available space
+                              ],
                             ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(
-                        imagePaths.length,
-                        (index) => Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                          child: Image.asset(
-                            _current == index
-                                ? "images/ActiveElipses.png"
-                                : "images/InActiveElipses.png",
-                            width: (10 / MediaQuery.of(context).size.width) *
-                                MediaQuery.of(context).size.width,
-                            height: (10 / MediaQuery.of(context).size.height) *
-                                MediaQuery.of(context).size.height,
+                            // SizedBox(
+                            //     height:
+                            //         MediaQuery.of(context).size.height * 0.02),
+                            // Row(
+                            //   mainAxisAlignment: MainAxisAlignment.start,
+                            //   children: [
+                            //     SizedBox(
+                            //       height:
+                            //           (50 / MediaQuery.of(context).size.height) *
+                            //               MediaQuery.of(context).size.height,
+                            //       child: ElevatedButton(
+                            //         onPressed: () {
+                            //           // Navigator.push(
+                            //           //   context,
+                            //           //   MaterialPageRoute(
+                            //           //     builder: (context) =>
+                            //           //         AddMoneyOldUsers(key: UniqueKey()),
+                            //           //   ),
+                            //           // );
+                            //           Navigator.push(
+                            //             context,
+                            //             MaterialPageRoute(
+                            //               builder: (context) =>
+                            //                   AddMoneyNewUsers(key: UniqueKey()),
+                            //             ),
+                            //           );
+                            //         },
+                            //         style: ButtonStyle(
+                            //           backgroundColor:
+                            //               WidgetStateProperty.resolveWith<Color>(
+                            //             (Set<WidgetState> states) {
+                            //               if (states
+                            //                   .contains(WidgetState.pressed)) {
+                            //                 return const Color(0xFF02AA03);
+                            //               }
+                            //               return const Color(0xFFEEF1F4);
+                            //             },
+                            //           ),
+                            //           foregroundColor:
+                            //               WidgetStateProperty.resolveWith<Color>(
+                            //             (Set<WidgetState> states) {
+                            //               if (states
+                            //                   .contains(WidgetState.pressed)) {
+                            //                 return Colors.white;
+                            //               }
+                            //               return const Color(0xFF02AA03);
+                            //             },
+                            //           ),
+                            //           elevation:
+                            //               WidgetStateProperty.all<double>(0),
+                            //           shape: WidgetStateProperty.all<
+                            //               RoundedRectangleBorder>(
+                            //             const RoundedRectangleBorder(
+                            //               borderRadius: BorderRadius.all(
+                            //                   Radius.circular(35)),
+                            //             ),
+                            //           ),
+                            //         ),
+                            //         child: Row(
+                            //           children: [
+                            //             Image.asset(
+                            //               'images/AddMoneyImg.png',
+                            //               height: 20,
+                            //             ),
+                            //             SizedBox(
+                            //                 width: MediaQuery.of(context)
+                            //                         .size
+                            //                         .width *
+                            //                     0.03),
+                            //             const Text(
+                            //               'Add Money',
+                            //               style: TextStyle(
+                            //                 fontFamily: 'Inter',
+                            //                 fontWeight: FontWeight.bold,
+                            //                 fontSize: 14.0,
+                            //               ),
+                            //             ),
+                            //           ],
+                            //         ),
+                            //       ),
+                            //     ),
+                            //     SizedBox(
+                            //         width:
+                            //             MediaQuery.of(context).size.width * 0.02),
+                            //     SizedBox(
+                            //       height:
+                            //           (50 / MediaQuery.of(context).size.height) *
+                            //               MediaQuery.of(context).size.height,
+                            //       child: ElevatedButton(
+                            //         onPressed: () {
+                            //           Navigator.push(
+                            //             context,
+                            //             MaterialPageRoute(
+                            //               builder: (context) =>
+                            //                   WithdrawMoneyPage(key: UniqueKey()),
+                            //             ),
+                            //           );
+                            //         },
+                            //         style: ButtonStyle(
+                            //           backgroundColor:
+                            //               WidgetStateProperty.resolveWith<Color>(
+                            //             (Set<WidgetState> states) {
+                            //               if (states
+                            //                   .contains(WidgetState.pressed)) {
+                            //                 return const Color(0xFF02AA03);
+                            //               }
+                            //               return const Color(0xFFEEF1F4);
+                            //             },
+                            //           ),
+                            //           foregroundColor:
+                            //               WidgetStateProperty.resolveWith<Color>(
+                            //             (Set<WidgetState> states) {
+                            //               if (states
+                            //                   .contains(WidgetState.pressed)) {
+                            //                 return Colors.white;
+                            //               }
+                            //               return const Color(0xFF02AA03);
+                            //             },
+                            //           ),
+                            //           elevation:
+                            //               WidgetStateProperty.all<double>(0),
+                            //           shape: WidgetStateProperty.all<
+                            //               RoundedRectangleBorder>(
+                            //             const RoundedRectangleBorder(
+                            //               borderRadius: BorderRadius.all(
+                            //                   Radius.circular(35)),
+                            //             ),
+                            //           ),
+                            //         ),
+                            //         child: Row(
+                            //           children: [
+                            //             Image.asset(
+                            //               'images/WithdrawImg.png',
+                            //               height: 20,
+                            //             ),
+                            //             SizedBox(
+                            //                 width: MediaQuery.of(context)
+                            //                         .size
+                            //                         .width *
+                            //                     0.03),
+                            //             const Text(
+                            //               'Withdraw',
+                            //               style: TextStyle(
+                            //                 fontFamily: 'Inter',
+                            //                 fontWeight: FontWeight.bold,
+                            //                 fontSize: 14.0,
+                            //               ),
+                            //             ),
+                            //           ],
+                            //         ),
+                            //       ),
+                            //     ),
+                            //   ],
+                            // ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.09),
+                      CarouselSlider(
+                        options: CarouselOptions(
+                          enlargeCenterPage: false,
+                          viewportFraction: 1.0,
+                          height: 150,
+                          enableInfiniteScroll: false,
+                          initialPage: 0,
+                          onPageChanged: (index, reason) {
+                            setState(() {
+                              _current = index;
+                            });
+                          },
+                        ),
+                        carouselController: _controller,
+                        items: imagePaths.map((item) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal:
+                                    20.0), // Adjust horizontal padding as needed
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(25),
+                              child: Image.asset(
+                                item,
+                                width: double
+                                    .infinity, // Make the width fill the screen
+                                fit: BoxFit
+                                    .cover, // Ensure the image covers the available space
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(
+                          imagePaths.length,
+                          (index) => Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 5.0),
+                            child: Image.asset(
+                              _current == index
+                                  ? "images/ActiveElipses.png"
+                                  : "images/InActiveElipses.png",
+                              width: (10 / MediaQuery.of(context).size.width) *
+                                  MediaQuery.of(context).size.width,
+                              height:
+                                  (10 / MediaQuery.of(context).size.height) *
+                                      MediaQuery.of(context).size.height,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.04),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const Expanded(
-                            flex: 5,
-                            child: Text(
-                              "Recent Transaction",
-                              overflow: TextOverflow.ellipsis,
+                      SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.04),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const Expanded(
+                              flex: 5,
+                              child: Text(
+                                "Recent Transaction",
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14.0,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                            const Spacer(),
+                            InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => TransactionPage(
+                                      key: UniqueKey(),
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: Row(
+                                children: [
+                                  const Text(
+                                    'See all',
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14.0,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                      width: MediaQuery.of(context).size.width *
+                                          0.008),
+                                  Image.asset(
+                                    'images/mdi_arrow-bottom.png',
+                                    height: 25,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.04),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Column(
+                          children: [
+                            Image.asset(
+                              'images/NoRecentActivityImg.png',
+                              height: 100,
+                            ),
+                            SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.02),
+                            const Text(
+                              'Looks like there’s no recent activity to show here. Get started by making a transactions',
+                              textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontFamily: 'Inter',
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14.0,
-                                color: Colors.black,
+                                color: Colors.grey,
                               ),
                             ),
-                          ),
-                          const Spacer(),
-                          InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => TransactionPage(
-                                    key: UniqueKey(),
-                                  ),
-                                ),
-                              );
-                            },
-                            child: Row(
-                              children: [
-                                const Text(
-                                  'See all',
-                                  style: TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14.0,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                                SizedBox(
-                                    width: MediaQuery.of(context).size.width *
-                                        0.008),
-                                Image.asset(
-                                  'images/mdi_arrow-bottom.png',
-                                  height: 25,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.04),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                      child: Column(
-                        children: [
-                          Image.asset(
-                            'images/NoRecentActivityImg.png',
-                            height: 100,
-                          ),
-                          SizedBox(
-                              height:
-                                  MediaQuery.of(context).size.height * 0.02),
-                          const Text(
-                            'Looks like there’s no recent activity to show here. Get started by making a transactions',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14.0,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                Positioned(
-                  top: MediaQuery.of(context).padding.top + 200,
-                  left: 0,
-                  right: 0,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Container(
-                      width: MediaQuery.of(context).size.width,
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 12.0, horizontal: 20.0),
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(25.0),
+                          ],
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black26,
-                            spreadRadius: 2,
-                            blurRadius: 10,
-                          ),
-                        ],
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => DataPage(
-                                    key: UniqueKey(),
-                                  ),
-                                ),
-                              );
-                            },
-                            child: Column(
-                              children: [
-                                Image.asset(
-                                  'images/DataImg.png',
-                                  height: 50,
-                                ),
-                                SizedBox(
-                                    height: MediaQuery.of(context).size.height *
-                                        0.005),
-                                const Text(
-                                  'Data',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12.0,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ],
-                            ),
+                    ],
+                  ),
+                  Positioned(
+                    top: MediaQuery.of(context).padding.top + 200,
+                    left: 0,
+                    right: 0,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Container(
+                        width: MediaQuery.of(context).size.width,
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 12.0, horizontal: 20.0),
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(25.0),
                           ),
-                          const Spacer(),
-                          InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => AirtimePage(
-                                    key: UniqueKey(),
-                                  ),
-                                ),
-                              );
-                            },
-                            child: Column(
-                              children: [
-                                Image.asset(
-                                  'images/AirtimeImg.png',
-                                  height: 50,
-                                ),
-                                SizedBox(
-                                    height: MediaQuery.of(context).size.height *
-                                        0.005),
-                                const Text(
-                                  'Airtime',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12.0,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ],
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black26,
+                              spreadRadius: 2,
+                              blurRadius: 10,
                             ),
-                          ),
-                          const Spacer(),
-                          InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      CableTVPage(key: UniqueKey()),
-                                ),
-                              );
-                            },
-                            child: Column(
-                              children: [
-                                Image.asset(
-                                  'images/CableTVImg.png',
-                                  height: 50,
-                                ),
-                                SizedBox(
-                                    height: MediaQuery.of(context).size.height *
-                                        0.005),
-                                const Text(
-                                  'Cable TV',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12.0,
-                                    color: Colors.black,
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => DataPage(
+                                      key: UniqueKey(),
+                                    ),
                                   ),
-                                ),
-                              ],
+                                );
+                              },
+                              child: Column(
+                                children: [
+                                  Image.asset(
+                                    'images/DataImg.png',
+                                    height: 50,
+                                  ),
+                                  SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.005),
+                                  const Text(
+                                    'Data',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12.0,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          const Spacer(),
-                          InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ServicePage(
-                                    key: UniqueKey(),
+                            const Spacer(),
+                            InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => AirtimePage(
+                                      key: UniqueKey(),
+                                    ),
                                   ),
-                                ),
-                              );
-                            },
-                            child: Column(
-                              children: [
-                                Image.asset(
-                                  'images/MoreImg.png',
-                                  height: 50,
-                                ),
-                                SizedBox(
-                                    height: MediaQuery.of(context).size.height *
-                                        0.005),
-                                const Text(
-                                  'More',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12.0,
-                                    color: Colors.black,
+                                );
+                              },
+                              child: Column(
+                                children: [
+                                  Image.asset(
+                                    'images/AirtimeImg.png',
+                                    height: 50,
                                   ),
-                                ),
-                              ],
+                                  SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.005),
+                                  const Text(
+                                    'Airtime',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12.0,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                            const Spacer(),
+                            InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        CableTVPage(key: UniqueKey()),
+                                  ),
+                                );
+                              },
+                              child: Column(
+                                children: [
+                                  Image.asset(
+                                    'images/CableTVImg.png',
+                                    height: 50,
+                                  ),
+                                  SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.005),
+                                  const Text(
+                                    'Cable TV',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12.0,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Spacer(),
+                            InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ServicePage(
+                                      key: UniqueKey(),
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: Column(
+                                children: [
+                                  Image.asset(
+                                    'images/MoreImg.png',
+                                    height: 50,
+                                  ),
+                                  SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.005),
+                                  const Text(
+                                    'More',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12.0,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-                if (welcomeAd)
-                  Stack(
-                    children: [
-                      // Your main content goes here
-                      // For example, a Scaffold with a FloatingActionButton:
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height,
-                        child: ModalBarrier(
-                          dismissible: true,
-                          color: Colors.black.withOpacity(0.5),
+                  if (welcomeAd)
+                    Stack(
+                      children: [
+                        // Your main content goes here
+                        // For example, a Scaffold with a FloatingActionButton:
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height,
+                          child: ModalBarrier(
+                            dismissible: true,
+                            color: Colors.black.withOpacity(0.5),
+                          ),
                         ),
-                      ),
-                      // The modal overlay
-                      Positioned(
-                        top: 0, // Start from the top
-                        left: 0,
-                        right: 0,
-                        bottom: 0, // Cover the entire height
-                        child: Center(
-                          child: SlideTransition(
-                            position: _slideAnimation,
-                            child: FadeTransition(
-                              opacity: _opacityAnimation,
-                              child: Container(
-                                padding: const EdgeInsets.only(
-                                    bottom: 10.0, top: 10),
-                                constraints: BoxConstraints(
-                                  maxHeight: MediaQuery.of(context)
-                                      .size
-                                      .height, // Set a max height for the content
-                                  maxWidth: MediaQuery.of(context).size.width *
-                                      0.9, // Set a width for the content
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors
-                                      .white, // White background for the content
-                                  borderRadius: BorderRadius.circular(
-                                      20.0), // Curved edges
-                                  boxShadow: const [
-                                    BoxShadow(
-                                      color: Colors.black26,
-                                      spreadRadius: 2,
-                                      blurRadius: 10,
-                                    ),
-                                  ],
-                                ),
-                                child: PopScope(
-                                  canPop: false,
-                                  onPopInvokedWithResult:
-                                      (didPop, dynamic result) {
-                                    if (!didPop) {
-                                      setState(() {
-                                        welcomeAd = false;
-                                        widget.welcomeAdActive();
-                                      });
-                                    }
-                                  },
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 20.0,
-                                            right: 20.0,
-                                            top: 12.0,
-                                            bottom: 14),
-                                        child: Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Image.asset(
-                                              "images/icons/AppIcon.png",
-                                              fit: BoxFit.contain,
-                                              width: 40,
-                                            ),
-                                            SizedBox(
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.02,
-                                            ),
-                                            const Expanded(
-                                              child: Text(
-                                                "Get Started With Us",
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
-                                                  fontFamily: 'Inter',
-                                                  fontSize: 16.0,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.black,
+                        // The modal overlay
+                        Positioned(
+                          top: 0, // Start from the top
+                          left: 0,
+                          right: 0,
+                          bottom: 0, // Cover the entire height
+                          child: Center(
+                            child: SlideTransition(
+                              position: _slideAnimation,
+                              child: FadeTransition(
+                                opacity: _opacityAnimation,
+                                child: Container(
+                                  padding: const EdgeInsets.only(
+                                      bottom: 10.0, top: 10),
+                                  constraints: BoxConstraints(
+                                    maxHeight: MediaQuery.of(context)
+                                        .size
+                                        .height, // Set a max height for the content
+                                    maxWidth:
+                                        MediaQuery.of(context).size.width *
+                                            0.9, // Set a width for the content
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors
+                                        .white, // White background for the content
+                                    borderRadius: BorderRadius.circular(
+                                        20.0), // Curved edges
+                                    boxShadow: const [
+                                      BoxShadow(
+                                        color: Colors.black26,
+                                        spreadRadius: 2,
+                                        blurRadius: 10,
+                                      ),
+                                    ],
+                                  ),
+                                  child: PopScope(
+                                    canPop: false,
+                                    onPopInvokedWithResult:
+                                        (didPop, dynamic result) {
+                                      if (!didPop) {
+                                        setState(() {
+                                          welcomeAd = false;
+                                          widget.welcomeAdActive();
+                                        });
+                                      }
+                                    },
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                              left: 20.0,
+                                              right: 20.0,
+                                              top: 12.0,
+                                              bottom: 14),
+                                          child: Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              Image.asset(
+                                                "images/icons/AppIcon.png",
+                                                fit: BoxFit.contain,
+                                                width: 40,
+                                              ),
+                                              SizedBox(
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.02,
+                                              ),
+                                              const Expanded(
+                                                child: Text(
+                                                  "Get Started With Us",
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                    fontFamily: 'Inter',
+                                                    fontSize: 16.0,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.black,
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Image.asset(
-                                        'images/AdImg2.png',
-                                        width: double.infinity,
-                                        fit: BoxFit.cover,
-                                      ),
-                                      SizedBox(
-                                        height:
-                                            MediaQuery.of(context).size.height *
-                                                0.03,
-                                      ),
-                                      const Padding(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 20.0),
-                                        child: Text(
-                                          'Enjoy our service that brings you fast and reliable deals for Airtime, Data, Cable TV, and more. Take a first try and give us feedback.',
-                                          textAlign: TextAlign.start,
-                                          style: TextStyle(
-                                            fontFamily: 'Inter',
-                                            fontSize: 16.0,
-                                            color: Colors.grey,
+                                            ],
                                           ),
                                         ),
-                                      ),
-                                      SizedBox(
-                                        height:
-                                            MediaQuery.of(context).size.height *
-                                                0.03,
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 10.0),
-                                        child: GestureDetector(
-                                          onTap:
-                                              _launchURL, // Call the function when tapped
-                                          child: const Text(
-                                            'www.Billsplug.ng/Referredandearn583',
+                                        Image.asset(
+                                          'images/AdImg2.png',
+                                          width: double.infinity,
+                                          fit: BoxFit.cover,
+                                        ),
+                                        SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.03,
+                                        ),
+                                        const Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 20.0),
+                                          child: Text(
+                                            'Enjoy our service that brings you fast and reliable deals for Airtime, Data, Cable TV, and more. Take a first try and give us feedback.',
                                             textAlign: TextAlign.start,
                                             style: TextStyle(
                                               fontFamily: 'Inter',
                                               fontSize: 16.0,
-                                              color: Color(0xFF1469CC),
+                                              color: Colors.grey,
                                             ),
                                           ),
                                         ),
-                                      ),
-                                      SizedBox(
-                                        height:
-                                            MediaQuery.of(context).size.height *
-                                                0.04,
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 20.0),
-                                        child: Container(
-                                          padding:
-                                              const EdgeInsets.only(left: 10.0),
-                                          decoration: BoxDecoration(
-                                            color: const Color.fromARGB(
-                                                28, 2, 170, 2),
-                                            borderRadius:
-                                                BorderRadius.circular(15.0),
-                                          ),
-                                          child: Row(children: [
-                                            const Text(
-                                              'Ignore',
+                                        SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.03,
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 10.0),
+                                          child: GestureDetector(
+                                            onTap:
+                                                _launchURL, // Call the function when tapped
+                                            child: const Text(
+                                              'www.Billsplug.ng/Referredandearn583',
                                               textAlign: TextAlign.start,
                                               style: TextStyle(
                                                 fontFamily: 'Inter',
-                                                fontWeight: FontWeight.bold,
                                                 fontSize: 16.0,
-                                                color: Color(0xFF5B5B5B),
+                                                color: Color(0xFF1469CC),
                                               ),
                                             ),
-                                            const Spacer(),
-                                            Row(
-                                              children: [
-                                                const Text(
-                                                  'View',
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.04,
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 20.0),
+                                          child: Container(
+                                            padding: const EdgeInsets.only(
+                                                left: 10.0),
+                                            decoration: BoxDecoration(
+                                              color: const Color.fromARGB(
+                                                  28, 2, 170, 2),
+                                              borderRadius:
+                                                  BorderRadius.circular(15.0),
+                                            ),
+                                            child: Row(children: [
+                                              GestureDetector(
+                                                onTap: () {
+                                                  setState(() {
+                                                    welcomeAd = false;
+                                                    widget.welcomeAdActive();
+                                                  });
+                                                },
+                                                child: Text(
+                                                  'Ignore',
                                                   textAlign: TextAlign.start,
                                                   style: TextStyle(
                                                     fontFamily: 'Inter',
+                                                    fontWeight: FontWeight.bold,
                                                     fontSize: 16.0,
-                                                    color: Color(0xFF02AA03),
+                                                    color: Color(0xFF5B5B5B),
                                                   ),
                                                 ),
-                                                IconButton(
-                                                  icon: const Icon(
-                                                    Icons.navigate_next,
-                                                    color: Color(0xFF02AA03),
+                                              ),
+                                              const Spacer(),
+                                              Row(
+                                                children: [
+                                                  const Text(
+                                                    'View',
+                                                    textAlign: TextAlign.start,
+                                                    style: TextStyle(
+                                                      fontFamily: 'Inter',
+                                                      fontSize: 16.0,
+                                                      color: Color(0xFF02AA03),
+                                                    ),
                                                   ),
-                                                  onPressed: () {},
-                                                ),
-                                              ],
-                                            ),
-                                          ]),
+                                                  IconButton(
+                                                    icon: const Icon(
+                                                      Icons.navigate_next,
+                                                      color: Color(0xFF02AA03),
+                                                    ),
+                                                    onPressed: () {
+                                                      _launchURL();
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            ]),
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  )
-              ],
-            ),
-          ],
+                      ],
+                    )
+                ],
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButton: Column(

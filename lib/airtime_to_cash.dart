@@ -1,6 +1,8 @@
 import 'package:bills_plug/airtime_to_cash2.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart' hide CarouselController;
+import 'package:contacts_service/contacts_service.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class AirtimeToCashPage extends StatefulWidget {
   const AirtimeToCashPage({super.key});
@@ -88,6 +90,8 @@ class AirtimeToCashPageState extends State<AirtimeToCashPage>
   String phoneNumber = '';
   String networkName = "MTN";
   String currentNetworkImg = "";
+  List<Contact> _cachedContacts = [];
+  bool selectedContact = false;
 
   @override
   void initState() {
@@ -97,6 +101,183 @@ class AirtimeToCashPageState extends State<AirtimeToCashPage>
   @override
   void dispose() {
     super.dispose();
+  }
+
+  void _showContacts() async {
+    // Request permission to access contacts
+    var status = await Permission.contacts.request();
+    if (status.isGranted) {
+      // Show loading indicator while fetching contacts
+      showDialog(
+        context: context,
+        barrierDismissible:
+            false, // Prevent dismissing the dialog while loading
+        builder: (context) {
+          return const AlertDialog(
+            title: Text('Loading Contacts...'),
+            content: SizedBox(
+              height: 100,
+              child: Center(
+                  child: CircularProgressIndicator(color: Color(0xFF02AA03))),
+            ),
+          );
+        },
+      );
+
+      // Fetch contacts if not already cached
+      if (_cachedContacts.isEmpty) {
+        Iterable<Contact> contacts = await ContactsService.getContacts();
+        _cachedContacts = contacts.toList(); // Cache the contacts
+      }
+      Navigator.of(context).pop(); // Close the loading dialog
+
+      // Create a stateful widget to manage the search functionality
+      showDialog(
+        context: context,
+        builder: (context) {
+          String searchQuery = '';
+          return StatefulBuilder(
+            builder: (context, setState) {
+              // Filter contacts based on the search query
+              List<Contact> filteredContacts = _cachedContacts
+                  .where((contact) =>
+                      contact.displayName
+                          ?.toLowerCase()
+                          .contains(searchQuery.toLowerCase()) ??
+                      false)
+                  .toList();
+
+              return AlertDialog(
+                title: const Text('Select a Contact'),
+                content: SizedBox(
+                  width: double.maxFinite,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextField(
+                        decoration: const InputDecoration(
+                          labelText: 'Search',
+                          hintText: 'Type to search...',
+                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            searchQuery = value;
+                          });
+                        },
+                      ),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: filteredContacts.length,
+                          itemBuilder: (context, index) {
+                            Contact contact = filteredContacts[index];
+                            return ListTile(
+                              title: Text(contact.displayName ?? ''),
+                              subtitle: Text(contact.phones!.isNotEmpty
+                                  ? contact.phones!.first.value ?? ''
+                                  : 'No phone number'),
+                              onTap: () {
+                                // Populate the TextFormField with the selected contact's phone number
+                                if (contact.phones!.isNotEmpty) {
+                                  String phoneNumber =
+                                      contact.phones!.first.value!;
+
+                                  phoneNumber = phoneNumber.replaceAll(' ', '');
+
+                                  // Replace the country code "+234" with "0"
+                                  if (phoneNumber.startsWith('+234')) {
+                                    phoneNumber =
+                                        '0${phoneNumber.substring(4)}'; // Remove "+234" and prepend "0"
+                                  }
+
+                                  phoneNumberController.text = phoneNumber;
+
+                                  validatePhoneNumber(phoneNumber);
+                                }
+                                Navigator.of(context).pop(); // Close the dialog
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Close'),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      );
+    } else {
+      // Handle the case when permission is denied
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Permission to access contacts denied')),
+      );
+    }
+  }
+
+  void validatePhoneNumber(String phoneNumber) {
+    setState(() {
+      // Ensure the phone number is 11 digits long
+      if (phoneNumber.length > 11) {
+        phoneNumber = phoneNumber.substring(phoneNumber.length - 11);
+      }
+
+      if (phoneNumber.length == 11) {
+        selectedContact = true;
+        FocusScope.of(context).unfocus(); // Dismiss the keyboard
+      } else {
+        selectedContact = false;
+      }
+
+      // Check for MTN
+      if (mtnPrefixes.any((prefix) => phoneNumber.startsWith(prefix)) &&
+          currentNetwork == 0) {
+        networkErrorMessage = ""; // Valid MTN number
+      } else {
+        if (currentNetwork == 0) {
+          networkErrorMessage = 'Please enter a valid MTN number.';
+        }
+      }
+
+      // Check for Glo
+      if (gloPrefixes.any((prefix) => phoneNumber.startsWith(prefix))) {
+        if (currentNetwork == 2) {
+          networkErrorMessage = ""; // Valid Glo number
+        }
+      } else {
+        if (currentNetwork == 2) {
+          networkErrorMessage = 'Please enter a valid Glo number.';
+        }
+      }
+
+      // Check for Airtel
+      if (airtelPrefixes.any((prefix) => phoneNumber.startsWith(prefix))) {
+        if (currentNetwork == 1) {
+          networkErrorMessage = ""; // Valid Airtel number
+        }
+      } else {
+        if (currentNetwork == 1) {
+          networkErrorMessage = 'Please enter a valid Airtel number.';
+        }
+      }
+
+      // Check for 9Mobile
+      if (nineMobilePrefixes.any((prefix) => phoneNumber.startsWith(prefix))) {
+        if (currentNetwork == 3) {
+          networkErrorMessage = ""; // Valid 9Mobile number
+        }
+      } else {
+        if (currentNetwork == 3) {
+          networkErrorMessage = 'Please enter a valid 9Mobile number.';
+        }
+      }
+    });
   }
 
   @override
@@ -191,7 +372,7 @@ class AirtimeToCashPageState extends State<AirtimeToCashPage>
                                     return Padding(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal:
-                                              20.0), // Adjust horizontal padding as needed
+                                              0.0), // Adjust horizontal padding as needed
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.circular(25),
                                         child: Image.asset(
@@ -339,9 +520,7 @@ class AirtimeToCashPageState extends State<AirtimeToCashPage>
                                             Icons.contact_phone,
                                             color: Colors.grey,
                                           ),
-                                          onPressed: () {
-                                            // Action when the icon is pressed
-                                          },
+                                          onPressed: _showContacts,
                                         ),
                                         counterText: '',
                                       ),
@@ -359,8 +538,11 @@ class AirtimeToCashPageState extends State<AirtimeToCashPage>
                                           }
 
                                           if (phoneNumber.length == 11) {
+                                            selectedContact = true;
                                             FocusScope.of(context)
                                                 .unfocus(); // Dismiss the keyboard
+                                          } else {
+                                            selectedContact = false;
                                           }
 
                                           // Check for MTN
@@ -372,6 +554,7 @@ class AirtimeToCashPageState extends State<AirtimeToCashPage>
                                                 ""; // Valid MTN number
                                           } else {
                                             if (currentNetwork == 0) {
+                                              selectedContact = false;
                                               networkErrorMessage =
                                                   'Please enter a valid MTN number.';
                                             }
@@ -386,6 +569,7 @@ class AirtimeToCashPageState extends State<AirtimeToCashPage>
                                             }
                                           } else {
                                             if (currentNetwork == 2) {
+                                              selectedContact = false;
                                               networkErrorMessage =
                                                   'Please enter a valid Glo number.';
                                             }
@@ -400,6 +584,7 @@ class AirtimeToCashPageState extends State<AirtimeToCashPage>
                                             }
                                           } else {
                                             if (currentNetwork == 1) {
+                                              selectedContact = false;
                                               networkErrorMessage =
                                                   'Please enter a valid Airtel number.';
                                             }
@@ -414,6 +599,7 @@ class AirtimeToCashPageState extends State<AirtimeToCashPage>
                                             }
                                           } else {
                                             if (currentNetwork == 3) {
+                                              selectedContact = false;
                                               networkErrorMessage =
                                                   'Please enter a valid 9Mobile number.';
                                             }
@@ -445,7 +631,7 @@ class AirtimeToCashPageState extends State<AirtimeToCashPage>
                               SizedBox(
                                   height: MediaQuery.of(context).size.height *
                                       0.04),
-                              if (phoneNumber.length == 11 &&
+                              if (selectedContact == true &&
                                   networkErrorMessage.isEmpty) ...[
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
