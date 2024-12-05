@@ -97,9 +97,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
       _bounceController.forward().then((_) {
         Future.delayed(const Duration(seconds: 2), () {
-          setState(() {
-            _isTextVisible = false; // Hide text
-          });
+          if (mounted) {
+            setState(() {
+              _isTextVisible = false; // Hide text
+            });
+          }
 
           _bounceController.reverse().then((_) {
             _startAnimationCycle(); // Restart the cycle
