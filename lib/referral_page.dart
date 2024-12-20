@@ -3,6 +3,8 @@ import 'package:bills_plug/notification.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:flutter/services.dart';
+import 'package:bills_plug/withdraw_money.dart';
 
 class ReferralPage extends StatefulWidget {
   const ReferralPage({super.key});
@@ -447,7 +449,19 @@ class _ReferralPageState extends State<ReferralPage>
                                                   .size
                                                   .height,
                                           child: ElevatedButton(
-                                            onPressed: () {},
+                                            onPressed: () {
+                                              // Copy the link to the clipboard
+                                              Clipboard.setData(const ClipboardData(
+                                                  text:
+                                                      "https://billsplug.ng//mobile/register/?referral=09055259546"));
+                                              // Optionally show a snackbar to inform the user
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                const SnackBar(
+                                                    content: Text(
+                                                        'Link copied to clipboard!')),
+                                              );
+                                            },
                                             style: ButtonStyle(
                                               backgroundColor:
                                                   WidgetStateProperty
@@ -517,7 +531,17 @@ class _ReferralPageState extends State<ReferralPage>
                                                   .size
                                                   .height,
                                           child: ElevatedButton(
-                                            onPressed: () {},
+                                            onPressed: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      WithdrawMoneyPage(
+                                                    key: UniqueKey(),
+                                                  ),
+                                                ),
+                                              );
+                                            },
                                             style: ButtonStyle(
                                               backgroundColor:
                                                   WidgetStateProperty

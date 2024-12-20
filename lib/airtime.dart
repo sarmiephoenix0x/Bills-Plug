@@ -734,7 +734,6 @@ class AirtimePageState extends State<AirtimePage>
                                         11, // Limit to 11 digits for Nigeria
                                     keyboardType: TextInputType.phone,
                                     onChanged: (value) {
-                                      validateForm();
                                       setState(() {
                                         phoneNumber = value;
 
@@ -800,6 +799,7 @@ class AirtimePageState extends State<AirtimePage>
                                           }
                                         }
                                       });
+                                      validateForm();
                                     },
                                     validator: (value) {
                                       // Validate the phone number length for Nigeria

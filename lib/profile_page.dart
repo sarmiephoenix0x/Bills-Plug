@@ -45,6 +45,9 @@ class _ProfilePageState extends State<ProfilePage>
   String? lastName;
   String? fullName;
   String? userBalance;
+  String? email;
+  String? phone;
+  String? state;
   bool isLoading = false;
   final storage = const FlutterSecureStorage();
 
@@ -59,6 +62,9 @@ class _ProfilePageState extends State<ProfilePage>
     firstName = await getFirstName();
     lastName = await getLastName();
     userBalance = await getUserBalance();
+    email = await getEmail();
+    phone = await getMobile();
+    state = await getState();
     if (mounted) {
       setState(() {
         fullName = "$firstName $lastName";
@@ -96,6 +102,36 @@ class _ProfilePageState extends State<ProfilePage>
     }
   }
 
+  Future<String?> getEmail() async {
+    final String? userJson = prefs.getString('user');
+    if (userJson != null) {
+      final Map<String, dynamic> userMap = jsonDecode(userJson);
+      return userMap['email'];
+    } else {
+      return null;
+    }
+  }
+
+  Future<String?> getMobile() async {
+    final String? userJson = prefs.getString('user');
+    if (userJson != null) {
+      final Map<String, dynamic> userMap = jsonDecode(userJson);
+      return userMap['mobile'];
+    } else {
+      return null;
+    }
+  }
+
+  Future<String?> getState() async {
+    final String? userJson = prefs.getString('user');
+    if (userJson != null) {
+      final Map<String, dynamic> userMap = jsonDecode(userJson);
+      return userMap['address']['state'];
+    } else {
+      return null;
+    }
+  }
+
   Future<void> _logout() async {
     final String? accessToken =
         await storage.read(key: 'billsplug_accessToken');
@@ -105,7 +141,17 @@ class _ProfilePageState extends State<ProfilePage>
         'You are not logged in.',
         isError: true,
       );
+      await prefs.remove('user');
 
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const IntroPage(),
+        ),
+      );
+      setState(() {
+        isLoading = false;
+      });
       return;
     }
 
@@ -514,7 +560,7 @@ class _ProfilePageState extends State<ProfilePage>
                             SizedBox(
                                 height:
                                     MediaQuery.of(context).size.height * 0.04),
-                            basicInfo("Name: ", "William John", Icons.person),
+                            basicInfo("Name: ", fullName, Icons.person),
                             SizedBox(
                               width: MediaQuery.of(context).size.width,
                               child: const Divider(
@@ -522,7 +568,7 @@ class _ProfilePageState extends State<ProfilePage>
                                 height: 20,
                               ),
                             ),
-                            basicInfo("Email: ", "test@gmail.com", Icons.mail),
+                            basicInfo("Email: ", email, Icons.mail),
                             SizedBox(
                               width: MediaQuery.of(context).size.width,
                               child: const Divider(
@@ -530,7 +576,7 @@ class _ProfilePageState extends State<ProfilePage>
                                 height: 20,
                               ),
                             ),
-                            basicInfo("Phone: ", "09022999999", Icons.phone),
+                            basicInfo("Phone: ", phone, Icons.phone),
                             SizedBox(
                               width: MediaQuery.of(context).size.width,
                               child: const Divider(
@@ -538,7 +584,7 @@ class _ProfilePageState extends State<ProfilePage>
                                 height: 20,
                               ),
                             ),
-                            basicInfo("State: ", "Delta", Icons.map),
+                            basicInfo("State: ", state, Icons.map),
                             SizedBox(
                               width: MediaQuery.of(context).size.width,
                               child: const Divider(
@@ -753,7 +799,7 @@ class _ProfilePageState extends State<ProfilePage>
     );
   }
 
-  Widget basicInfo(String title, String value, IconData icon,
+  Widget basicInfo(String title, String? value, IconData icon,
       {showUnverified = false, showArrow = false}) {
     return Row(
       children: [
@@ -777,7 +823,7 @@ class _ProfilePageState extends State<ProfilePage>
                   ),
                 ),
                 TextSpan(
-                  text: value,
+                  text: value ?? "N/A",
                   style: const TextStyle(
                     fontFamily: 'Inter',
                     fontSize: 16.0,

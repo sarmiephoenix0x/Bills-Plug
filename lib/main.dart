@@ -122,13 +122,13 @@ class _MyAppState extends State<MyApp> {
       return;
     }
 
-    // Proceed with fetching the token and checking login status
-    await _requestPermission();
-    await _getToken();
-
     const storage = FlutterSecureStorage();
     final accessToken = await storage.read(key: 'billsplug_accessToken');
     isLoggedIn = accessToken != null;
+
+    // Proceed with fetching the token and checking login status
+    await _requestPermission();
+    await _getToken();
 
     setState(() {
       isLoading = false; // Stop loading
