@@ -225,7 +225,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AddMoneyNewUsers(key: UniqueKey()),
+              builder: (context) => AddMoneyOldUsers(key: UniqueKey()),
             ),
           );
         });
